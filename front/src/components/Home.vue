@@ -4,7 +4,7 @@
  <el-button type="primary" @click="count++"> {{ count }} </el-button>
   <!-- <button  class="p-4 bg-gray-600 rounded-full">count is: </button> -->
   Дата:
-  
+
   <!-- <el-form ref="form" :model="form" label-width="120px"> -->
   <el-form label-width="120px">
   <el-form-item label="Activity name">
@@ -50,14 +50,14 @@
     <el-button>Cancel</el-button>
   </el-form-item>
 </el-form>
-  
+
 </div>
 </template>
 
 <script lang="ts">
 import { ref, defineComponent, reactive, toRefs } from 'vue'
 export default defineComponent({
-  name: 'HelloWorld',
+  name: 'Home',
   props: {
     msg: {
       type: String,
@@ -67,14 +67,14 @@ export default defineComponent({
   setup: () => {
 	const input = ref('');
       const count = ref(0);
-	  
+
 	  const onSubmit = () => {
         console.log('submit!');
       }
-	  
+
     const useScriptSetup = ref(false);
     const useTsPlugin = ref(false);
-	
+
 	const form = reactive({
           name: 'kek',
           region: '',
@@ -85,7 +85,7 @@ export default defineComponent({
           resource: '',
           desc: ''
         });
-		
+
     return { count, useScriptSetup, useTsPlugin, input, onSubmit,  form }
   }
 })

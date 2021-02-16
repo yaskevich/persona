@@ -1,6 +1,6 @@
 <template>
 <div class="box">
- <h1 class="text-yellow-500 bg-blue-500">{{ msg }}</h1>
+ <!-- <h1 class="text-yellow-500 bg-blue-500">{{ msg }}</h1> -->
  <el-button type="primary" @click="count++"> {{ count }} </el-button>
   <!-- <button  class="p-4 bg-gray-600 rounded-full">count is: </button> -->
   Дата:
@@ -59,10 +59,10 @@ import { ref, defineComponent, reactive, toRefs } from 'vue'
 export default defineComponent({
   name: 'Home',
   props: {
-    msg: {
-      type: String,
-      required: true
-    }
+    // msg: {
+    //   type: String,
+    //   required: true
+    // }
   },
   setup: () => {
 	const input = ref('');

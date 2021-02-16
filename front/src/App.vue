@@ -1,22 +1,27 @@
 <template>
 
 <el-container style="margin-top:-4rem; border: 1px solid #eee">
-  <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+  <el-aside width="200px" style="background-color: rgb(238, 241, 246);text-align:left;">
     <el-menu :default-openeds="['1', '3']">
       <el-submenu index="1">
-        <template #title><i class="el-icon-message"></i>Пользователи</template>
-        <el-menu-item-group>
-          <template #title>Group 1</template>
-          <el-menu-item index="1-1">Option 1</el-menu-item>
-          <el-menu-item index="1-2">Option 2</el-menu-item>
-        </el-menu-item-group>
-        <el-menu-item-group title="Group 2">
+        <template #title><i class="el-icon-message"></i>Всякое</template>
+        <!-- <el-menu-item-group>
+          <template #title>Group 1</template> -->
+          <!-- <div id="nav">
+             <router-link to="/">Home</router-link> |
+             <router-link to="/about">About</router-link>
+         </div>
+         <router-view /> -->
+          <el-menu-item index="1-1"><router-link to="/">Главная</router-link></el-menu-item>
+          <el-menu-item index="1-2"><router-link to="/users">Пользователи</router-link></el-menu-item>
+        <!-- </el-menu-item-group> -->
+        <!-- <el-menu-item-group title="Group 2">
           <el-menu-item index="1-3">Option 3</el-menu-item>
-        </el-menu-item-group>
-        <el-submenu index="1-4">
+        </el-menu-item-group> -->
+        <!-- <el-submenu index="1-4">
           <template #title>Option4</template>
           <el-menu-item index="1-4-1">Option 4-1</el-menu-item>
-        </el-submenu>
+        </el-submenu> -->
       </el-submenu>
       <el-submenu index="2">
         <template #title><i class="el-icon-menu"></i>Navigator Two</template>
@@ -71,8 +76,9 @@
       <el-container>
         <el-header>Header</el-header>
         <el-main> -->
-          Main
-          <HelloWorld msg="Проект" />
+          <!-- Main -->
+          <router-view />
+          <!-- <Home msg="Проект" /> -->
         <!-- </el-main>
       </el-container>
     </div> -->
@@ -83,12 +89,12 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import HelloWorld from './components/HelloWorld.vue'
+import Home from './components/Home.vue';
 
 export default defineComponent({
   name: 'App',
   components: {
-    HelloWorld
+    Home
   }
 })
 </script>

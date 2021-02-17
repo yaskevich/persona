@@ -1,10 +1,10 @@
 <template>
 
-<el-container style="margin-top:-4rem; border: 1px solid #eee">
+<el-container style="border: 1px solid #eee">
   <el-aside width="200px" style="background-color: rgb(238, 241, 246);text-align:left;">
     <el-menu :default-openeds="['1', '3']">
       <el-submenu index="1">
-        <template #title><i class="el-icon-message"></i>Всякое</template>
+        <template #title><i class="el-icon-message"></i>Управление</template>
         <!-- <el-menu-item-group>
           <template #title>Group 1</template> -->
           <!-- <div id="nav">
@@ -12,8 +12,15 @@
              <router-link to="/about">About</router-link>
          </div>
          <router-view /> -->
-          <el-menu-item index="1-1"><router-link to="/">Главная</router-link></el-menu-item>
-          <el-menu-item index="1-2"><router-link to="/users">Пользователи</router-link></el-menu-item>
+         <router-link to="/">
+          <el-menu-item index="1-1">Главная</el-menu-item>
+          </router-link>
+          <router-link to="/persons">
+            <el-menu-item index="1-7">Персоналии</el-menu-item>
+          </router-link>
+          <router-link to="/users">
+            <el-menu-item index="1-2">Пользователи</el-menu-item>
+          </router-link>
         <!-- </el-menu-item-group> -->
         <!-- <el-menu-item-group title="Group 2">
           <el-menu-item index="1-3">Option 3</el-menu-item>
@@ -23,7 +30,7 @@
           <el-menu-item index="1-4-1">Option 4-1</el-menu-item>
         </el-submenu> -->
       </el-submenu>
-      <el-submenu index="2">
+      <!-- <el-submenu index="2">
         <template #title><i class="el-icon-menu"></i>Navigator Two</template>
         <el-menu-item-group>
           <template #title>Group 1</template>
@@ -37,8 +44,8 @@
           <template #title>Option 4</template>
           <el-menu-item index="2-4-1">Option 4-1</el-menu-item>
         </el-submenu>
-      </el-submenu>
-      <el-submenu index="3">
+      </el-submenu> -->
+      <!-- <el-submenu index="3">
         <template #title><i class="el-icon-setting"></i>Navigator Three</template>
         <el-menu-item-group>
           <template #title>Group 1</template>
@@ -52,7 +59,7 @@
           <template #title>Option 4</template>
           <el-menu-item index="3-4-1">Option 4-1</el-menu-item>
         </el-submenu>
-      </el-submenu>
+      </el-submenu> -->
     </el-menu>
   </el-aside>
 
@@ -68,7 +75,7 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      <span>Tom</span>
+      <span>Алексей</span>
     </el-header>
 
     <el-main>
@@ -89,12 +96,12 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import Home from './components/Home.vue';
+// import Home from './components/Home.vue';
 
 export default defineComponent({
   name: 'App',
   components: {
-    Home
+    // Home
   }
 })
 </script>
@@ -106,7 +113,7 @@ export default defineComponent({
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  /* margin-top: 60px; */
 }
 .el-header {
     background-color: #B3C0D1;

@@ -31,6 +31,7 @@
 
 <script>
 import { reactive, ref } from 'vue';
+import axios from 'axios'
 export default {
   name: "PersonList",
   props: {
@@ -52,6 +53,10 @@ export default {
     const onSubmit = () => {
       // form.validate();
         console.log('submit!', form);
+        axios.get('/').then((response) => {
+          console.log(response.data);
+        })
+
     };
 
 

@@ -18,14 +18,14 @@ const LocalStrategy = passportLocal.Strategy;
 (async () => {
 
 	const app = express();
-	const port = process.env.PORT || 4000;
-	
+	const port = process.env.PORT || 3555;
+
 	passport.use(new LocalStrategy(
 	  function(id, password, done) {
 		let user = {"id": id};
 		if (id === process.env.USER_ID && password === process.env.USER_PASSWORD) {
 			console.log("user " + id + " authenticated");
-			return done(null, user);		
+			return done(null, user);
 		} else {
 			console.log("login attempt as [" + id + "]::[" + password + "]");
 			return done(null,false);
@@ -52,6 +52,9 @@ const LocalStrategy = passportLocal.Strategy;
 	  // app.get(path, function(req, res) { etc. });
 	// });
 	app.get('/cool.js', async (req,res) => { res.json({}) });
+
+	app.get('/api/data', async (req,res) => { res.json({"hello": "test"}) });
+
 	// app.get('/', async(req,res) => {
 		// res.sendFile(path.join(__dirname, 'public', 'index.html'));
 	// });
@@ -68,9 +71,9 @@ const LocalStrategy = passportLocal.Strategy;
 	  passport.authenticate('local', function(err, user, info) {
 		if (err) { return next(err); }
 		console.log(user, info);
-		if (!user) { 
+		if (!user) {
 			return res.sendFile(path.join(__dirname, 'public', 'login.html'));
-			// return res.redirect('/login'); 
+			// return res.redirect('/login');
 		}
 		req.logIn(user, function(err) {
 		  if (err) { return next(err); }
@@ -85,7 +88,6 @@ const LocalStrategy = passportLocal.Strategy;
 		res.redirect('/login');
 	});
 
-	app.listen(port);  
+	app.listen(port);
 	console.log("Running at Port "+ port);
 })()
-

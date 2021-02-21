@@ -3,19 +3,19 @@
   Персоналии
 </div>
 <el-form label-width="120px" v-model="form" :inline="true">
+  <!-- label="Имя" -->
   <el-form-item
    prop="firstName"
-   label="Имя"
    :rules="[
-     { required: true, validator: isString, message: 'Обязательное поле', trigger: 'blur' },
-     { validator: isString, message: 'Не соответствует формату', trigger: ['blur', 'change'] }
+     { required: true, validator: isString, trigger: 'blur' },
+     { validator: isString, trigger: ['blur', 'change'] }
    ]"
  >
-  <el-input placeholder="Имя" v-model="form.firstName" class="text-input" propr="firstName"></el-input>
+  <el-input placeholder="Имя" v-model="form.firstName" class="text-input" prop="firstName"></el-input>
   </el-form-item>
 
 <el-input placeholder="Фамилия" v-model="form.lastName" class="text-input"></el-input>
-<el-input placeholder="Фамилия при рождении" v-model="form.lastName2" class="text-input"></el-input>
+<!-- <el-input placeholder="Фамилия при рождении" v-model="form.lastName2" class="text-input"></el-input> -->
 <el-input placeholder="Отчество" v-model="form.patroName" class="text-input"></el-input>
 <el-input placeholder="Wikidata ID" prop="wikidata" v-model="form.wikidata" class="text-input"></el-input>
 <!-- <el-form-item label="Пол"> -->
@@ -41,15 +41,19 @@ export default {
     const form  = reactive({ firstName: '', lastName: '', lastName2: '', patroName: '', sex: '1', wikidata: ''});
 
     const isString = (rule, value, callback) => {
-      console.log("x", rule);
-      const res = form[rule.field].match(/^[а-я]+$/gi);
-      console.log("res", form[rule.field], res);
-      if(!res) {
-        // return  callback(new Error('Please input the password again')) ;
-        return false;
+      // console.log("x", rule, value);
+      const val = form[rule.field];
+      if(val) {
+        const res = form[rule.field].match(/^[а-я\-]+$/gi);
+        // console.log("res", form[rule.field], res);
+        if(!res) {
+          return  callback(new Error('Не соответствует формату')) ;
+        }
+      } else {
+        return  callback(new Error('Обязательное поле')) ;
       }
-
     };
+
     const onSubmit = () => {
       // form.validate();
         console.log('submit!', form);

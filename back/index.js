@@ -6,6 +6,7 @@ import session from 'cookie-session'
 import passport from 'passport'
 import passportLocal from 'passport-local'
 import dotenv from 'dotenv'
+import db from './db.js';
 
 dotenv.config();
 

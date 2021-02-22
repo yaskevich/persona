@@ -54,6 +54,13 @@ const LocalStrategy = passportLocal.Strategy;
 	// });
 	app.get('/cool.js', async (req,res) => { res.json({}) });
 
+	app.post('/api/person/add', async (req,res) => {
+		const result = await db.createPerson();
+		 res.json(result)
+	 });
+
+
+
 	app.get('/api/data', async (req,res) => { res.json({"hello": "test"}) });
 
 	// app.get('/', async(req,res) => {

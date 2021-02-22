@@ -55,7 +55,8 @@ const LocalStrategy = passportLocal.Strategy;
 	app.get('/cool.js', async (req,res) => { res.json({}) });
 
 	app.post('/api/person/add', async (req,res) => {
-		const result = await db.createPerson();
+		console.log(req.body);
+		const result = await db.createPerson(req.body);
 		 res.json(result)
 	 });
 

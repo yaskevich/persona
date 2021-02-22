@@ -57,10 +57,16 @@ export default {
     const onSubmit = () => {
       // form.validate();
         console.log('submit!', form);
-        axios.get('/api/data').then((response) => {
-          console.log(response.data);
-        })
-
+        // axios.get('/api/data').then((response) => {
+        //   console.log(response.data);
+        // })
+        axios.post('/api/person/add', form)
+          .then(function (response) {
+            console.log(response);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
     };
 
 

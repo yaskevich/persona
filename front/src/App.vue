@@ -5,8 +5,9 @@
     <el-menu :default-openeds="['1', '3']">
       <el-submenu index="1">
         <template #title><i class="el-icon-message"></i>Управление</template>
-        <!-- <el-menu-item-group>
-          <template #title>Group 1</template> -->
+        <el-menu-item-group>
+          <template #title>Контент</template>
+
           <!-- <div id="nav">
              <router-link to="/">Home</router-link> |
              <router-link to="/about">About</router-link>
@@ -18,13 +19,15 @@
           <router-link to="/persons">
             <el-menu-item index="1-7">Персоналии</el-menu-item>
           </router-link>
+          <router-link to="/works">
+            <el-menu-item index="1-4">Произведения</el-menu-item>
+          </router-link>
+        </el-menu-item-group>
+        <el-menu-item-group title="Доступ">
           <router-link to="/users">
             <el-menu-item index="1-2">Пользователи</el-menu-item>
           </router-link>
-        <!-- </el-menu-item-group> -->
-        <!-- <el-menu-item-group title="Group 2">
-          <el-menu-item index="1-3">Option 3</el-menu-item>
-        </el-menu-item-group> -->
+        </el-menu-item-group>
         <!-- <el-submenu index="1-4">
           <template #title>Option4</template>
           <el-menu-item index="1-4-1">Option 4-1</el-menu-item>

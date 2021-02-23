@@ -57,12 +57,17 @@ const LocalStrategy = passportLocal.Strategy;
 	app.post('/api/person/add', async (req,res) => {
 		console.log(req.body);
 		const result = await db.createPerson(req.body);
-		 res.json(result)
+		res.json(result)
 	 });
 
-
+	 app.get('/api/person/list', async (req,res) => {
+		const result = await db.getPersons();
+ 		res.json(result)
+ 	});
 
 	app.get('/api/data', async (req,res) => { res.json({"hello": "test"}) });
+
+
 
 	// app.get('/', async(req,res) => {
 		// res.sendFile(path.join(__dirname, 'public', 'index.html'));

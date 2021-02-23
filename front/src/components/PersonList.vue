@@ -13,10 +13,10 @@
  >
   <el-input placeholder="Имя" v-model="form.firstName" class="text-input" prop="firstName"></el-input>
   </el-form-item>
-
+<el-input placeholder="Отчество" v-model="form.patroName" class="text-input"></el-input>
 <el-input placeholder="Фамилия" v-model="form.lastName" class="text-input"></el-input>
 <!-- <el-input placeholder="Фамилия при рождении" v-model="form.lastName2" class="text-input"></el-input> -->
-<el-input placeholder="Отчество" v-model="form.patroName" class="text-input"></el-input>
+
 <el-input placeholder="Wikidata ID" prop="wikidata" v-model="form.wikidata" class="text-input"></el-input>
 <!-- <el-form-item label="Пол"> -->
 <el-form-item>
@@ -27,10 +27,20 @@
 </el-form-item>
  <el-button type="primary" @click="onSubmit">Добавить</el-button>
 </el-form>
+
+<el-row v-for="(value, key) in persons"  :gutter="20" :key="key">
+  <el-col :span="4"><div class="grid-content bg-purple">{{value.firstname}}</div></el-col>
+  <el-col :span="4"><div class="grid-content bg-purple-light">{{value.patroname}}</div></el-col>
+  <el-col :span="4"><div class="grid-content bg-purple">{{value.lastname}}</div></el-col>
+  <el-col :span="4"><div class="grid-content bg-purple-light">{{value.wikidata}}</div></el-col>
+  <el-col :span="4"><div class="grid-content bg-purple"></div></el-col>
+  <!-- <el-col :span="4"><div class="grid-content bg-purple-light"></div></el-col> -->
+</el-row>
 </template>
 
 <script>
 import { reactive, ref } from 'vue';
+import { onBeforeMount } from 'vue';
 import axios from 'axios'
 export default {
   name: "PersonList",
@@ -38,7 +48,22 @@ export default {
     // datum: Object,
   },
   setup() {
+
+    const persons = reactive([]);
+
+    onBeforeMount(async() => {
+      axios.get('/api/person/list').then((response) => {
+        console.log(response.data);
+        persons.push(...response.data);
+      })
+
+    })
+
+
+
     const form  = reactive({ firstName: '', lastName: '', lastName2: '', patroName: '', sex: '1', wikidata: ''});
+
+
 
     const isString = (rule, value, callback) => {
       // console.log("x", rule, value);
@@ -69,8 +94,8 @@ export default {
           });
     };
 
-
-    return {form, onSubmit, isString};
+    console.log("render");
+    return {form, onSubmit, isString, persons};
   },
   components: {
 
@@ -83,4 +108,30 @@ export default {
   width: 10rem;
   margin-right:1rem;
 }
+.el-row {
+   margin-bottom: 20px;
+   &:last-child {
+     margin-bottom: 0;
+   }
+ }
+ .el-col {
+   border-radius: 4px;
+ }
+ .bg-purple-dark {
+   background: #99a9bf;
+ }
+ .bg-purple {
+   background: #d3dce6;
+ }
+ .bg-purple-light {
+   background: #e5e9f2;
+ }
+ .grid-content {
+   border-radius: 4px;
+   min-height: 36px;
+ }
+ .row-bg {
+   padding: 10px 0;
+   background-color: #f9fafc;
+ }
 </style>

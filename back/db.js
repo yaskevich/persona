@@ -13,6 +13,7 @@ const pool = new Pool();
 	wikidata integer,
 	features jsonb
 )`;
+`ALTER TABLE persons OWNER TO persona_user`;
 
 
 export default {
@@ -21,7 +22,7 @@ export default {
         return res.rows;
 	},
 	async createPerson(data){
-		const res = await pool.query(`INSERT INTO persons (firstName, lastName, patroName, sex, wikidata) VALUES($1, $2, $3, $4, $5) RETURNING id`, [data.firstName, data.lastName, data.patroName, data.sex. data.wikidata]);
+		const res = await pool.query(`INSERT INTO persons (firstName, lastName, patroName, sex, wikidata) VALUES($1, $2, $3, $4, $5) RETURNING id`, [data.firstName, data.lastName, data.patroName, data.sex, data.wikidata]);
 		// res.rows[0].id;
     return res.rows;
 	},

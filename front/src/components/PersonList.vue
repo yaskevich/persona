@@ -33,7 +33,12 @@
   <el-col :span="4"><div class="grid-content bg-purple-light">{{value.patroname}}</div></el-col>
   <el-col :span="4"><div class="grid-content bg-purple">{{value.lastname}}</div></el-col>
   <el-col :span="4"><div class="grid-content bg-purple-light">{{value.wikidata}}</div></el-col>
-  <el-col :span="4"><div class="grid-content bg-purple"></div></el-col>
+  <el-col :span="4"><div class="grid-content bg-purple">
+    <router-link :to="'/person/' + value.id">
+    <el-button type="text" size="mini" icon="el-icon-edit" plain class="full-width"></el-button>
+  </router-link>
+  </div></el-col>
+
   <!-- <el-col :span="4"><div class="grid-content bg-purple-light"></div></el-col> -->
 </el-row>
 </template>
@@ -41,7 +46,8 @@
 <script>
 import { reactive, ref } from 'vue';
 import { onBeforeMount } from 'vue';
-import axios from 'axios'
+import axios from 'axios';
+import Person from './Person.vue';
 export default {
   name: "PersonList",
   props: {
@@ -128,10 +134,14 @@ export default {
  }
  .grid-content {
    border-radius: 4px;
-   min-height: 36px;
+   /* min-height: 36px; */
  }
  .row-bg {
    padding: 10px 0;
    background-color: #f9fafc;
+ }
+ .full-width{
+   display: block;
+   width: 100%;
  }
 </style>

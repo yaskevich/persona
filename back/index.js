@@ -64,6 +64,10 @@ const LocalStrategy = passportLocal.Strategy;
 		const result = await db.getPersons();
  		res.json(result)
  	});
+	 app.get('/api/person/get/:id', async (req,res) => {
+		const id = parseInt(req.params['id']);
+ 		res.json(id ? await db.getPerson(id) : {})
+ 	});
 
 	app.get('/api/data', async (req,res) => { res.json({"hello": "test"}) });
 

@@ -21,6 +21,10 @@ export default {
 		const res = await pool.query('select * from persons');
         return res.rows;
 	},
+	async getPerson(id){
+		const res = await pool.query('select * from persons where id = $1', [id]);
+    return res.rows;
+	},
 	async createPerson(data){
 		const res = await pool.query(`INSERT INTO persons (firstName, lastName, patroName, sex, wikidata) VALUES($1, $2, $3, $4, $5) RETURNING id`, [data.firstName, data.lastName, data.patroName, data.sex, data.wikidata]);
 		// res.rows[0].id;

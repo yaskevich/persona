@@ -29,10 +29,10 @@
 </el-form>
 
 <el-row v-for="(value, key) in persons"  :gutter="20" :key="key">
-  <el-col :span="4"><div class="grid-content bg-purple">{{value.firstname}}</div></el-col>
+  <el-col :span="4"><div class="grid-content bg-purple"><i :class="value.sex === 1 ? 'el-icon-male' : 'el-icon-female'"></i> {{value.firstname}}</div></el-col>
   <el-col :span="4"><div class="grid-content bg-purple-light">{{value.patroname}}</div></el-col>
   <el-col :span="4"><div class="grid-content bg-purple">{{value.lastname}}</div></el-col>
-  <el-col :span="4"><div class="grid-content bg-purple-light">{{value.wikidata}}</div></el-col>
+  <el-col :span="4"><div class="grid-content bg-purple-light">{{value.wikidata||'&nbsp;'}}</div></el-col>
   <el-col :span="4"><div class="grid-content bg-purple">
     <router-link :to="'/person/' + value.id">
     <el-button type="text" size="mini" icon="el-icon-edit" plain class="full-width"></el-button>
@@ -94,6 +94,7 @@ export default {
         axios.post('/api/person/add', form)
           .then(function (response) {
             console.log(response);
+            persons.push(form);
           })
           .catch(function (error) {
             console.log(error);

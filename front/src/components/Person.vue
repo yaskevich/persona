@@ -26,7 +26,7 @@
 import { reactive, ref } from 'vue';
 import { onBeforeMount } from 'vue';
 import axios from 'axios';
-
+import { useRoute } from 'vue-router';
 export default {
   name: "Person",
   props: {
@@ -35,9 +35,11 @@ export default {
   setup() {
 
     let person = ref({});
+    const vuerouter = useRoute();
+    const id = vuerouter.params.id;
 
     onBeforeMount(async() => {
-      axios.get('/api/person/get/1').then((response) => {
+      axios.get('/api/person/get/'+id).then((response) => {
         console.log(response.data[0]);
         person.value = response.data[0];
         person.value.sex = person.value.sex.toString();
@@ -46,11 +48,11 @@ export default {
 
     const onSubmit = () => {
       // form.validate();
-        console.log('submit!', form);
+        console.log('save:', person.value);
         // axios.get('/api/data').then((response) => {
         //   console.log(response.data);
         // })
-        axios.post('/api/person/add', form)
+        axios.post('/api/person/set', person.value)
           .then(function (response) {
             console.log(response);
           })

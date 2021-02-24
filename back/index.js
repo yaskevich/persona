@@ -57,17 +57,23 @@ const LocalStrategy = passportLocal.Strategy;
 	app.post('/api/person/add', async (req,res) => {
 		console.log(req.body);
 		const result = await db.createPerson(req.body);
-		res.json(result)
+		res.json(result);
 	 });
 
 	 app.get('/api/person/list', async (req,res) => {
 		const result = await db.getPersons();
- 		res.json(result)
+ 		res.json(result);
  	});
 	 app.get('/api/person/get/:id', async (req,res) => {
 		const id = parseInt(req.params['id']);
  		res.json(id ? await db.getPerson(id) : {})
  	});
+	app.post('/api/person/set', async (req,res) => {
+		console.log(req.body);
+		const result = await db.setPerson(req.body);
+		res.json(result);
+ });
+
 
 	app.get('/api/data', async (req,res) => { res.json({"hello": "test"}) });
 

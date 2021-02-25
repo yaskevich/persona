@@ -2,7 +2,8 @@
 <div>
   Персоналии
 </div>
-<el-form label-width="120px" v-model="form" :inline="true">
+<!-- ref="formInstance" -->
+<el-form label-width="120px" :ref="setFormRef" v-model="form" :inline="true" :rules="rules">
   <!-- label="Имя" -->
   <el-form-item
    prop="firstName"
@@ -14,7 +15,7 @@
   <el-input placeholder="Имя" v-model="form.firstName" class="text-input" prop="firstName"></el-input>
   </el-form-item>
 <el-input placeholder="Отчество" v-model="form.patroName" class="text-input"></el-input>
-<el-input placeholder="Фамилия" v-model="form.lastName" class="text-input"></el-input>
+<el-input placeholder="Фамилия" v-model="form.lastName" prop="lastName" class="text-input"></el-input>
 <!-- <el-input placeholder="Фамилия при рождении" v-model="form.lastName2" class="text-input"></el-input> -->
 
 <el-input placeholder="Wikidata ID" prop="wikidata" v-model="form.wikidata" class="text-input"></el-input>
@@ -65,11 +66,13 @@ export default {
 
     })
 
-
+    let formInstance = ref();
 
     const form  = reactive({ firstName: '', lastName: '', lastName2: '', patroName: '', sex: '1', wikidata: ''});
 
-
+    const setFormRef = (el) => {
+         formInstance.value = el;
+       };
 
     const isString = (rule, value, callback) => {
       // console.log("x", rule, value);
@@ -87,22 +90,36 @@ export default {
 
     const onSubmit = () => {
       // form.validate();
-        console.log('submit!', form);
-        // axios.get('/api/data').then((response) => {
-        //   console.log(response.data);
-        // })
-        axios.post('/api/person/add', form)
-          .then(function (response) {
-            console.log(response);
-            persons.push(form);
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-    };
+        console.log('submit!', form, formInstance);
+        // formInstance.value.resetFields();
+        formInstance.value.validate(form, (valid) => {
+          console.log(kek, valid);
+          if(valid){
+            alert("submit");
+          } else{
+            return false;
+          }
+        });
 
+
+
+        // axios.post('/api/person/add', form)
+        //   .then(function (response) {
+        //     console.log(response);
+        //     persons.push(form);
+        //   })
+        //   .catch(function (error) {
+        //     console.log(error);
+        //   });
+    };
+    const  rules = {
+      lastName: [
+        { required: true, message: 'Please input Activity name', trigger: 'blur' },
+        { min: 3, max: 5, message: 'Length should be 3 to 5', trigger: 'blur' }
+      ],
+    };
     console.log("render");
-    return {form, onSubmit, isString, persons};
+    return {form, onSubmit, isString, persons, formInstance, setFormRef, rules};
   },
   components: {
 

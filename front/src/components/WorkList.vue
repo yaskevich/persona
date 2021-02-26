@@ -32,7 +32,7 @@ export default defineComponent({
     const works = reactive([]);
 
     onBeforeMount(async() => {
-      axios.get('/api/list/works').then((response) => {
+      axios.get('/api/get/works').then((response) => {
         console.log(response.data);
         works.push(...response.data);
       })
@@ -52,7 +52,8 @@ export default defineComponent({
           axios.post('/api/work/add', form)
             .then(function (response) {
               console.log(response);
-              persons.push(form);
+              works.unshift({...form});
+              formRef.value?.resetFields();
             })
             .catch(function (error) {
               console.log(error);

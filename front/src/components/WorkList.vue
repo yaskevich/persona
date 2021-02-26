@@ -2,22 +2,42 @@
   <div>
     Произведения
   </div>
-  <el-form :model="form" :ref="setFormRef" label-width="100px" :rules="rules">
-    <el-input placeholder="Название" v-model="form.title" class="text-input" prop="title"></el-input>
+  <el-form :model="form" ref="formRef" label-width="100px" :rules="rules">
+    <el-form-item prop="title">
+      <el-input placeholder="Название" v-model="form.title" class="text-input"></el-input>
+    </el-form-item>
+
+    <el-form-item prop="genre">
+      <el-input placeholder="Тип" v-model="form.genre" class="text-input"></el-input>
+    </el-form-item>
+
+    <el-button type="primary" @click="resetForm">Очистить</el-button>
     <el-button type="primary" @click="confirm">Добавить</el-button>
   </el-form>
+
+  <el-row v-for="(value, key) in works"  :gutter="20" :key="key">
+    {{value.title}} // {{value.genre}}
+  </el-row>
 </template>
 
 <script lang="ts">
-import { ElForm } from 'element-plus';
-import { defineComponent, ref, reactive } from 'vue';
+// import { ElForm } from 'element-plus';
+import { defineComponent, ref, reactive, onBeforeMount } from 'vue';
+import axios from 'axios';
 
 export default defineComponent({
   setup() {
     const formRef = ref<InstanceType<typeof ElForm>>();
-    const setFormRef = (el: InstanceType<typeof ElForm>) => {
-      formRef.value = el;
-    };
+
+    const works = reactive([]);
+
+    onBeforeMount(async() => {
+      axios.get('/api/person/list').then((response) => {
+        console.log(response.data);
+        works.push(...response.data);
+      })
+    })
+
 
     const resetForm = () => {
       formRef.value?.resetFields();
@@ -26,24 +46,42 @@ export default defineComponent({
       formRef.value?.validate((valid) => {
         if (valid) {
           // do
+          console.log("here");
+          // return false;
+
+          axios.post('/api/work/add', form)
+            .then(function (response) {
+              console.log(response);
+              persons.push(form);
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+
+        }  else{
+          return false;
         }
       });
     };
-    const form  = reactive({ title: ''});
+    const form  = reactive({ title: '', genre: ''});
     const  rules = {
       title: [
-        { required: true, message: 'Please input Activity name', trigger: 'blur' },
-        { min: 3, max: 5, message: 'Length should be 3 to 5', trigger: 'blur' }
+        { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
+        { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' }
+      ],
+      genre: [
+        { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
+        { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' }
       ],
     };
 
     return {
-      setFormRef,
       resetForm,
       confirm,
       formRef,
       rules,
-      form
+      form,
+      works
     };
   },
 });

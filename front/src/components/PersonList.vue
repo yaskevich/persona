@@ -59,7 +59,9 @@ export default {
     const persons = reactive([]);
 
     onBeforeMount(async() => {
-      axios.get('/api/person/list').then((response) => {
+      // , {params: {id: 12345}}
+      axios.get('/api/get/persons')
+      .then((response) => {
         console.log(response.data);
         persons.push(...response.data);
       })

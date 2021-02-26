@@ -60,13 +60,15 @@ const LocalStrategy = passportLocal.Strategy;
 		res.json(result);
 	 });
 
-	 app.get('/api/person/list', async (req,res) => {
-		const result = await db.getPersons();
- 		res.json(result);
- 	});
-	 app.get('/api/person/get/:id', async (req,res) => {
-		const id = parseInt(req.params['id']);
- 		res.json(id ? await db.getPerson(id) : {})
+	//  app.get('/api/get/:table', async (req,res) => {
+	// 	console.log("here");
+ 	// 	res.json({});
+ 	// });
+	 app.get('/api/get/:table', async (req,res) => {
+		console.log(req.params, req.query);
+		const id = parseInt(req.query['id']);
+		const table = req.params['table'];
+ 		res.json(await db.getData(table, id));
  	});
 	app.post('/api/person/set', async (req,res) => {
 		console.log(req.body);

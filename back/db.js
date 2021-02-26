@@ -14,14 +14,25 @@ const pool = new Pool();
 	features jsonb
 )`;
 `ALTER TABLE persons OWNER TO persona_user`;
+`CREATE TABLE works (
+	id SERIAL PRIMARY KEY,
+	title text not null,
+	genre text
+)`;
+`ALTER TABLE works OWNER TO persona_user`;
 
+const tables = ['persons', 'works'];
 
 export default {
-	async getPersons(){
-		const res = await pool.query('select * from persons ORDER BY id DESC');
-        return res.rows;
+	async getData(table, id){
+		if (tables.includes(table)) {
+			const result  = id ? await pool.query('select * from persons where id = $1', [id]) :  await pool.query(`select * from ${table} ORDER BY id DESC`);
+			return result.rows;
+		} else {
+			return {};
+		}
 	},
-	async getPerson(id){
+	async getUnit(table, id){
 		const res = await pool.query('select * from persons where id = $1', [id]);
     return res.rows;
 	},

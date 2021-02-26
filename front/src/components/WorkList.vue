@@ -32,7 +32,7 @@ export default defineComponent({
     const works = reactive([]);
 
     onBeforeMount(async() => {
-      axios.get('/api/person/list').then((response) => {
+      axios.get('/api/list/works').then((response) => {
         console.log(response.data);
         works.push(...response.data);
       })

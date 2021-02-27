@@ -4,6 +4,7 @@ import UserList from './components/UserList.vue';
 import PersonList from './components/PersonList.vue';
 import Person from './components/Person.vue';
 import WorkList from './components/WorkList.vue';
+import BookList from './components/BookList.vue';
 
 const routes = [
 	{
@@ -31,6 +32,11 @@ const routes = [
 		path: '/works',
 		component: WorkList,
 		name: 'WorkList',
+	},
+	{
+		path: '/books',
+		component: BookList,
+		name: 'BookList',
 	},
 ];
 

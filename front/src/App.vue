@@ -22,6 +22,9 @@
           <router-link to="/works">
             <el-menu-item index="1-4">Произведения</el-menu-item>
           </router-link>
+          <router-link to="/books">
+            <el-menu-item index="1-8">Издания</el-menu-item>
+          </router-link>
         </el-menu-item-group>
         <el-menu-item-group title="Доступ">
           <router-link to="/users">

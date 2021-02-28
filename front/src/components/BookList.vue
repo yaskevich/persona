@@ -24,7 +24,7 @@ export default defineComponent({
 
 
     const openForm = () => {
-      router.push("/book")
+      router.push("/book/")
     };
 
 

@@ -1,3 +1,4 @@
+<template>
 <el-form :model="form" ref="formRef" label-width="100px" :rules="rules">
   <el-form-item prop="title">
     <el-input placeholder="Название" v-model="form.title" class="text-input"></el-input>
@@ -10,7 +11,7 @@
   <el-button type="primary" @click="resetForm">Очистить</el-button>
   <el-button type="primary" @click="confirm">Добавить</el-button>
 </el-form>
-
+</template>
 
 <script lang="ts">
 // import { ElForm } from 'element-plus';

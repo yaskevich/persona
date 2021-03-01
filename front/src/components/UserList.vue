@@ -38,9 +38,16 @@
     <el-button type="primary" @click="resetForm">Очистить</el-button>
     <el-button type="primary" @click="confirm">Добавить</el-button>
   </el-form>
-
+<div style="margin-top:2rem;"></div>
   <el-row v-for="(value, key) in users"  :gutter="20" :key="key">
-    {{value.firstname}} // {{value.lastname}}
+    <el-col :span="4"><div class="grid-content bg-purple"><i :class="value.sex === 1 ? 'el-icon-male' : 'el-icon-female'"></i> {{value.firstname}}</div></el-col>
+        <el-col :span="4"><div class="grid-content bg-purple">{{value.lastname}}</div></el-col>
+    <el-col :span="4"><div class="grid-content bg-purple-light">{{options.filter(x => x.value === value.privs)[0]["label"]}}</div></el-col>
+    <el-col :span="4"><div class="grid-content bg-purple">
+      <router-link :to="'/user/' + value.id">
+      <el-button type="text" size="mini" icon="el-icon-edit" plain class="full-width"></el-button>
+    </router-link>
+    </div></el-col>
   </el-row>
 </template>
 
@@ -62,7 +69,7 @@ export default defineComponent({
         console.log("data", response.data);
         if (response.data && Object.keys(response.data).length) {
         users.push(...response.data);
-        firstRun = false;
+        firstRun.value = false;
         }
       })
     })
@@ -97,8 +104,8 @@ export default defineComponent({
           axios.post('/api/user/add', form)
             .then(function (response) {
               console.log("add user", response);
-              // users.unshift({...form});
-              // formRef.value?.resetFields();
+              users.unshift({...form});
+              formRef.value?.resetFields();
             })
             .catch(function (error) {
               console.log(error);
@@ -138,3 +145,39 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped>
+.text-input{
+  width: 10rem;
+  margin-right:1rem;
+}
+.el-row {
+   margin-bottom: 20px;
+   &:last-child {
+     margin-bottom: 0;
+   }
+ }
+ .el-col {
+   border-radius: 4px;
+ }
+ .bg-purple-dark {
+   background: #99a9bf;
+ }
+ .bg-purple {
+   background: #d3dce6;
+ }
+ .bg-purple-light {
+   background: #e5e9f2;
+ }
+ .grid-content {
+   border-radius: 4px;
+   /* min-height: 36px; */
+ }
+ .row-bg {
+   padding: 10px 0;
+   background-color: #f9fafc;
+ }
+ .full-width{
+   display: block;
+   width: 100%;
+ }
+</style>

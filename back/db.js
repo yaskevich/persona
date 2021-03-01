@@ -39,7 +39,7 @@ const pool = new Pool();
 
 
 
-const tables = ['persons', 'works'];
+const tables = ['persons', 'works', 'users'];
 
 
 const infoQuery  = `SELECT

@@ -20,6 +20,18 @@ const pool = new Pool();
 	genre text
 )`;
 `ALTER TABLE works OWNER TO persona_user`;
+`CREATE TABLE users (
+	id SERIAL PRIMARY KEY,
+	firstname text not null,
+	lastname text not null,
+	email text not null,
+	sex integer not null,
+	privs integer not null,
+	passdata text not null
+)`;
+`ALTER TABLE users OWNER TO persona_user`;
+
+
 
 const tables = ['persons', 'works'];
 
@@ -42,7 +54,12 @@ export default {
     return res.rows;
 	},
 	async createWork(data){
-		const res = await pool.query(`INSERT INTO works (title, genre) VALUES($1, $2) RETURNING id`, [data.title, data.genre]);		
+		const res = await pool.query(`INSERT INTO works (title, genre) VALUES($1, $2) RETURNING id`, [data.title, data.genre]);
+    return res.rows;
+	},
+
+	async createUser(data){
+		const res = await pool.query(`INSERT INTO users (firstname, lastname, email, sex, privs, passdata) VALUES($1, $2, $3, $4, $5) RETURNING id`, [data.firstname, data.lastname, data.email, data.sex, data.privs, data.passdata]);
     return res.rows;
 	},
 };

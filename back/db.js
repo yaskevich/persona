@@ -1,5 +1,11 @@
 'use strict';
 
+import bcrypt from 'bcrypt';
+const saltRounds = 8;
+
+import passGen from 'generate-password';
+const passOptions = {	length: 18, numbers: true, uppercase: false, excludeSimilarCharacters: true, strict: true , symbols: false };
+
 import pg from 'pg';
 const { Pool } = pg;
 const pool = new Pool();
@@ -35,6 +41,23 @@ const pool = new Pool();
 
 const tables = ['persons', 'works'];
 
+
+const infoQuery  = `SELECT
+   table_name,
+   column_name,
+   data_type
+FROM
+   information_schema.columns
+WHERE
+   table_name = $1`;
+
+const infoQueryDB = `
+SELECT *
+FROM pg_catalog.pg_tables
+WHERE schemaname != 'pg_catalog' AND
+    schemaname != 'information_schema'`;
+
+
 export default {
 	async getData(table, id){
 		if (tables.includes(table)) {
@@ -59,7 +82,24 @@ export default {
 	},
 
 	async createUser(data){
-		const res = await pool.query(`INSERT INTO users (firstname, lastname, email, sex, privs, passdata) VALUES($1, $2, $3, $4, $5) RETURNING id`, [data.firstname, data.lastname, data.email, data.sex, data.privs, data.passdata]);
+		console.log("create user");
+		const pwd  = passGen.generate(passOptions);
+		console.log("make hash");
+		const hash = await bcrypt.hash(pwd, saltRounds);
+		console.log("ready");
+
+		// const resInfo = await pool.query(infoQuery, ['persons']);
+		// console.log("info", resInfo.rows);
+		// const resInfo = await pool.query(infoQueryDB);
+		// console.log("info", resInfo.rows);
+		console.log(pwd, hash);
+
+
+
+		// const result = await bcrypt.compare('PASSWORD', hash)
+
+		const res = await pool.query(`INSERT INTO users (firstname, lastname, email, sex, privs, passdata) VALUES($1, $2, $3, $4, $5, $6) RETURNING id`, [data.firstname, data.lastname, data.email, data.sex, data.privs, hash]);
     return res.rows;
+		// return {pwd: pwd};
 	},
 };

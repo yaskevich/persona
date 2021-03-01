@@ -3,12 +3,12 @@
     Пользователи
   </div>
   <el-form :model="form" ref="formRef" label-width="100px" :rules="rules">
-    <el-form-item prop="title">
-      <el-input placeholder="Имя" v-model="form.title" class="text-input"></el-input>
+    <el-form-item prop="firstname">
+      <el-input placeholder="Имя" v-model="form.firstname" class="text-input"></el-input>
     </el-form-item>
 
-    <el-form-item prop="genre">
-      <el-input placeholder="Фамилия" v-model="form.genre" class="text-input"></el-input>
+    <el-form-item prop="lastname">
+      <el-input placeholder="Фамилия" v-model="form.lastname" class="text-input"></el-input>
     </el-form-item>
 
     <el-form-item prop="email">
@@ -23,8 +23,8 @@
       </el-radio-group>
     </el-form-item>
 
-<el-form-item prop="privs">
-  <el-select v-model="form.priv" placeholder="Select" value-key>
+<el-form-item>
+  <el-select v-model="form.privs" placeholder="Select" value-key>
   <el-option
     v-for="item in options"
     :key="item.value"
@@ -39,8 +39,8 @@
     <el-button type="primary" @click="confirm">Добавить</el-button>
   </el-form>
 
-  <el-row v-for="(value, key) in works"  :gutter="20" :key="key">
-    {{value.title}} // {{value.genre}}
+  <el-row v-for="(value, key) in users"  :gutter="20" :key="key">
+    {{value.firstname}} // {{value.lastname}}
   </el-row>
 </template>
 
@@ -53,13 +53,17 @@ export default defineComponent({
   setup() {
     const formRef = ref<InstanceType<typeof ElForm>>();
 
-    const works = reactive([]);
+    const users = reactive([]);
+    const firstRun = ref(true);
 
 
     onBeforeMount(async() => {
-      axios.get('/api/get/works').then((response) => {
-        console.log(response.data);
-        works.push(...response.data);
+      axios.get('/api/get/users').then((response) => {
+        console.log("data", response.data);
+        if (response.data && Object.keys(response.data).length) {
+        users.push(...response.data);
+        firstRun = false;
+        }
       })
     })
 
@@ -84,34 +88,34 @@ export default defineComponent({
     };
     const confirm = () => {
       formRef.value?.validate((valid) => {
-        console.log("here", priv.value);
+
         if (valid) {
           // do
-
+          console.log("ok send", form);
           // return false;
 
-          // axios.post('/api/work/add', form)
-          //   .then(function (response) {
-          //     console.log(response);
-          //     works.unshift({...form});
-          //     formRef.value?.resetFields();
-          //   })
-          //   .catch(function (error) {
-          //     console.log(error);
-          //   });
+          axios.post('/api/user/add', form)
+            .then(function (response) {
+              console.log("add user", response);
+              // users.unshift({...form});
+              // formRef.value?.resetFields();
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
 
         }  else{
           return false;
         }
       });
     };
-    const form  = reactive({ title: '', genre: '', email: '', sex : '2', priv: 5});
+    const form  = reactive({ firstname: '', lastname: '', email: '', sex : '2', privs: firstRun.value ? 1 : 5});
     const  rules = {
-      title: [
+      firstname: [
         { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
         { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' }
       ],
-      genre: [
+      lastname: [
         { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
         { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' }
       ],
@@ -129,7 +133,7 @@ export default defineComponent({
       formRef,
       rules,
       form,
-      works
+      users
     };
   },
 });

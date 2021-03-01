@@ -66,6 +66,12 @@ const LocalStrategy = passportLocal.Strategy;
 		res.json(result);
 	 });
 
+	app.post('/api/user/add', async (req,res) => {
+		// console.log(req.body);
+		const result = await db.createUser(req.body);
+		res.json(result);
+	 });
+
 	//  app.get('/api/get/:table', async (req,res) => {
 	// 	console.log("here");
  	// 	res.json({});

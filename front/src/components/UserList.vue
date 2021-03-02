@@ -2,7 +2,7 @@
   <div>
     Пользователи
   </div>
-  <el-form :model="form" ref="formRef" label-width="100px" :rules="rules">
+  <el-form :model="form" ref="formRef" label-width="100px" :rules="rules" :inline="true">
     <el-form-item prop="firstname">
       <el-input placeholder="Имя" v-model="form.firstname" class="text-input"></el-input>
     </el-form-item>
@@ -23,17 +23,16 @@
       </el-radio-group>
     </el-form-item>
 
-<el-form-item>
-  <el-select v-model="form.privs" placeholder="Select" value-key>
-  <el-option
-    v-for="item in options"
-    :key="item.value"
-    :label="item.label"
-    :value="item.value">
-  </el-option>
-</el-select>
-
-</el-form-item>
+  <el-form-item>
+    <el-select v-model="form.privs" placeholder="Select" value-key>
+      <el-option
+        v-for="item in options"
+        :key="item.value"
+        :label="item.label"
+        :value="item.value">
+      </el-option>
+    </el-select>
+  </el-form-item>
 
     <el-button type="primary" @click="resetForm">Очистить</el-button>
     <el-button type="primary" @click="confirm">Добавить</el-button>
@@ -42,7 +41,7 @@
   <el-row v-for="(value, key) in users"  :gutter="20" :key="key">
     <el-col :span="4"><div class="grid-content bg-purple"><i :class="value.sex === 1 ? 'el-icon-male' : 'el-icon-female'"></i> {{value.firstname}}</div></el-col>
         <el-col :span="4"><div class="grid-content bg-purple">{{value.lastname}}</div></el-col>
-    <el-col :span="4"><div class="grid-content bg-purple-light">{{options.filter(x => x.value === value.privs)[0]["label"]}}</div></el-col>
+    <el-col :span="4"><div class="grid-content bg-purple-light">{{options.filter(x => x.value === value.privs)[0]["label"].split('(')[0]}}</div></el-col>
     <el-col :span="4"><div class="grid-content bg-purple">
       <router-link :to="'/user/' + value.id">
       <el-button type="text" size="mini" icon="el-icon-edit" plain class="full-width"></el-button>

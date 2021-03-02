@@ -6,6 +6,7 @@ import Person from './components/Person.vue';
 import WorkList from './components/WorkList.vue';
 import BookList from './components/BookList.vue';
 import Book from './components/Book.vue';
+import LogList from './components/LogList.vue';
 
 const routes = [
 	{
@@ -33,6 +34,11 @@ const routes = [
 		path: '/works',
 		component: WorkList,
 		name: 'WorkList',
+	},
+	{
+		path: '/logs',
+		component: LogList,
+		name: 'LogList',
 	},
 	{
 		path: '/books',

@@ -28,7 +28,10 @@
         </el-menu-item-group>
         <el-menu-item-group title="Доступ">
           <router-link to="/users">
-            <el-menu-item index="1-2">Пользователи</el-menu-item>
+            <el-menu-item index="1-20">Пользователи</el-menu-item>
+          </router-link>
+          <router-link to="/logs">
+            <el-menu-item index="1-21">Действия</el-menu-item>
           </router-link>
         </el-menu-item-group>
         <!-- <el-submenu index="1-4">

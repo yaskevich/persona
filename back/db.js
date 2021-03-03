@@ -82,10 +82,17 @@ export default {
 	},
 	async getUserData(email, pwd){
 		if (email && pwd) {
-			const data = await pool.query(`SELECT * FROM users where email = $1`, [email]);
-			const result = await bcrypt.compare(pwd, data.passdata);
-			if (result) {
-	    	return res.rows;
+			console.log("email/pwd", email, pwd);
+			const res = await pool.query(`SELECT * FROM users where email = $1`, [email]);
+			if (res.rows.length){
+				const data = res.rows[0];
+				console.log("userdata", data);
+				console.log("pass/hash", pwd, data.passdata);
+				const result = await bcrypt.compare(pwd, data.passdata);
+				console.log("pass/hash result", result);
+				if (result) {
+		    	return res.rows[0];
+				}
 			}
 		}
 		return {};

@@ -3,8 +3,8 @@
     <el-form-item prop="email">
       <el-input placeholder="E-mail" v-model="user.email"></el-input>
     </el-form-item>
-    <el-form-item prop="pwd">
-      <el-input type="password" placeholder="Пароль" v-model="user.pwd" autocomplete="off"></el-input>
+    <el-form-item prop="password">
+      <el-input type="password" placeholder="Пароль" v-model="user.password" autocomplete="off"></el-input>
     </el-form-item>
     <el-button type="primary" @click="confirm">Войти</el-button>
   </el-form>
@@ -17,7 +17,7 @@ import axios from 'axios';
 export default defineComponent({
   setup() {
     const formRef = ref<InstanceType<typeof ElForm>>();
-    let user = reactive({email: '', pwd: ''});
+    let user = reactive({email: '', password: ''});
 
     const resetForm = () => {
       formRef.value?.resetFields();
@@ -30,7 +30,7 @@ export default defineComponent({
           console.log("ok send", user);
           // return false;
 
-          axios.post('/api/user/login', form)
+          axios.post('/api/user/login', user)
             .then(function (response) {
               // formRef.value?.resetFields();
               console.log("login result", response);
@@ -52,7 +52,7 @@ export default defineComponent({
           { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
         { type: 'email', message: 'Please input correct email address', trigger: ['blur', 'change'] }
       ],
-      pwd: [
+      password: [
         { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
         { min: 18, message: 'Не менее 18 символов', trigger: 'blur' }
       ],

@@ -1,3 +1,5 @@
+'use strict';
+
 import path from 'path'
 import express from 'express'
 import compression from 'compression'
@@ -21,12 +23,16 @@ const LocalStrategy = passportLocal.Strategy;
 	const app = express();
 	const port = process.env.PORT || 3555;
 
-	passport.use(new LocalStrategy(
-	  function(id, password, done) {
+	passport.use(new LocalStrategy( {
+      usernameField: "email",
+      passwordField: "password"
+    },
+	  async function(id, password, done) {
 		let user = {"id": id};
-		const userData = db.getUserData(email);
-		
-		if (userData.data && Object.keys(userData.data).length) {
+		const userData = await db.getUserData(id, password);
+		console.log("userdata", userData);
+
+		if (userData && Object.keys(userData).length) {
 			console.log("user " + id + " authenticated");
 			return done(null, user);
 		} else {
@@ -107,17 +113,18 @@ const LocalStrategy = passportLocal.Strategy;
 	});
 
 	// app.get('/login', passport.authenticate('local', { successRedirect: '/full' }));
-	app.get('/api/user/login', function(req, res, next) {
+	app.post('/api/user/login', function(req, res, next) {
+		console.log("login");
 	  passport.authenticate('local', function(err, user, info) {
 		if (err) { return next(err); }
 		console.log(user, info);
 		if (!user) {
-			return res.sendFile(path.join(__dirname, 'public', 'login.html'));
+			return res.status(400).send([user, "Cannot log in", info]);
 			// return res.redirect('/login');
 		}
 		req.logIn(user, function(err) {
 		  if (err) { return next(err); }
-		  return res.redirect('/full');
+		  return res.json(user);
 		});
 	  })(req, res, next);
 });

@@ -24,7 +24,9 @@ const LocalStrategy = passportLocal.Strategy;
 	passport.use(new LocalStrategy(
 	  function(id, password, done) {
 		let user = {"id": id};
-		if (id === process.env.USER_ID && password === process.env.USER_PASSWORD) {
+		const userData = db.getUserData(email);
+		
+		if (userData.data && Object.keys(userData.data).length) {
 			console.log("user " + id + " authenticated");
 			return done(null, user);
 		} else {
@@ -105,7 +107,7 @@ const LocalStrategy = passportLocal.Strategy;
 	});
 
 	// app.get('/login', passport.authenticate('local', { successRedirect: '/full' }));
-	app.get('/login', function(req, res, next) {
+	app.get('/api/user/login', function(req, res, next) {
 	  passport.authenticate('local', function(err, user, info) {
 		if (err) { return next(err); }
 		console.log(user, info);
@@ -120,7 +122,7 @@ const LocalStrategy = passportLocal.Strategy;
 	  })(req, res, next);
 });
 
-	app.get('/logout', (req, res) => {
+	app.get('/api/logout', (req, res) => {
 		console.log("logging out");
 		req.logout();
 		res.redirect('/login');

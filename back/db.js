@@ -80,7 +80,16 @@ export default {
 		const res = await pool.query(`INSERT INTO works (title, genre) VALUES($1, $2) RETURNING id`, [data.title, data.genre]);
     return res.rows;
 	},
-
+	async getUserData(email, pwd){
+		if (email && pwd) {
+			const data = await pool.query(`SELECT * FROM users where email = $1`, [email]);
+			const result = await bcrypt.compare(pwd, data.passdata);
+			if (result) {
+	    	return res.rows;
+			}
+		}
+		return {};
+	},
 	async createUser(data){
 		console.log("create user");
 		const pwd  = passGen.generate(passOptions);

@@ -10,6 +10,11 @@ import pg from 'pg';
 const { Pool } = pg;
 const pool = new Pool();
 
+
+// import * as pgSession from 'connect-pg-simple';
+import expressSession from 'express-session';
+import connectPgSimple from 'connect-pg-simple';
+
 `CREATE TABLE persons (
 	id SERIAL PRIMARY KEY,
 	firstName text not null,
@@ -37,7 +42,18 @@ const pool = new Pool();
 )`;
 `ALTER TABLE users OWNER TO persona_user`;
 
+`CREATE TABLE "session" (
+  "sid" varchar NOT NULL COLLATE "default",
+	"sess" json NOT NULL,
+	"expire" timestamp(6) NOT NULL
+)
+WITH (OIDS=FALSE);
 
+ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
+
+CREATE INDEX "IDX_session_expire" ON "session" ("expire")`;
+
+`ALTER TABLE session OWNER TO persona_user`;
 
 const tables = ['persons', 'works', 'users'];
 
@@ -59,6 +75,26 @@ WHERE schemaname != 'pg_catalog' AND
 
 
 export default {
+	expressPgSession(){
+		const pgSession = connectPgSimple(expressSession);
+	  const sessionSettings = {
+			store: new pgSession({ pool : pool,}),
+			secret: process.env.SESSION_SECRET,
+			resave: false,
+			saveUninitialized: false,
+			cookie:  { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days
+			 // cookie: { secure: true }
+			};
+			return expressSession(sessionSettings);
+		// return new pgSession({
+    // pool : pool,                // Connection pool
+    // // tableName : 'user_sessions'   // Use another table-name than the default "session" one
+		// });
+		// return pgSession;
+		// const pgs = pgSession.default(session);
+		 // const pgs = pgSession(session);
+	},
+
 	async getData(table, id){
 		if (tables.includes(table)) {
 			const result  = id ? await pool.query('select * from ${table} where id = $1', [id]) :  await pool.query(`select * from ${table} ORDER BY id DESC`);
@@ -91,7 +127,7 @@ export default {
 				const result = await bcrypt.compare(pwd, data.passdata);
 				delete data.passdata;
 				console.log("pass/hash result", result);
-				return result ? data : {"error": "password"};				
+				return result ? data : {"error": "password"};
 			} else {
 				 return {"error": "email"};
 			}

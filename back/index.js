@@ -4,7 +4,7 @@ import path from 'path'
 import express from 'express'
 import compression from 'compression'
 import bodyParser from 'body-parser'
-import session from 'cookie-session'
+// import session from 'cookie-session'
 import passport from 'passport'
 import passportLocal from 'passport-local'
 import dotenv from 'dotenv'
@@ -43,7 +43,9 @@ const LocalStrategy = passportLocal.Strategy;
 	));
 	passport.serializeUser(function(user, cb) {
 		console.log("ser", user);
-		cb(null, user.id);
+		if(user) {
+			cb(null, user.id);
+		}
 	 });
 	passport.deserializeUser(async function(id, cb) {
 		console.log("deser", id);
@@ -52,13 +54,10 @@ const LocalStrategy = passportLocal.Strategy;
 		};
 	  cb(null, user);
 	});
-	app.use(session({
-	  secret: 'wqddqad',
-	  resave: false,
-	  saveUninitialized: true,
-	  cookie: { secure: true }
-	}));
+
+
 	app.use(passport.initialize());
+	app.use(db.expressPgSession());
 	app.use(passport.session());
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({ extended: true }));
@@ -66,7 +65,6 @@ const LocalStrategy = passportLocal.Strategy;
 	// ['path', 'altPath'].forEach(function(path) {
 	  // app.get(path, function(req, res) { etc. });
 	// });
-	app.get('/cool.js', async (req,res) => { res.json({}) });
 
 	app.post('/api/person/add', async (req,res) => {
 		console.log(req.body);
@@ -118,23 +116,39 @@ const LocalStrategy = passportLocal.Strategy;
 		}
 	});
 
-	// app.get('/login', passport.authenticate('local', { successRedirect: '/full' }));
-	app.post('/api/user/login', function(req, res, next) {
-		console.log("login");
-	  passport.authenticate('local', function(err, user, info) {
-		if (err) { return next(err); }
-		console.log("login data: user", user, "info", info, "err", err);
-		if (!user) {
-			// return res.status(400).send([user, "Cannot log in", info]);
-			// return res.redirect('/login');
-			res.json({});
-		}
-		req.logIn(user, function(err) {
-		  if (err) { return next(err); }
-		  return res.json(user);
-		});
-	  })(req, res, next);
-});
+// app.get('/login', passport.authenticate('local', { successRedirect: '/full' }));
+// 	app.post('/test', function(req, res, next) {
+// 		console.log("login");
+// 	  passport.authenticate('local', function(err, user, info) {
+// 		if (err) { return next(err); }
+// 		console.log("login data: user", user, "info", info, "err", err);
+// 		if (!user) {
+// 			// return res.status(400).send([user, "Cannot log in", info]);
+// 			// return res.redirect('/login');
+// 			res.json({});
+// 		}
+// 		req.logIn(user, function(err) {
+// 		  if (err) { return next(err); }
+// 		  return res.json(user);
+// 		});
+// 	  })(req, res, next);
+// });
+
+app.post('/api/user/login',
+  passport.authenticate('local', { failWithError: true }),
+  function(req, res, next) {
+    // Handle success
+    // return res.send({ success: true, message: 'Logged in' })
+		return res.json({ id: req.user });
+  },
+  function(err, req, res, next) {
+    // Handle error
+		console.log("error", req, res);
+		// console.log("error", req.user, err);
+    // return res.status(401).send({ success: false, message: err })
+    return res.status(200).json({ message: "no"});
+  }
+)
 
 	app.get('/api/logout', (req, res) => {
 		console.log("logging out");

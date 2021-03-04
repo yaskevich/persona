@@ -28,22 +28,28 @@ const LocalStrategy = passportLocal.Strategy;
       passwordField: "password"
     },
 	  async function(id, password, done) {
-		let user = {"id": id};
+
 		const userData = await db.getUserData(id, password);
 		console.log("userdata", userData);
 
-		if (userData && Object.keys(userData).length) {
+		if (userData && Object.keys(userData).length && !userData.hasOwnProperty("error") ) {
 			console.log("user " + id + " authenticated");
-			return done(null, user);
+			return done(null, userData);
 		} else {
 			console.log("login attempt as [" + id + "]::[" + password + "]");
-			return done(null,false);
+			return done(null, false);
 		}
 	  }
 	));
-	passport.serializeUser(function(user, cb) { cb(null, user.id); });
+	passport.serializeUser(function(user, cb) {
+		console.log("ser", user);
+		cb(null, user.id);
+	 });
 	passport.deserializeUser(async function(id, cb) {
-	  let user = {"id": id};
+		console.log("deser", id);
+	  let user = {
+		  id: 1
+		};
 	  cb(null, user);
 	});
 	app.use(session({
@@ -117,10 +123,11 @@ const LocalStrategy = passportLocal.Strategy;
 		console.log("login");
 	  passport.authenticate('local', function(err, user, info) {
 		if (err) { return next(err); }
-		console.log(user, info);
+		console.log("login data: user", user, "info", info, "err", err);
 		if (!user) {
-			return res.status(400).send([user, "Cannot log in", info]);
+			// return res.status(400).send([user, "Cannot log in", info]);
 			// return res.redirect('/login');
+			res.json({});
 		}
 		req.logIn(user, function(err) {
 		  if (err) { return next(err); }

@@ -89,13 +89,17 @@ export default {
 				console.log("userdata", data);
 				console.log("pass/hash", pwd, data.passdata);
 				const result = await bcrypt.compare(pwd, data.passdata);
+				delete data.passdata;
 				console.log("pass/hash result", result);
-				if (result) {
-		    	return res.rows[0];
-				}
+				return result ? data : {"error": "password"};				
+			} else {
+				 return {"error": "email"};
 			}
+		} else {
+			if (!email) { return {"error": "email"}; }
+			else if (!pwd) { return {"error": "password"}; }
 		}
-		return {};
+		return {"error": "unknown"};
 	},
 	async createUser(data){
 		console.log("create user");

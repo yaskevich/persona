@@ -117,24 +117,23 @@ export default {
     return res.rows;
 	},
 	async getUserData(email, pwd){
-		if (email && pwd) {
-			console.log("email/pwd", email, pwd);
-			const res = await pool.query(`SELECT * FROM users where email = $1`, [email]);
-			if (res.rows.length){
-				const data = res.rows[0];
-				console.log("userdata", data);
-				console.log("pass/hash", pwd, data.passdata);
-				const result = await bcrypt.compare(pwd, data.passdata);
-				delete data.passdata;
-				console.log("pass/hash result", result);
-				return result ? data : {"error": "password"};
-			} else {
-				 return {"error": "email"};
-			}
+		if (!email) { return {"error": "email"}; }
+		else if (!pwd) { return {"error": "password"}; }
+		
+		// console.log("email/pwd", email, pwd);
+		const res = await pool.query(`SELECT * FROM users where email = $1`, [email]);
+		if (res.rows.length){
+			const data = res.rows[0];
+			// console.log("userdata", data);
+			// console.log("pass/hash", pwd, data.passdata);
+			const result = await bcrypt.compare(pwd, data.passdata);
+			delete data.passdata;
+			// console.log("pass/hash result", result);
+			return result ? data : {"error": "password"};
 		} else {
-			if (!email) { return {"error": "email"}; }
-			else if (!pwd) { return {"error": "password"}; }
+			 return {"error": "email"};
 		}
+
 		return {"error": "unknown"};
 	},
 	async createUser(data){

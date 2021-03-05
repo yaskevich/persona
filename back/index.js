@@ -30,17 +30,19 @@ const LocalStrategy = passportLocal.Strategy;
 	  async function(id, password, done) {
 
 		const userData = await db.getUserData(id, password);
-		console.log("userdata", userData);
+		// console.log("userdata", userData);
 
 		if (userData && Object.keys(userData).length && !userData.hasOwnProperty("error") ) {
-			console.log("user " + id + " authenticated");
+			console.log("user " + id + " SUCCESS");
 			return done(null, userData);
 		} else {
-			console.log("login attempt as [" + id + "]::[" + password + "]");
-			return done(null, false);
+			console.log(`login attempt as [${id}]•[${password}]►${userData.error}◄`);
+			return done(null, false, userData);
 		}
 	  }
 	));
+
+
 	passport.serializeUser(function(user, cb) {
 		console.log("ser", user);
 		if(user) {
@@ -134,21 +136,28 @@ const LocalStrategy = passportLocal.Strategy;
 // 	  })(req, res, next);
 // });
 
-app.post('/api/user/login',
-  passport.authenticate('local', { failWithError: true }),
-  function(req, res, next) {
-    // Handle success
-    // return res.send({ success: true, message: 'Logged in' })
-		return res.json({ id: req.user });
-  },
-  function(err, req, res, next) {
-    // Handle error
-		console.log("error", req, res);
-		// console.log("error", req.user, err);
-    // return res.status(401).send({ success: false, message: err })
-    return res.status(200).json({ message: "no"});
-  }
-)
+// app.post('/api/user/login',
+//   passport.authenticate('local', { failWithError: true }),
+//   function(req, res, next) {
+//     // Handle success
+//     // return res.send({ success: true, message: 'Logged in' })
+// 		return res.json({ id: req.user });
+//   },
+//   function(err, req, res, next) {
+//     // Handle error
+// 		// console.log("error", res);
+// 		// console.log(JSON.stringify(res.res.route));
+// 		// console.log("error", req.user, err);
+//     // return res.status(401).send({ success: false, message: err })
+//     return res.status(200).json({ message: "no"});
+//   }
+// );
+//
+
+
+	app.post('/api/user/login', (req, res, next) => {
+	  passport.authenticate('local', (err, user, info) => res.json( user === false ? info : user ))(req, res, next);
+	});
 
 	app.get('/api/logout', (req, res) => {
 		console.log("logging out");

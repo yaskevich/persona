@@ -80,10 +80,9 @@ export default {
 	  const sessionSettings = {
 			store: new pgSession({ pool : pool,}),
 			secret: process.env.SESSION_SECRET,
+			saveUninitialized: true,
 			resave: false,
-			saveUninitialized: false,
-			cookie:  { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days
-			 // cookie: { secure: true }
+			cookie:  { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days			 
 			};
 			return expressSession(sessionSettings);
 		// return new pgSession({
@@ -119,7 +118,7 @@ export default {
 	async getUserData(email, pwd){
 		if (!email) { return {"error": "email"}; }
 		else if (!pwd) { return {"error": "password"}; }
-		
+
 		// console.log("email/pwd", email, pwd);
 		const res = await pool.query(`SELECT * FROM users where email = $1`, [email]);
 		if (res.rows.length){

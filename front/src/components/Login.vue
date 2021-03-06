@@ -22,7 +22,7 @@ export default defineComponent({
     const resetForm = () => {
       formRef.value?.resetFields();
     };
-    const confirm = () => {
+    const confirm = async () => {
       formRef.value?.validate((valid) => {
 
         if (valid) {
@@ -30,7 +30,12 @@ export default defineComponent({
           console.log("ok send", user);
           // return false;
 
-          axios.post('/api/user/login', user)
+          axios.post('/api/user/login', user, {
+              "withCredentials": true,
+              "headers": {
+                  "Accept": 'application/json',
+                  "Content-Type": 'application/json',
+              }})
             .then(function (response) {
               // formRef.value?.resetFields();
               console.log("login result", response);

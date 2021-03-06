@@ -12,8 +12,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, reactive } from 'vue';
-import axios from 'axios';
-
+import store from "../store"
 export default defineComponent({
   setup() {
     const formRef = ref<InstanceType<typeof ElForm>>();
@@ -23,27 +22,17 @@ export default defineComponent({
       formRef.value?.resetFields();
     };
     const confirm = async () => {
-      formRef.value?.validate((valid) => {
+      formRef.value?.validate(async(valid) => {
 
         if (valid) {
           // do
           console.log("ok send", user);
           // return false;
-
-          axios.post('/api/user/login', user, {
-              "withCredentials": true,
-              "headers": {
-                  "Accept": 'application/json',
-                  "Content-Type": 'application/json',
-              }})
-            .then(function (response) {
+          const err  = await store.doLogin(user);
+          if(!err) {
               // formRef.value?.resetFields();
-              console.log("login result", response);
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
-
+          }
+          console.log(store.state);
         }  else{
           console.log("not valid");
           return false;

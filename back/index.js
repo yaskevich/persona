@@ -10,6 +10,13 @@ import passportLocal from 'passport-local'
 import dotenv from 'dotenv'
 import db from './db.js';
 // import cors from 'cors';
+
+import passportJWT from "passport-jwt";
+const JWTStrategy   = passportJWT.Strategy;
+const ExtractJWT = passportJWT.ExtractJwt;
+
+import jwt from 'jsonwebtoken';
+
 import cookieParser from 'cookie-parser';
 dotenv.config();
 
@@ -24,33 +31,52 @@ const LocalStrategy = passportLocal.Strategy;
 	const app = express();
 	const port = process.env.PORT || 3555;
 
-	passport.use(new LocalStrategy({ usernameField: "email", passwordField: "password" },
-	  async function(id, password, done) {
-			const userData = await db.getUserData(id, password);
-			// console.log("userdata", userData);
-			if (userData && Object.keys(userData).length && !userData.hasOwnProperty("error") ) {
-				console.log(id, "<SUCCESS>");
-				return done(null, userData);
-			} else {
-				console.log(`login attempt as [${id}]•[${password}]►${userData.error}◄`);
-				return done(null, false, userData);
-			}
-	  })
-	);
+	const genToken = user => {
+	  return jwt.sign({
+	    iss: 'yaskevich',
+	    sub: user.id,
+	    iat: new Date().getTime(),
+	    exp: new Date().setDate(new Date().getDate() + 1)
+	  }, process.env.JWT_SECRET);
+	};
 
-	passport.serializeUser(function(user, cb) {
-		console.log("ser", user);
-		if(user) {
-			cb(null, user.id);
-		}
-	 });
-	passport.deserializeUser(function(id, cb) {
-		console.log("deser", id);
-	  let user = {
-		  id: 1
-		};
-	  cb(null, user);
-	});
+	const strategy  = new JWTStrategy({
+	  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+	  secretOrKey   : process.env.JWT_SECRET
+		}, function (jwtPayload, done) {
+			 return db.getUserDataByID(jwtPayload.sub)
+		   .then(user => { return done(null, user); })
+			 .catch(err => { return done(err); });
+		});
+	passport.use(strategy);
+
+	// passport.use(new LocalStrategy({ usernameField: "email", passwordField: "password" },
+	//   async function(id, password, done) {
+	// 		const userData = await db.getUserData(id, password);
+	// 		// console.log("userdata", userData);
+	// 		if (userData && Object.keys(userData).length && !userData.hasOwnProperty("error") ) {
+	// 			console.log(id, "<SUCCESS>");
+	// 			return done(null, userData);
+	// 		} else {
+	// 			console.log(`login attempt as [${id}]•[${password}]►${userData.error}◄`);
+	// 			return done(null, false, userData);
+	// 		}
+	//   })
+	// );
+	//
+	// passport.serializeUser(function(user, cb) {
+	// 	console.log("ser", user);
+	// 	if(user) {
+	// 		cb(null, user.id);
+	// 	}
+	//  });
+	// passport.deserializeUser(function(id, cb) {
+	// 	console.log("deser", id);
+	//   let user = {
+	// 	  id: 1
+	// 	};
+	//   cb(null, user);
+	// });
 
 	function ifAuthenticatedOnly(req, res, next) {
 	  if (!req.isAuthenticated()) {
@@ -110,7 +136,7 @@ const LocalStrategy = passportLocal.Strategy;
  	// });
 //
 	 // app.get('/api/get/:table', cors({credentials: true, origin: 'http://localhost:3555'}), ifAuthenticatedOnly, async (req,res) => {
-	 app.get('/api/get/:table', ifAuthenticatedOnly, async (req,res) => {
+	 app.get('/api/get/:table', passport.authenticate('jwt',{session: false}), async (req,res) => {
 
 		 console.log(req.cookies)
 
@@ -136,8 +162,24 @@ const LocalStrategy = passportLocal.Strategy;
 		res.json(result);
 	});
 // cors({credentials: true, , origin: 'http://localhost:3555'}),
-	app.post('/api/user/login', (req, res, next) => {
-	  passport.authenticate('local', (err, user, info) => res.json( user === false ? info : user ))(req, res, next);
+	app.post('/api/user/login', async(req, res) => {
+		const userData = await db.getUserData(req.body["email"], req.body["password"]);
+		if (userData && Object.keys(userData).length && !userData.hasOwnProperty("error") ) {
+			console.log(req.body["email"], "<SUCCESS>");
+			const token = genToken(userData);
+			userData["token"] = token;
+			res.json(userData);
+		} else {
+			console.log(`login attempt as [${id}]•[${password}]►${userData.error}◄`);
+			res.json(userData);
+		}
+	 	// (req, res, next) => {
+	  // passport.authenticate('local', (err, user, info) => res.json( user === false ? info : user ))(req, res, next);
+		// passport.authenticate('jwt',{session: false}),(req,res,next)=>{
+    // 	res.json("Secret Data");
+		//
+		// const token = genToken(newUser)
+  	// res.status(200).json({token})
 	});
 
 	app.get('/api/logout', (req, res) => {

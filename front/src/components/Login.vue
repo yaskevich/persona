@@ -12,7 +12,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, reactive } from 'vue';
-import store from "../store"
+import store from "../store";
 export default defineComponent({
   setup() {
     const formRef = ref<InstanceType<typeof ElForm>>();

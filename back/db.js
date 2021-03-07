@@ -82,7 +82,7 @@ export default {
 			secret: process.env.SESSION_SECRET,
 			saveUninitialized: true,
 			resave: false,
-			cookie:  { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days			 
+			cookie:  { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days
 			};
 			return expressSession(sessionSettings);
 		// return new pgSession({
@@ -114,6 +114,10 @@ export default {
 	async createWork(data){
 		const res = await pool.query(`INSERT INTO works (title, genre) VALUES($1, $2) RETURNING id`, [data.title, data.genre]);
     return res.rows;
+	},
+	async getUserDataByID(id){
+		const res = await pool.query(`SELECT * FROM users where id = $1`, [id]);
+		return res.rows[0]
 	},
 	async getUserData(email, pwd){
 		if (!email) { return {"error": "email"}; }

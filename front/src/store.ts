@@ -6,6 +6,7 @@ const state = reactive({
   token: localStorage.getItem('token') || '',
   user: {},
   test: "ok",
+  error: "",
 });
 
 const getUser = async() => {
@@ -21,17 +22,35 @@ const getUser = async() => {
 };
 
 const doLogin = async(payload: Object): Promise<T> => {
-  if (!state.token) {
+  // if (!state.token) {
     try {
      const response = await axios.post("/api/user/login", payload);
      state.user = response.data;
+     state.token  = response.data.token || '';
+     localStorage.setItem('token', state.token);
      // router.push("/dashboard")
      return;
    } catch (error) {
-     console.log("Cannot log in", errors)
+     console.log("Cannot log in", error)
+     return error;
+   }
+ // }
+ // console.log("No query: token exists.");
+};
+
+const getData = async(table: string): Promise<T> => {
+  if (state.token) {
+    try {
+    const config = { headers: { Authorization: "Bearer " + state.token } };
+     const response = await axios.get("/api/get/" + table, config);
+     return response;
+   } catch (error) {
+     console.log("Cannot get", error)
      return error;
    }
  }
+ console.log("No token. Fail.");
+
 };
 // axios.post('/api/user/login', user, {
 //     "withCredentials": true,
@@ -51,6 +70,7 @@ export default {
   // state: readonly(state),
   getUser,
   doLogin,
+  getData,
   // doLogout,
   // getData
   state: state,

@@ -8,6 +8,7 @@
 import { defineComponent, ref, reactive, onBeforeMount } from 'vue';
 import axios from 'axios';
 import router from "../router";
+import store from "../store";
 
 export default defineComponent({
   setup() {
@@ -16,10 +17,15 @@ export default defineComponent({
     const works = reactive([]);
 
     onBeforeMount(async() => {
-      axios.get('/api/get/works').then((response) => {
-        console.log(response.data);
-        works.push(...response.data);
-      })
+      // axios.get('/api/get/works').then((response) => {
+      //   console.log(response.data);
+      //   works.push(...response.data);
+      // })
+      const result = await store.getData("works");
+      if(result.hasOwnProperty("data")) {
+        console.log(result.data);
+        works.push(...result.data);
+      }
     });
 
 

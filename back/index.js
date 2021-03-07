@@ -40,6 +40,8 @@ const __dirname = path.dirname(__filename);
 		});
 
 	passport.use(strategy);
+	const auth = passport.authenticate('jwt', {session: false});
+	// app.use(compression());
 	// app.set('trust proxy', 1);
 	app.use(passport.initialize());
 	app.use(passport.session());
@@ -65,20 +67,20 @@ const __dirname = path.dirname(__filename);
 		res.json(result);
 	 });
 
-	 app.get('/api/get/:table', passport.authenticate('jwt',{session: false}), async (req,res) => {
+	 app.post('/api/person/set', async (req,res) => {
+ 		console.log(req.body);
+ 		const result = await db.setPerson(req.body);
+ 		res.json(result);
+	});
+
+	 app.get('/api/get/:table', auth, async (req,res) => {
 		console.log("table get params", req.params, "query", req.query);
 		const id = parseInt(req.query['id']);
 		const table = req.params['table'];
 		res.json(await db.getData(table, id));
 	});
 
-	app.post('/api/person/set', async (req,res) => {
-		console.log(req.body);
-		const result = await db.setPerson(req.body);
-		res.json(result);
-	});
-
-	app.post('/api/user/login', async(req, res) => {
+	app.post('/api/login', async(req, res) => {
 		const userData = await db.getUserData(req.body["email"], req.body["password"]);
 		if (userData && Object.keys(userData).length && !userData.hasOwnProperty("error") ) {
 			console.log(req.body["email"], "<SUCCESS>");
@@ -93,7 +95,8 @@ const __dirname = path.dirname(__filename);
 
 	app.get('/api/logout', (req, res) => {
 		console.log("logging out");
-		req.logout();
+		// You can add "issue time" to token and maintain "last logout time" for each user on the server.
+		// When you check token validity, also check "issue time" be after "last logout time".
 		// res.redirect('/login');
 	});
 

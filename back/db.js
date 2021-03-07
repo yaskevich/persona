@@ -10,11 +10,6 @@ import pg from 'pg';
 const { Pool } = pg;
 const pool = new Pool();
 
-
-// import * as pgSession from 'connect-pg-simple';
-import expressSession from 'express-session';
-import connectPgSimple from 'connect-pg-simple';
-
 `CREATE TABLE persons (
 	id SERIAL PRIMARY KEY,
 	firstName text not null,
@@ -42,19 +37,6 @@ import connectPgSimple from 'connect-pg-simple';
 )`;
 `ALTER TABLE users OWNER TO persona_user`;
 
-`CREATE TABLE "session" (
-  "sid" varchar NOT NULL COLLATE "default",
-	"sess" json NOT NULL,
-	"expire" timestamp(6) NOT NULL
-)
-WITH (OIDS=FALSE);
-
-ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
-
-CREATE INDEX "IDX_session_expire" ON "session" ("expire")`;
-
-`ALTER TABLE session OWNER TO persona_user`;
-
 const tables = ['persons', 'works', 'users'];
 
 
@@ -75,25 +57,6 @@ WHERE schemaname != 'pg_catalog' AND
 
 
 export default {
-	expressPgSession(){
-		const pgSession = connectPgSimple(expressSession);
-	  const sessionSettings = {
-			store: new pgSession({ pool : pool,}),
-			secret: process.env.SESSION_SECRET,
-			saveUninitialized: true,
-			resave: false,
-			cookie:  { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days
-			};
-			return expressSession(sessionSettings);
-		// return new pgSession({
-    // pool : pool,                // Connection pool
-    // // tableName : 'user_sessions'   // Use another table-name than the default "session" one
-		// });
-		// return pgSession;
-		// const pgs = pgSession.default(session);
-		 // const pgs = pgSession(session);
-	},
-
 	async getData(table, id){
 		if (tables.includes(table)) {
 			const result  = id ? await pool.query('select * from ${table} where id = $1', [id]) :  await pool.query(`select * from ${table} ORDER BY id DESC`);
@@ -117,7 +80,7 @@ export default {
 	},
 	async getUserDataByID(id){
 		const res = await pool.query(`SELECT * FROM users where id = $1`, [id]);
-		return res.rows[0]
+		return res.rows[0];
 	},
 	async getUserData(email, pwd){
 		if (!email) { return {"error": "email"}; }
@@ -145,19 +108,12 @@ export default {
 		console.log("make hash");
 		const hash = await bcrypt.hash(pwd, saltRounds);
 		console.log("ready");
-
 		// const resInfo = await pool.query(infoQuery, ['persons']);
 		// console.log("info", resInfo.rows);
 		// const resInfo = await pool.query(infoQueryDB);
 		// console.log("info", resInfo.rows);
-		console.log(pwd, hash);
-
-
-
-		// const result = await bcrypt.compare('PASSWORD', hash)
-
+		// console.log(pwd, hash);
 		const res = await pool.query(`INSERT INTO users (firstname, lastname, email, sex, privs, passdata) VALUES($1, $2, $3, $4, $5, $6) RETURNING id`, [data.firstname, data.lastname, data.email, data.sex, data.privs, hash]);
     return res.rows;
-		// return {pwd: pwd};
 	},
 };

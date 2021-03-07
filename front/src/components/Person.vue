@@ -25,7 +25,7 @@
 <script>
 import { reactive, ref } from 'vue';
 import { onBeforeMount } from 'vue';
-import axios from 'axios';
+import store from "../store";
 import { useRoute } from 'vue-router';
 export default {
   name: "Person",
@@ -39,12 +39,12 @@ export default {
     const id = vuerouter.params.id;
 
     onBeforeMount(async() => {
-      axios.get('/api/get/persons', {params: {id: id}}).then((response) => {
-        console.log(response.data[0]);
-        person.value = response.data[0];
+      const result = await store.getData("persons", id);
+      if(result.hasOwnProperty("data")) {
+        person.value = result.data[0];
         person.value.sex = person.value.sex.toString();
-      })
-    })
+      }
+    });
 
     const onSubmit = () => {
       // form.validate();

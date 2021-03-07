@@ -23,7 +23,7 @@
 <script lang="ts">
 // import { ElForm } from 'element-plus';
 import { defineComponent, ref, reactive, onBeforeMount } from 'vue';
-import axios from 'axios';
+import store from "../store";
 
 export default defineComponent({
   setup() {
@@ -32,11 +32,11 @@ export default defineComponent({
     const works = reactive([]);
 
     onBeforeMount(async() => {
-      axios.get('/api/get/works').then((response) => {
-        console.log(response.data);
-        works.push(...response.data);
-      })
-    })
+      const result = await store.getData("works");
+      if(result.hasOwnProperty("data")) {
+        works.push(...result.data);
+      }
+    });
 
 
     const resetForm = () => {

@@ -47,7 +47,7 @@
 <script>
 import { reactive, ref } from 'vue';
 import { onBeforeMount } from 'vue';
-import axios from 'axios';
+import store from "../store";
 import Person from './Person.vue';
 export default {
   name: "PersonList",
@@ -59,14 +59,11 @@ export default {
     const persons = reactive([]);
 
     onBeforeMount(async() => {
-      // , {params: {id: 12345}}
-      axios.get('/api/get/persons')
-      .then((response) => {
-        console.log(response.data);
-        persons.push(...response.data);
-      })
-
-    })
+      const result = await store.getData("persons");
+      if(result.hasOwnProperty("data")) {
+        persons.push(...result.data);
+      }
+    });
 
     let formInstance = ref();
 

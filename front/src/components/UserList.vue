@@ -53,7 +53,7 @@
 <script lang="ts">
 // import { ElForm } from 'element-plus';
 import { defineComponent, ref, reactive, onBeforeMount } from 'vue';
-import axios from 'axios';
+import store from "../store";
 
 export default defineComponent({
   setup() {
@@ -62,16 +62,14 @@ export default defineComponent({
     const users = reactive([]);
     const firstRun = ref(true);
 
-
     onBeforeMount(async() => {
-      axios.get('/api/get/users').then((response) => {
-        console.log("data", response.data);
-        if (response.data && Object.keys(response.data).length) {
-        users.push(...response.data);
+      const result = await store.getData("users");
+      // if (response.data && Object.keys(response.data).length) {
+      if(result.hasOwnProperty("data")) {
+        users.push(...result.data);
         firstRun.value = false;
-        }
-      })
-    })
+      }
+    });
 
     const options = [{
           value: 1,

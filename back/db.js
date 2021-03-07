@@ -1,5 +1,7 @@
 'use strict';
 
+import dotenv from 'dotenv';
+dotenv.config();
 import bcrypt from 'bcrypt';
 const saltRounds = 8;
 
@@ -19,13 +21,13 @@ const pool = new Pool();
 	wikidata integer,
 	features jsonb
 )`;
-`ALTER TABLE persons OWNER TO persona_user`;
+`ALTER TABLE persons OWNER TO ${process.env.PGUSER}`;
 `CREATE TABLE works (
 	id SERIAL PRIMARY KEY,
 	title text not null,
 	genre text
 )`;
-`ALTER TABLE works OWNER TO persona_user`;
+`ALTER TABLE works OWNER TO ${process.env.PGUSER}`;
 `CREATE TABLE users (
 	id SERIAL PRIMARY KEY,
 	firstname text not null,
@@ -33,33 +35,35 @@ const pool = new Pool();
 	email text not null,
 	sex integer not null,
 	privs integer not null,
-	passdata text not null
+	_passhash text not null
 )`;
-`ALTER TABLE users OWNER TO persona_user`;
+// `ALTER TABLE users RENAME COLUMN passdata TO _passhash`;
+`ALTER TABLE users OWNER TO ${process.env.PGUSER}`;
+
+const qry = await pool.query(`SELECT
+	table_name, column_name, ordinal_position, column_default, is_nullable, data_type
+	FROM information_schema.columns
+	WHERE table_schema = 'public'
+	ORDER BY table_name, ordinal_position`);
+
+const dbStructure = {};
+for(let row of qry.rows) {
+	dbStructure[row.table_name] ?
+		dbStructure[row.table_name][row.column_name] = row
+		:
+		dbStructure[row.table_name] = { [row.column_name]: row }
+}
+
+console.log(dbStructure);
+
+
 
 const tables = ['persons', 'works', 'users'];
-
-
-const infoQuery  = `SELECT
-   table_name,
-   column_name,
-   data_type
-FROM
-   information_schema.columns
-WHERE
-   table_name = $1`;
-
-const infoQueryDB = `
-SELECT *
-FROM pg_catalog.pg_tables
-WHERE schemaname != 'pg_catalog' AND
-    schemaname != 'information_schema'`;
-
 
 export default {
 	async getData(table, id){
 		if (tables.includes(table)) {
-			const result  = id ? await pool.query('select * from ${table} where id = $1', [id]) :  await pool.query(`select * from ${table} ORDER BY id DESC`);
+			const result  = id ? await pool.query(`select * from ${table} where id = $1`, [id]) :  await pool.query(`select * from ${table} ORDER BY id DESC`);
 			return result.rows;
 		} else {
 			return {};
@@ -91,9 +95,9 @@ export default {
 		if (res.rows.length){
 			const data = res.rows[0];
 			// console.log("userdata", data);
-			// console.log("pass/hash", pwd, data.passdata);
-			const result = await bcrypt.compare(pwd, data.passdata);
-			delete data.passdata;
+			// console.log("pass/hash", pwd, data._passhash);
+			const result = await bcrypt.compare(pwd, data._passhash);
+			delete data._passhash;
 			// console.log("pass/hash result", result);
 			return result ? data : {"error": "password"};
 		} else {
@@ -108,12 +112,8 @@ export default {
 		console.log("make hash");
 		const hash = await bcrypt.hash(pwd, saltRounds);
 		console.log("ready");
-		// const resInfo = await pool.query(infoQuery, ['persons']);
-		// console.log("info", resInfo.rows);
-		// const resInfo = await pool.query(infoQueryDB);
-		// console.log("info", resInfo.rows);
 		// console.log(pwd, hash);
-		const res = await pool.query(`INSERT INTO users (firstname, lastname, email, sex, privs, passdata) VALUES($1, $2, $3, $4, $5, $6) RETURNING id`, [data.firstname, data.lastname, data.email, data.sex, data.privs, hash]);
+		const res = await pool.query(`INSERT INTO users (firstname, lastname, email, sex, privs, _passhash) VALUES($1, $2, $3, $4, $5, $6) RETURNING id`, [data.firstname, data.lastname, data.email, data.sex, data.privs, hash]);
     return res.rows;
 	},
 };

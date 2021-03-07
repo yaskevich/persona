@@ -7,7 +7,6 @@ import express from 'express';
 import compression from 'compression';
 import bodyParser from 'body-parser';
 import passport from 'passport';
-import passportLocal from 'passport-local';
 import passportJWT from "passport-jwt";
 import jwt from 'jsonwebtoken';
 import db from './db.js';

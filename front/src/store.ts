@@ -38,11 +38,16 @@ const doLogin = async(payload: Object): Promise<T> => {
  // console.log("No query: token exists.");
 };
 
-const getData = async(table: string): Promise<T> => {
+const getData = async(table: string, id: string): Promise<T> => {
   if (state.token) {
     try {
     const config = { headers: { Authorization: "Bearer " + state.token } };
+      if(id) {
+        config["params"] = { id: id };
+      }
+     console.log("send query", table);
      const response = await axios.get("/api/get/" + table, config);
+     console.log(response.data);
      return response;
    } catch (error) {
      console.log("Cannot get", error)

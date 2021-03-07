@@ -58,15 +58,20 @@ for (let table of Object.keys(dbStructure)) {
 	selectables[table] = ["SELECT",
 	 Object.values(dbStructure[table]).filter(x => x.column_name.charAt(0)!== '_').map(x => x.column_name).join(', '),
 	 "FROM", table, ' '].join(' ');
-}
+} // columns with names starting with _underscore are not exposed for client code!
 
-console.log(selectables);
+// console.log(selectables);
 // console.log(dbStructure);
 
 export default {
 	async getData(table, id){
 		if (dbStructure.hasOwnProperty(table)) {
-			const result  = id ? await pool.query(selectables[table] + "WHERE id = $1", [id]) :  await pool.query(selectables[table] + "ORDER BY id DESC");
+			const idInt  = parseInt(id, 10);
+			const params  = idInt ?
+				[selectables[table] + "WHERE id = $1", [idInt]]
+				:
+				[selectables[table] + "ORDER BY id DESC"];
+			const result  = await pool.query(...params);
 			return result.rows;
 		} else {
 			return {};

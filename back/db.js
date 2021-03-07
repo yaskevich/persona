@@ -15,11 +15,10 @@ const pool = new Pool();
 `CREATE TABLE persons (
 	id SERIAL PRIMARY KEY,
 	firstName text not null,
-	lastName text,
+	lastName varchar,
 	patroName text,
 	sex integer,
-	wikidata integer,
-	features jsonb
+	wikidata integer
 )`;
 `ALTER TABLE persons OWNER TO ${process.env.PGUSER}`;
 `CREATE TABLE works (
@@ -47,23 +46,27 @@ const qry = await pool.query(`SELECT
 	ORDER BY table_name, ordinal_position`);
 
 const dbStructure = {};
+
 for(let row of qry.rows) {
 	dbStructure[row.table_name] ?
 		dbStructure[row.table_name][row.column_name] = row
 		:
 		dbStructure[row.table_name] = { [row.column_name]: row }
 }
+const selectables = {};
+for (let table of Object.keys(dbStructure)) {
+	selectables[table] = ["SELECT",
+	 Object.values(dbStructure[table]).filter(x => x.column_name.charAt(0)!== '_').map(x => x.column_name).join(', '),
+	 "FROM", table, ' '].join(' ');
+}
 
-console.log(dbStructure);
-
-
-
-const tables = ['persons', 'works', 'users'];
+console.log(selectables);
+// console.log(dbStructure);
 
 export default {
 	async getData(table, id){
-		if (tables.includes(table)) {
-			const result  = id ? await pool.query(`select * from ${table} where id = $1`, [id]) :  await pool.query(`select * from ${table} ORDER BY id DESC`);
+		if (dbStructure.hasOwnProperty(table)) {
+			const result  = id ? await pool.query(selectables[table] + "WHERE id = $1", [id]) :  await pool.query(selectables[table] + "ORDER BY id DESC");
 			return result.rows;
 		} else {
 			return {};

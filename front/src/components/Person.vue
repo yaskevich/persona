@@ -46,19 +46,20 @@ export default {
       }
     });
 
-    const onSubmit = () => {
+    const onSubmit = async() => {
       // form.validate();
         console.log('save:', person.value);
         // axios.get('/api/data').then((response) => {
         //   console.log(response.data);
         // })
-        axios.post('/api/person/set', person.value)
-          .then(function (response) {
-            console.log(response);
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
+        const result = await store.postData("person", person.value);
+        // axios.post('/api/person/set', person.value)
+        //   .then(function (response) {
+        //     console.log(response);
+        //   })
+        //   .catch(function (error) {
+        //     console.log(error);
+        //   });
     };
 
     console.log("render");

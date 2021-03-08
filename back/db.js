@@ -56,7 +56,10 @@ for(let row of qry.rows) {
 const selectables = {};
 for (let table of Object.keys(dbStructure)) {
 	selectables[table] = ["SELECT",
-	 Object.values(dbStructure[table]).filter(x => x.column_name.charAt(0)!== '_').map(x => x.column_name).join(', '),
+		Object.values(dbStructure[table])
+		 .filter(x => x.column_name.charAt(0)!== '_')
+		 .map(x => x.column_name)
+		 .join(', '),
 	 "FROM", table, ' '].join(' ');
 } // columns with names starting with _underscore are not exposed for client code!
 

@@ -38,6 +38,26 @@ const doLogin = async(payload: Object): Promise<T> => {
  // console.log("No query: token exists.");
 };
 
+const postData = async(table: string, data: Object): Promise<T> => {
+  if (state.token) {
+    try {
+    const config = { headers: { Authorization: "Bearer " + state.token } };
+      // if(id) {
+      //   config["params"] = { id: id };
+      // }
+     console.log("send query", table);
+     // const response = await axios.get("/api/get/" + table, config);
+     const response = await axios.post('/api/person/set', data);
+     console.log(response.data);
+     return response;
+   } catch (error) {
+     console.log("Cannot get", error)
+     return error;
+   }
+ }
+ console.log("No token. Fail.");
+};
+
 const getData = async(table: string, id: string): Promise<T> => {
   if (state.token) {
     try {
@@ -55,7 +75,6 @@ const getData = async(table: string, id: string): Promise<T> => {
    }
  }
  console.log("No token. Fail.");
-
 };
 // axios.post('/api/user/login', user, {
 //     "withCredentials": true,
@@ -73,6 +92,7 @@ const getData = async(table: string, id: string): Promise<T> => {
 
 export default {
   // state: readonly(state),
+  postData,
   getUser,
   doLogin,
   getData,

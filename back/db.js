@@ -81,6 +81,29 @@ export default {
 		}
 	},
 	async setPerson(data){
+		const table = "persons";
+		const dbData = dbStructure[table];
+		// console.log("data", data, dbData);
+		const record = {};
+		for (let key of Object.keys(data)) {
+			if (dbData.hasOwnProperty(key)){
+				if (dbData[key]["data_type"] === "integer") {
+					record[key] = parseInt(data[key],10);
+				} else {
+					record[key] = data[key]; // check for well-formed string
+				}
+				// console.log("key", key, data[key], dbData[key]);
+			}
+		}
+		let query  = `UPDATE ${table} SET `;
+		const parts = [];
+		for (let key of Object.keys(record)) {
+			console.log(dbData[key]);
+			if (dbData[key]["column_default"] && !dbData[key]["column_default"].includes("nextval")) {
+				parts.push(`${key} = ${record[key]}`);
+			}
+		}
+		console.log(query+ parts.join(", ") + ` WHERE id = ${record["id"]}`);
 		const res = await pool.query('UPDATE persons SET firstName = $2, lastname = $3, patroname = $4, sex = $5, wikidata = $6 WHERE id = $1', [data.id, data.firstname, data.lastname, data.patroname, data.sex, data.wikidata]);
     return res.rows;
 	},

@@ -67,7 +67,7 @@ const __dirname = path.dirname(__filename);
 	 });
 
 	 app.post('/api/person/set', async (req,res) => {
- 		console.log(req.body);
+ 		// console.log(req.body);
  		const result = await db.setPerson(req.body);
  		res.json(result);
 	});

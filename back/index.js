@@ -49,10 +49,12 @@ const __dirname = path.dirname(__filename);
 	app.use(express.static('public'));
 
 	app.post('/api/person/add', async (req,res) => {
-		console.log(req.body);
-		const result = await db.createPerson(req.body);
-		res.json(result);
+		res.json(await db.setData(req.body, "persons"));
 	 });
+
+	 app.post('/api/person/set', async (req,res) => {
+ 		res.json(await db.setData(req.body, "persons"));
+	});
 
 	app.post('/api/work/add', async (req,res) => {
 		console.log(req.body);
@@ -65,12 +67,6 @@ const __dirname = path.dirname(__filename);
 		const result = await db.createUser(req.body);
 		res.json(result);
 	 });
-
-	 app.post('/api/person/set', async (req,res) => {
- 		// console.log(req.body);
- 		const result = await db.setPerson(req.body);
- 		res.json(result);
-	});
 
 	 app.get('/api/get/:table', auth, async (req,res) => {
 		console.log("table get params", req.params, "query", req.query);

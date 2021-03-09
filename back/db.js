@@ -80,38 +80,45 @@ export default {
 			return {};
 		}
 	},
-	async setPerson(data){
-		const table = "persons";
-		const dbData = dbStructure[table];
-		// console.log("data", data, dbData);
-		const record = {};
-		for (let key of Object.keys(data)) {
-			if (dbData.hasOwnProperty(key)){
-				if (dbData[key]["data_type"] === "integer") {
-					record[key] = parseInt(data[key],10);
-				} else {
-					record[key] = data[key]; // check for well-formed string
+	async setData(data, table){
+		if (dbStructure.hasOwnProperty(table)) {
+			const dbData = dbStructure[table];
+			// console.log("data", data, dbData);
+			const record = {};
+			const meta = {};
+			for (let key of Object.keys(data)) {
+				if (dbData.hasOwnProperty(key)){
+					if (dbData[key]["column_default"] && dbData[key]["column_default"].includes("nextval")){
+						meta[key] = data[key];
+					} else {
+						if (dbData[key]["data_type"] === "integer") {
+							record[key] = data[key] === null ? 'null' : parseInt(data[key], 10);
+						} else { // string
+							// trim
+							// check for well-formed string
+							record[key] = "'" + data[key] + "'";
+						}
+					}
+					// console.log("key", key, data[key], dbData[key]);
 				}
-				// console.log("key", key, data[key], dbData[key]);
 			}
-		}
-		let query  = `UPDATE ${table} SET `;
-		const parts = [];
-		for (let key of Object.keys(record)) {
-			console.log(dbData[key]);
-			if (dbData[key]["column_default"] && !dbData[key]["column_default"].includes("nextval")) {
-				parts.push(`${key} = ${record[key]}`);
+			let query  = '';
+			if (meta.hasOwnProperty("id") && meta.id){
+				const pairs  = Object.keys(record).map(key => `${key} = ${record[key]}`).join(", ");
+				query  = `UPDATE ${table} SET ${pairs} WHERE id = ${meta.id} RETURNING id`;
+				// const res = await pool.query('UPDATE persons SET firstName = $2, lastname = $3, patroname = $4, sex = $5, wikidata = $6 WHERE id = $1', [data.id, data.firstname, data.lastname, data.patroname, data.sex, data.wikidata]);
+			} else {
+				query  = `INSERT INTO ${table} (${Object.keys(record).join(', ')}) VALUES(${Object.values(record).join(', ')}) RETURNING id`;
+				// const res = await pool.query(`INSERT INTO persons (firstName, lastname, patroname, sex, wikidata) VALUES($1, $2, $3, $4, $5) RETURNING id`, [data.firstName, data.lastName, data.patroName, data.sex, data.wikidata||null]);
 			}
+			console.log(query);
+			const res = await pool.query(query);
+			return res.rows;
+			// return {};
+		}  else {
+			return {};
 		}
-		console.log(query+ parts.join(", ") + ` WHERE id = ${record["id"]}`);
-		const res = await pool.query('UPDATE persons SET firstName = $2, lastname = $3, patroname = $4, sex = $5, wikidata = $6 WHERE id = $1', [data.id, data.firstname, data.lastname, data.patroname, data.sex, data.wikidata]);
-    return res.rows;
-	},
-	async createPerson(data){
-		const res = await pool.query(`INSERT INTO persons (firstName, lastname, patroname, sex, wikidata) VALUES($1, $2, $3, $4, $5) RETURNING id`, [data.firstName, data.lastName, data.patroName, data.sex, data.wikidata||null]);
-		// res.rows[0].id;
-    return res.rows;
-	},
+	},	
 	async createWork(data){
 		const res = await pool.query(`INSERT INTO works (title, genre) VALUES($1, $2) RETURNING id`, [data.title, data.genre]);
     return res.rows;

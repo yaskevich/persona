@@ -48,8 +48,10 @@ const __dirname = path.dirname(__filename);
 	app.use(bodyParser.urlencoded({ extended: true }));
 	app.use(express.static('public'));
 
-	app.post('/api/person/add', async (req,res) => {
-		res.json(await db.setData(req.body, "persons"));
+	app.post('/api/x/:table', async (req,res) => {
+		console.log("table POST params", req.params, "query", req.query);
+		const table = req.params['table'];
+		res.json(await db.setData(req.body, table));
 	 });
 
 	 app.post('/api/person/set', async (req,res) => {
@@ -69,7 +71,7 @@ const __dirname = path.dirname(__filename);
 	 });
 
 	 app.get('/api/get/:table', auth, async (req,res) => {
-		console.log("table get params", req.params, "query", req.query);
+		console.log("table GET params", req.params, "query", req.query);
 		const id = parseInt(req.query['id']);
 		const table = req.params['table'];
 		res.json(await db.getData(table, id));

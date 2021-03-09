@@ -9,6 +9,7 @@ import passGen from 'generate-password';
 const passOptions = {	length: 18, numbers: true, uppercase: false, excludeSimilarCharacters: true, strict: true , symbols: false };
 
 import pg from 'pg';
+import pgFormat from 'pg-format';
 const { Pool } = pg;
 const pool = new Pool();
 
@@ -95,8 +96,11 @@ export default {
 							record[key] = data[key] === null ? 'null' : parseInt(data[key], 10);
 						} else { // string
 							// trim
-							// check for well-formed string
-							record[key] = "'" + data[key] + "'";
+							if (data[key]) {
+								data[key] = data[key].trim();
+							}
+							// check for well-formed string && prevent SQLi
+							record[key] = pgFormat.literal(data[key]);
 						}
 					}
 					// console.log("key", key, data[key], dbData[key]);
@@ -118,8 +122,10 @@ export default {
 		}  else {
 			return {};
 		}
-	},	
+	},
 	async createWork(data){
+		// settings table_name// add default author in authors
+		// years??
 		const res = await pool.query(`INSERT INTO works (title, genre) VALUES($1, $2) RETURNING id`, [data.title, data.genre]);
     return res.rows;
 	},

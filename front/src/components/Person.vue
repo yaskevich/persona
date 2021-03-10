@@ -23,7 +23,7 @@
     </el-form>
 </template>
 <script>
-import { reactive, ref } from 'vue';
+import { ref } from 'vue';
 import { onBeforeMount } from 'vue';
 import store from "../store";
 import { useRoute } from 'vue-router';
@@ -40,7 +40,7 @@ export default {
 
     onBeforeMount(async() => {
       const result = await store.getData("persons", id);
-      if(result.hasOwnProperty("data")) {
+      if("data" in result) {
         person.value = result.data[0];
         person.value.sex = person.value.sex.toString();
       }
@@ -49,20 +49,10 @@ export default {
     const onSubmit = async() => {
       // form.validate();
         console.log('save:', person.value);
-        // axios.get('/api/data').then((response) => {
-        //   console.log(response.data);
-        // })
-        const result = await store.postData("person", person.value);
-        // axios.post('/api/person/set', person.value)
-        //   .then(function (response) {
-        //     console.log(response);
-        //   })
-        //   .catch(function (error) {
-        //     console.log(error);
-        //   });
+        const result = await store.postData("persons", person.value);
+        console.log(result);
     };
 
-    console.log("render");
     return {onSubmit, person};
   },
   components: {

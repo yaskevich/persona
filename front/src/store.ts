@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 import axios from "axios";
-import router from "./router";
+// import router from "./router";
 
 const state = reactive({
   token: localStorage.getItem('token') || '',
@@ -16,12 +16,12 @@ const getUser = async() => {
             state.user = response.data;
         })
         .catch((errors) => {
-            console.log(errors)
+            console.log(errors);
         })
   }
 };
 
-const doLogin = async(payload: Object): Promise<T> => {
+const doLogin = async(payload: Object): Promise<any> => {
   // if (!state.token) {
     try {
      const response = await axios.post("/api/user/login", payload);
@@ -38,39 +38,48 @@ const doLogin = async(payload: Object): Promise<T> => {
  // console.log("No query: token exists.");
 };
 
-const postData = async(table: string, data: Object): Promise<T> => {
+const initUser = async(data: Object): Promise<any> => {
   if (state.token) {
     try {
-    const config = { headers: { Authorization: "Bearer " + state.token } };
-      // if(id) {
-      //   config["params"] = { id: id };
-      // }
-     console.log("send query", table);
-     // const response = await axios.get("/api/get/" + table, config);
-     const response = await axios.post('/api/person/set', data);
-     console.log(response.data);
-     return response;
+      const config = { headers: { Authorization: "Bearer " + state.token } };
+      const response = await axios.post('/api/user/add', data, config);
+      console.log(response.data);
+      return response;
    } catch (error) {
-     console.log("Cannot get", error)
+     console.log("Cannot get", error);
      return error;
    }
  }
  console.log("No token. Fail.");
 };
 
-const getData = async(table: string, id: string): Promise<T> => {
+const postData = async(table: string, data: Object): Promise<any> => {
   if (state.token) {
     try {
-    const config = { headers: { Authorization: "Bearer " + state.token } };
-      if(id) {
-        config["params"] = { id: id };
-      }
+      const config = { headers: { Authorization: "Bearer " + state.token } };
+      console.log("send query", table);
+      const response = await axios.post('/api/x/'+ table, data, config);
+      console.log(response.data);
+      return response;
+   } catch (error) {
+     console.log("Cannot get", error);
+     return error;
+   }
+ }
+ console.log("No token. Fail.");
+};
+
+const getData = async(table: string, id?: string): Promise<any> => {
+  if (state.token) {
+    try {
+    const config = { headers: { Authorization: "Bearer " + state.token }, "params": {} };
+     if(id) { config["params"] = { id: id }; }
      console.log("send query", table);
      const response = await axios.get("/api/get/" + table, config);
      console.log(response.data);
      return response;
    } catch (error) {
-     console.log("Cannot get", error)
+     console.log("Cannot get", error);
      return error;
    }
  }
@@ -92,6 +101,7 @@ const getData = async(table: string, id: string): Promise<T> => {
 
 export default {
   // state: readonly(state),
+  initUser,
   postData,
   getUser,
   doLogin,

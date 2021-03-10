@@ -48,7 +48,7 @@
 import { reactive, ref } from 'vue';
 import { onBeforeMount } from 'vue';
 import store from "../store";
-import Person from './Person.vue';
+// import Person from './Person.vue';
 export default {
   name: "PersonList",
   props: {
@@ -60,7 +60,7 @@ export default {
 
     onBeforeMount(async() => {
       const result = await store.getData("persons");
-      if(result.hasOwnProperty("data")) {
+      if("data" in result) {
         persons.push(...result.data);
       }
     });
@@ -77,7 +77,7 @@ export default {
       // console.log("x", rule, value);
       const val = form[rule.field];
       if(val) {
-        const res = form[rule.field].match(/^[а-я\-]+$/gi);
+        const res = form[rule.field].match(/^[а-я-]+$/gi);
         // console.log("res", form[rule.field], res);
         if(!res) {
           return  callback(new Error('Не соответствует формату')) ;
@@ -92,7 +92,6 @@ export default {
         console.log('submit!', form, formInstance);
         // formInstance.value.resetFields();
         formInstance.value.validate(form, (valid) => {
-          console.log(kek, valid);
           if(valid){
             alert("submit");
           } else{

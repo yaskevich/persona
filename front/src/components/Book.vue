@@ -71,20 +71,19 @@
 
 <script lang="ts">
 // import { ElForm } from 'element-plus';
-import { defineComponent, ref, reactive, onBeforeMount } from 'vue';
+import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
+import { ElForm } from 'element-plus';
 import axios from 'axios';
 
 export default defineComponent({
   setup() {
-    const formRef = ref<InstanceType<typeof ElForm>>();
-
+    const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
     const works = ref([]);
     let persons = [];
     const loading = ref(false);
     const selectedWorks = ref([]);
     const selectedEditors = ref([]);
     const editors = ref([]);
-
 
     onBeforeMount(async() => {
       axios.get('/api/get/persons')

@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, reactive, toRefs } from 'vue'
+import { ref, defineComponent, reactive } from 'vue'
 export default defineComponent({
   name: 'Home',
   props: {
@@ -68,7 +68,7 @@ export default defineComponent({
 	const input = ref('');
       const count = ref(0);
 
-	  const onSubmit = () => {
+      const onSubmit = () => {
         console.log('submit!');
       }
 

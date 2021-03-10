@@ -51,23 +51,23 @@
 </template>
 
 <script lang="ts">
-// import { ElForm } from 'element-plus';
-import { defineComponent, ref, reactive, onBeforeMount } from 'vue';
+import { ElForm } from 'element-plus';
+import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
 import store from "../store";
 
 export default defineComponent({
   setup() {
-    const formRef = ref<InstanceType<typeof ElForm>>();
+    const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
 
     const users = reactive([]);
-    const firstRun = ref(true);
+    const form  = reactive({ firstname: '', lastname: '', email: '', sex : '2', privs: 1 });
 
     onBeforeMount(async() => {
       const result = await store.getData("users");
       // if (response.data && Object.keys(response.data).length) {
-      if(result.hasOwnProperty("data")) {
+      if("data" in result) {
         users.push(...result.data);
-        firstRun.value = false;
+        form.privs = 5;
       }
     });
 
@@ -83,37 +83,27 @@ export default defineComponent({
         }
       ];
 
-
-    const handleClick = (e) => {
-      console.log(e);
-    };
     const resetForm = () => {
       formRef.value?.resetFields();
     };
     const confirm = () => {
-      formRef.value?.validate((valid) => {
+      formRef.value?.validate(async(valid) => {
 
         if (valid) {
           // do
           console.log("ok send", form);
           // return false;
-
-          axios.post('/api/user/add', form)
-            .then(function (response) {
-              console.log("add user", response);
-              users.unshift({...form});
-              formRef.value?.resetFields();
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
-
+          const result = await store.initUser(form);
+          console.log(result);
+          users.unshift({...form});
+          formRef.value?.resetFields();
         }  else{
+          console.log("form not valid");
           return false;
         }
       });
     };
-    const form  = reactive({ firstname: '', lastname: '', email: '', sex : '2', privs: firstRun.value ? 1 : 5});
+
     const  rules = {
       firstname: [
         { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
@@ -130,7 +120,6 @@ export default defineComponent({
     };
 
     return {
-      handleClick,
       options,
       resetForm,
       confirm,

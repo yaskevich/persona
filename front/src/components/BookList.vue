@@ -5,19 +5,20 @@
 
 <script lang="ts">
 // import { ElForm } from 'element-plus';
-import { defineComponent, ref, reactive, onBeforeMount } from 'vue';
+import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
+import { ElForm } from 'element-plus';
 import router from "../router";
 import store from "../store";
 
 export default defineComponent({
   setup() {
-    const formRef = ref<InstanceType<typeof ElForm>>();
+    const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
 
     const books = reactive([]);
 
     onBeforeMount(async() => {
       const result = await store.getData("books");
-      if(result.hasOwnProperty("data")) {
+      if("data" in result) {
         if(Object.keys(result.data).length) {
           books.push(...result.data);
         } else {

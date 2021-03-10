@@ -16,24 +16,29 @@
   </el-form>
 
   <el-row v-for="(value, key) in works"  :gutter="20" :key="key">
-    {{value.title}} // {{value.genre}}
+    <el-col :span="12"><div class="grid-content bg-purple">
+      {{value.title}}
+    </div></el-col>
+    <el-col :span="12"><div class="grid-content bg-purple-light">
+      {{value.genre}}
+    </div></el-col>
   </el-row>
 </template>
 
 <script lang="ts">
-// import { ElForm } from 'element-plus';
-import { defineComponent, ref, reactive, onBeforeMount } from 'vue';
+import { ElForm } from 'element-plus';
+import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
 import store from "../store";
 
 export default defineComponent({
   setup() {
-    const formRef = ref<InstanceType<typeof ElForm>>();
+    const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
 
     const works = reactive([]);
 
     onBeforeMount(async() => {
       const result = await store.getData("works");
-      if(result.hasOwnProperty("data")) {
+      if("data" in result) {
         works.push(...result.data);
       }
     });
@@ -43,22 +48,14 @@ export default defineComponent({
       formRef.value?.resetFields();
     };
     const confirm = () => {
-      formRef.value?.validate((valid) => {
+      formRef.value?.validate(async(valid) => {
         if (valid) {
-          // do
-          console.log("here");
-          // return false;
-
-          axios.post('/api/work/add', form)
-            .then(function (response) {
-              console.log(response);
-              works.unshift({...form});
-              formRef.value?.resetFields();
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
-
+          const result = await store.postData("works", form);
+          console.log(result);
+          if("data" in result && "id" in result.data) {
+            works.unshift({...form});
+            formRef.value?.resetFields();
+          }
         }  else{
           return false;
         }
@@ -87,3 +84,32 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+  .el-row {
+    margin-bottom: 20px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  .el-col {
+    border-radius: 4px;
+  }
+  .bg-purple-dark {
+    background: #99a9bf;
+  }
+  .bg-purple {
+    background: #d3dce6;
+  }
+  .bg-purple-light {
+    background: #e5e9f2;
+  }
+  .grid-content {
+    border-radius: 4px;
+    min-height: 36px;
+  }
+  .row-bg {
+    padding: 10px 0;
+    background-color: #f9fafc;
+  }
+</style>

@@ -11,16 +11,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive } from 'vue';
+import { defineComponent, ref, reactive, ComponentPublicInstance } from 'vue';
+import { ElForm } from 'element-plus';
 import store from "../store";
+
 export default defineComponent({
   setup() {
-    const formRef = ref<InstanceType<typeof ElForm>>();
+    const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
     let user = reactive({email: '', password: ''});
 
-    const resetForm = () => {
-      formRef.value?.resetFields();
-    };
+    // const resetForm = () => {
+    //   formRef.value?.resetFields();
+    // };
     const confirm = async () => {
       formRef.value?.validate(async(valid) => {
 

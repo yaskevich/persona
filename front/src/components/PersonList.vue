@@ -88,6 +88,12 @@ export default defineComponent({
         if (valid) {
           // do
           console.log("ok send", form);
+          const result = await store.postData("persons", form);
+          console.log(result);
+          if("data" in result && "id" in result.data) {
+            persons.unshift({...form});
+            formRef.value?.resetFields();
+          }
           // const result = await store.initUser(form);
           // console.log(result);
           // persons.unshift({...form});

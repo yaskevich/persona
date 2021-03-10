@@ -3,19 +3,17 @@
   Персоналии
 </div>
 <!-- ref="formInstance" -->
-<el-form label-width="120px" :ref="setFormRef" v-model="form" :inline="true" :rules="rules">
+<el-form label-width="120px" ref="formRef" :model="form" :inline="true" :rules="rules">
   <!-- label="Имя" -->
-  <el-form-item
-   prop="firstName"
-   :rules="[
-     { required: true, validator: isString, trigger: 'blur' },
-     { validator: isString, trigger: ['blur', 'change'] }
-   ]"
- >
-  <el-input placeholder="Имя" v-model="form.firstName" class="text-input" prop="firstName"></el-input>
+  <el-form-item prop="firstname">
+    <el-input placeholder="Имя" v-model="form.firstname" class="text-input"></el-input>
   </el-form-item>
-<el-input placeholder="Отчество" v-model="form.patroName" class="text-input"></el-input>
-<el-input placeholder="Фамилия" v-model="form.lastName" prop="lastName" class="text-input"></el-input>
+  <el-form-item prop="patroname">
+    <el-input placeholder="Отчество" v-model="form.patroname" class="text-input"></el-input>
+  </el-form-item>
+  <el-form-item prop="lastname">
+    <el-input placeholder="Фамилия" v-model="form.lastname"></el-input>
+  </el-form-item>
 <!-- <el-input placeholder="Фамилия при рождении" v-model="form.lastName2" class="text-input"></el-input> -->
 
 <el-input placeholder="Wikidata ID" prop="wikidata" v-model="form.wikidata" class="text-input"></el-input>
@@ -26,7 +24,7 @@
     <el-radio label="2">Женщина</el-radio>
   </el-radio-group>
 </el-form-item>
- <el-button type="primary" @click="onSubmit">Добавить</el-button>
+ <el-button type="primary" @click="confirm">Добавить</el-button>
 </el-form>
 
 <el-row v-for="(value, key) in persons"  :gutter="20" :key="key">
@@ -44,16 +42,13 @@
 </el-row>
 </template>
 
-<script>
-import { reactive, ref } from 'vue';
-import { onBeforeMount } from 'vue';
+<script lang="ts">
+import { ElForm } from 'element-plus';
+import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
 import store from "../store";
-// import Person from './Person.vue';
-export default {
-  name: "PersonList",
-  props: {
-    // datum: Object,
-  },
+
+
+export default defineComponent({
   setup() {
 
     const persons = reactive([]);
@@ -65,13 +60,9 @@ export default {
       }
     });
 
-    let formInstance = ref();
+    const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
 
-    const form  = reactive({ firstName: '', lastName: '', lastName2: '', patroName: '', sex: '1', wikidata: ''});
-
-    const setFormRef = (el) => {
-         formInstance.value = el;
-       };
+    const form  = reactive({ firstname: '', lastname: '', patroname: '', sex: '1', wikidata: ''});
 
     const isString = (rule, value, callback) => {
       // console.log("x", rule, value);
@@ -87,18 +78,43 @@ export default {
       }
     };
 
+
+    const resetForm = () => {
+      formRef.value?.resetFields();
+    };
+    const confirm = () => {
+      formRef.value?.validate(async(valid) => {
+
+        if (valid) {
+          // do
+          console.log("ok send", form);
+          // const result = await store.initUser(form);
+          // console.log(result);
+          // persons.unshift({...form});
+          // formRef.value?.resetFields();
+        }  else{
+          console.log("form not valid");
+          return false;
+        }
+      });
+    };
+
+
     const onSubmit = () => {
       // form.validate();
-        console.log('submit!', form, formInstance);
         // formInstance.value.resetFields();
-        formInstance.value.validate(form, (valid) => {
-          if(valid){
-            alert("submit");
-          } else{
-            return false;
-          }
-        });
+        // formInstance.value.validate(form, (valid) => {
+        //   if(valid){
+        //     alert("submit");
+        //   } else{
+        //     return false;
+        //   }
+        // });
 
+        // :rules="[
+        //   { required: true, validator: isString, trigger: 'blur' },
+        //   { validator: isString, trigger: ['blur', 'change'] }
+        // ]"
 
 
         // axios.post('/api/person/add', form)
@@ -112,18 +128,23 @@ export default {
         //   });
     };
     const  rules = {
-      lastName: [
-        { required: true, message: 'Please input Activity name', trigger: 'blur' },
-        { min: 3, max: 5, message: 'Length should be 3 to 5', trigger: 'blur' }
+      firstname: [
+        { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
+        { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' }
+      ],
+      lastname: [
+        { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
+        { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' }
+      ],
+      patroname: [
+        { required: false, message: 'Поле должно быть заполнено', trigger: 'blur' },
+        { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' }
       ],
     };
     console.log("render");
-    return {form, onSubmit, isString, persons, formInstance, setFormRef, rules};
-  },
-  components: {
-
+    return { resetForm, confirm, formRef, form, onSubmit, isString, persons, rules};
   }
-};
+});
 </script>
 
 <style scoped>

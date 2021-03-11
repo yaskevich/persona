@@ -58,9 +58,8 @@ import store from "../store";
 export default defineComponent({
   setup() {
     const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
-
-    const users = reactive([]);
     const form  = reactive({ firstname: '', lastname: '', email: '', sex : '2', privs: 1 });
+    const users = reactive([]);
 
     onBeforeMount(async() => {
       const result = await store.getData("users");

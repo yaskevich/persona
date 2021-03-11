@@ -59,7 +59,7 @@ const postData = async(table: string, data: Object): Promise<any> => {
       const config = { headers: { Authorization: "Bearer " + state.token } };
       console.log("send query", table);
       const response = await axios.post('/api/x/'+ table, data, config);
-      console.log(response.data);
+      console.log("store:response", response.data);
       return response;
    } catch (error) {
      console.log("Cannot get", error);

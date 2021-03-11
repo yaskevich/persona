@@ -37,8 +37,20 @@
     <el-button type="text" size="mini" icon="el-icon-edit" plain class="full-width"></el-button>
   </router-link>
   </div></el-col>
+  <el-col :span="4"><div class="grid-content bg-purple-light">
+    <!-- <el-button type="primary" @click="confirm">Удалить</el-button> -->
+    <el-popconfirm
+      title="Точно удалить это к чертям собачьим?"
+      confirmButtonText="Ага!"
+      cancelButtonText="Нееееет!"
+      @confirm="deletePerson"
+    >
+    <template #reference>
+      <el-button>Удалить</el-button>
+      </template>
+      </el-popconfirm>
 
-  <!-- <el-col :span="4"><div class="grid-content bg-purple-light"></div></el-col> -->
+  </div></el-col>
 </el-row>
 </template>
 
@@ -50,7 +62,8 @@ import store from "../store";
 
 export default defineComponent({
   setup() {
-
+    const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
+    const form  = reactive({ firstname: '', lastname: '', patroname: '', sex: '1', wikidata: ''});
     const persons = reactive([]);
 
     onBeforeMount(async() => {
@@ -60,44 +73,38 @@ export default defineComponent({
       }
     });
 
-    const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
+    // const isString = (rule, value, callback) => {
+    //   // console.log("x", rule, value);
+    //   const val = form[rule.field];
+    //   if(val) {
+    //     const res = form[rule.field].match(/^[а-я-]+$/gi);
+    //     // console.log("res", form[rule.field], res);
+    //     if(!res) {
+    //       return  callback(new Error('Не соответствует формату')) ;
+    //     }
+    //   } else {
+    //     return  callback(new Error('Обязательное поле')) ;
+    //   }
+    // };
 
-    const form  = reactive({ firstname: '', lastname: '', patroname: '', sex: '1', wikidata: ''});
 
-    const isString = (rule, value, callback) => {
-      // console.log("x", rule, value);
-      const val = form[rule.field];
-      if(val) {
-        const res = form[rule.field].match(/^[а-я-]+$/gi);
-        // console.log("res", form[rule.field], res);
-        if(!res) {
-          return  callback(new Error('Не соответствует формату')) ;
-        }
-      } else {
-        return  callback(new Error('Обязательное поле')) ;
-      }
+    const deletePerson = () => {
+      console.log("delete!!");
     };
-
-
     const resetForm = () => {
       formRef.value?.resetFields();
     };
     const confirm = () => {
       formRef.value?.validate(async(valid) => {
-
         if (valid) {
-          // do
           console.log("ok send", form);
           const result = await store.postData("persons", form);
           console.log(result);
           if("data" in result && "id" in result.data) {
             persons.unshift({...form});
+            console.log("success", persons);
             formRef.value?.resetFields();
           }
-          // const result = await store.initUser(form);
-          // console.log(result);
-          // persons.unshift({...form});
-          // formRef.value?.resetFields();
         }  else{
           console.log("form not valid");
           return false;
@@ -105,34 +112,6 @@ export default defineComponent({
       });
     };
 
-
-    const onSubmit = () => {
-      // form.validate();
-        // formInstance.value.resetFields();
-        // formInstance.value.validate(form, (valid) => {
-        //   if(valid){
-        //     alert("submit");
-        //   } else{
-        //     return false;
-        //   }
-        // });
-
-        // :rules="[
-        //   { required: true, validator: isString, trigger: 'blur' },
-        //   { validator: isString, trigger: ['blur', 'change'] }
-        // ]"
-
-
-        // axios.post('/api/person/add', form)
-        //   .then(function (response) {
-        //     console.log(response);
-        //     persons.push(form);
-        // works.unshift({...form});
-        //   })
-        //   .catch(function (error) {
-        //     console.log(error);
-        //   });
-    };
     const  rules = {
       firstname: [
         { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
@@ -147,8 +126,7 @@ export default defineComponent({
         { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' }
       ],
     };
-    console.log("render");
-    return { resetForm, confirm, formRef, form, onSubmit, isString, persons, rules};
+    return { deletePerson, resetForm, confirm, formRef, form, persons, rules};
   }
 });
 </script>

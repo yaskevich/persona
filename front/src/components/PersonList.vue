@@ -43,7 +43,7 @@
       title="Точно удалить это к чертям собачьим?"
       confirmButtonText="Ага!"
       cancelButtonText="Нееееет!"
-      @confirm="deletePerson"
+      @confirm="deletePerson(value.id, key)"
     >
     <template #reference>
       <el-button>Удалить</el-button>
@@ -86,10 +86,13 @@ export default defineComponent({
     //     return  callback(new Error('Обязательное поле')) ;
     //   }
     // };
-
-
-    const deletePerson = () => {
-      console.log("delete!!");
+    const deletePerson = async(id, key) => {
+      const result = await store.deleteById("persons", id);
+      // console.log(result);
+      if("data" in result && "id" in result.data) {
+        console.log("deleted", id);
+        persons.splice(key, 1);
+      }
     };
     const resetForm = () => {
       formRef.value?.resetFields();

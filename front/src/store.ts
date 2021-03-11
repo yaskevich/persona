@@ -69,6 +69,23 @@ const postData = async(table: string, data: Object): Promise<any> => {
  console.log("No token. Fail.");
 };
 
+const deleteById = async(table: string, id: string): Promise<any> => {
+  if (state.token) {
+    try {
+    const config = { headers: { Authorization: "Bearer " + state.token }, "params": {} };
+     // if(id) { config["params"] = { id: id }; }
+     console.log("delete query", table, id);
+     const response = await axios.delete("/api/" + table + "/" + id, config);
+     console.log(response.data);
+     return response;
+   } catch (error) {
+     console.log("Cannot delete", error);
+     return error;
+   }
+ }
+ console.log("No token. Fail.");
+};
+
 const getData = async(table: string, id?: string): Promise<any> => {
   if (state.token) {
     try {
@@ -106,6 +123,7 @@ export default {
   getUser,
   doLogin,
   getData,
+  deleteById,
   // doLogout,
   // getData
   state: state,

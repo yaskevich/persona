@@ -68,6 +68,18 @@ for (let table of Object.keys(dbStructure)) {
 // console.log(dbStructure);
 
 export default {
+	async deleteData(table, id) {
+		const idInt  = parseInt(id, 10);
+		if (table in dbStructure && idInt) {
+			try {
+				const res = await pool.query(`DELETE FROM ${table} WHERE id=${id} RETURNING id`);
+				return res.rows;
+			} catch (error) {
+				return {"error": error};
+			}
+		}
+		return {"error": "bad query"};
+	},
 	async getData(table, id){
 		if (dbStructure.hasOwnProperty(table)) {
 			const idInt  = parseInt(id, 10);
@@ -77,9 +89,8 @@ export default {
 				[selectables[table] + "ORDER BY id DESC"];
 			const result  = await pool.query(...params);
 			return result.rows;
-		} else {
-			return {};
 		}
+		return {"error": "bad query"};
 	},
 	async setData(data, table){
 		if (dbStructure.hasOwnProperty(table)) {
@@ -116,11 +127,14 @@ export default {
 				// const res = await pool.query(`INSERT INTO persons (firstName, lastname, patroname, sex, wikidata) VALUES($1, $2, $3, $4, $5) RETURNING id`, [data.firstName, data.lastName, data.patroName, data.sex, data.wikidata||null]);
 			}
 			console.log(query);
-			const res = await pool.query(query);
-			return res.rows;
-			// return {};
+			try {
+				const res = await pool.query(query);
+				return res.rows[0];
+			} catch (error) {
+				return {"error": error};
+			}
 		}  else {
-			return {};
+			return {"error": "bad query"};
 		}
 	},
 	async createWork(data){

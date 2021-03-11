@@ -54,8 +54,9 @@ const __dirname = path.dirname(__filename);
 		res.json(await db.setData(req.body, table));
 	 });
 
-	 app.post('/api/person/set', async (req,res) => {
- 		res.json(await db.setData(req.body, "persons"));
+	 app.delete('/api/:table/:id', async (req,res) => {
+		console.log("table DELETE params", req.params, "query", req.query);
+		res.json(await db.deleteData(req.params["table"], req.params["id"]));
 	});
 
 	app.post('/api/work/add', async (req,res) => {

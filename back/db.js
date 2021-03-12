@@ -73,7 +73,7 @@ export default {
 		if (table in dbStructure && idInt) {
 			try {
 				const res = await pool.query(`DELETE FROM ${table} WHERE id=${id} RETURNING id`);
-				return res.rows;
+				return res.rows[0];
 			} catch (error) {
 				return {"error": error};
 			}
@@ -81,7 +81,7 @@ export default {
 		return {"error": "bad query"};
 	},
 	async getData(table, id){
-		if (dbStructure.hasOwnProperty(table)) {
+		if (table in dbStructure) {
 			const idInt  = parseInt(id, 10);
 			const params  = idInt ?
 				[selectables[table] + "WHERE id = $1", [idInt]]
@@ -93,18 +93,21 @@ export default {
 		return {"error": "bad query"};
 	},
 	async setData(data, table){
-		if (dbStructure.hasOwnProperty(table)) {
+		// console.log(data);
+		if (table in dbStructure) {
 			const dbData = dbStructure[table];
 			// console.log("data", data, dbData);
 			const record = {};
 			const meta = {};
 			for (let key of Object.keys(data)) {
-				if (dbData.hasOwnProperty(key)){
+				if (key in dbData){
 					if (dbData[key]["column_default"] && dbData[key]["column_default"].includes("nextval")){
 						meta[key] = data[key];
 					} else {
 						if (dbData[key]["data_type"] === "integer") {
-							record[key] = data[key] === null ? 'null' : parseInt(data[key], 10);
+							// console.log(`${key}${data[key]}`, typeof data[key]);
+							record[key] = data[key] === null || (typeof data[key] === 'string' && !data[key]) ?
+														'null' : parseInt(data[key], 10);
 						} else { // string
 							// trim
 							if (data[key]) {
@@ -118,7 +121,7 @@ export default {
 				}
 			}
 			let query  = '';
-			if (meta.hasOwnProperty("id") && meta.id){
+			if ("id" in meta && meta.id){
 				const pairs  = Object.keys(record).map(key => `${key} = ${record[key]}`).join(", ");
 				query  = `UPDATE ${table} SET ${pairs} WHERE id = ${meta.id} RETURNING id`;
 				// const res = await pool.query('UPDATE persons SET firstName = $2, lastname = $3, patroname = $4, sex = $5, wikidata = $6 WHERE id = $1', [data.id, data.firstname, data.lastname, data.patroname, data.sex, data.wikidata]);

@@ -31,10 +31,14 @@ const doLogin = async(payload: Object): Promise<any> => {
   // if (!state.token) {
     try {
      const response = await axios.post("/api/user/login", payload);
-     state.user = response.data;
-     state.token  = response.data.token || '';
-     localStorage.setItem('token', state.token);
-     // router.push("/dashboard")
+     if ("data" in response && "id" in response.data){
+       state.user = response.data;
+       state.token  = response.data.token || '';
+       localStorage.setItem('token', state.token);
+     } else {
+       console.log(response);
+       return response.data.error;
+     }
      return;
    } catch (error) {
      console.log("Cannot log in", error)
@@ -124,7 +128,7 @@ const getData = async(table: string, id?: string): Promise<any> => {
 
 export default {
   // state: readonly(state),
-  logout, 
+  logout,
   initUser,
   postData,
   getUser,

@@ -153,7 +153,7 @@ export default defineComponent({
     },
     computed: {
       loggedIn() {
-        return Boolean(store.state.user && Object.keys(store.state.user).length);
+        return store.state.user && Object.keys(store.state.user).length;
       }
     },
     components: {

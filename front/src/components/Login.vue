@@ -7,6 +7,7 @@
       <el-input type="password" placeholder="Пароль" v-model="user.password" autocomplete="off"></el-input>
     </el-form-item>
     <el-button type="primary" @click="confirm">Войти</el-button>
+    <div class="error">{{error}}</div>
   </el-form>
 </template>
 
@@ -19,21 +20,20 @@ export default defineComponent({
   setup() {
     const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
     let user = reactive({email: '', password: ''});
+    const error = ref('');
 
     // const resetForm = () => {
     //   formRef.value?.resetFields();
     // };
     const confirm = async () => {
       formRef.value?.validate(async(valid) => {
-
         if (valid) {
-          // do
           console.log("ok send", user);
           // return false;
-          const err  = await store.doLogin(user);
-          if(!err) {
-              // formRef.value?.resetFields();
-          }
+          error.value  = await store.doLogin(user);
+          // if(!error.value) {
+          //     // formRef.value?.resetFields();
+          // }
           console.log(store.state);
         }  else{
           console.log("not valid");
@@ -55,7 +55,13 @@ export default defineComponent({
     };
 
 
-    return { formRef, confirm, user, rules };
+    return { formRef, confirm, user, rules, error };
   },
 });
 </script>
+
+<style scoped>
+.error {
+  color: red;
+}
+</style>

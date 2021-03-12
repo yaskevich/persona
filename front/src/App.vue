@@ -1,5 +1,6 @@
 <template>
 <div id="main" v-if="dataReady">
+  <div v-if="loggedIn">
 <el-container style="border: 1px solid #eee">
   <el-aside width="200px" style="background-color: rgb(238, 241, 246);text-align:left;">
     <el-menu :default-openeds="['1', '3']">
@@ -78,15 +79,13 @@
         <i class="el-icon-setting" style="margin-right: 15px"></i>
         <template #dropdown>
           <el-dropdown-menu>
-              <el-dropdown-item>View</el-dropdown-item>
-              <el-dropdown-item>Add</el-dropdown-item>
-              <el-dropdown-item>Delete</el-dropdown-item>
+              <el-dropdown-item>Профиль</el-dropdown-item>
+              <el-dropdown-item>Выйти</el-dropdown-item>              
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      <span>Алексей</span>
+      <span>{{state.user.firstname}}</span>
     </el-header>
-
     <el-main>
       <!-- <div class="common-layout">
       <el-container>
@@ -101,6 +100,11 @@
     </el-main>
   </el-container>
 </el-container>
+  </div>
+  <div v-else>
+    Пользователь не авторизован!
+    <Login/>
+  </div>
 </div>
 <div v-else>
     <!-- {{$config.locale.loading}} -->
@@ -111,7 +115,9 @@
 <script lang="ts">
 import { defineComponent, onBeforeMount, ref } from 'vue';
 // import Home from './components/Home.vue';
+// import router from "./router";
 import store from "./store";
+import Login from './components/Login.vue';
 
 export default defineComponent({
   name: 'App',
@@ -127,14 +133,26 @@ export default defineComponent({
     })
      console.log("app → setup");
      const dataReady = ref(false);
-     const isAuth =  ref(store.state.user && Object.keys(store.state.user).length);
+     // const isAuth =  ref(store.state.user && Object.keys(store.state.user).length);
+     // if (!isAuth.value) {
+     //   console.log("no user");
+     //   // router.replace("/login");
+     // }
      // console.log("auth:", store.actions.isAuth());
      return {
        dataReady,
-       isAuth,
        state: store.state,
+       // isAuth,
      };
     },
+    computed: {
+      loggedIn() {
+        return Boolean(store.state.user && Object.keys(store.state.user).length);
+      }
+    },
+    components: {
+      Login
+    }
 })
 </script>
 

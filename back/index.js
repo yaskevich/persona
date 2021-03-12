@@ -48,7 +48,7 @@ const __dirname = path.dirname(__filename);
 	app.use(bodyParser.urlencoded({ extended: true }));
 	app.use(express.static('public'));
 
-	app.post('/api/login', async(req, res) => {
+	app.post('/api/user/login', async(req, res) => {
 		const userData = await db.getUserData(req.body["email"], req.body["password"]);
 		if (userData && Object.keys(userData).length && !userData.hasOwnProperty("error") ) {
 			console.log(req.body["email"], "<SUCCESS>");
@@ -56,12 +56,12 @@ const __dirname = path.dirname(__filename);
 			userData["token"] = token;
 			res.json(userData);
 		} else {
-			console.log(`login attempt as [${id}]•[${password}]►${userData.error}◄`);
+			console.log(`login attempt as [${req.body["email"]}]•[${req.body["password"]}]►${userData.error}◄`);
 			res.json(userData);
 		}
 	});
 
-	app.get('/api/logout', (req, res) => {
+	app.get('/api/user/logout', (req, res) => {
 		console.log("logging out");
 		// You can add "issue time" to token and maintain "last logout time" for each user on the server.
 		// When you check token validity, also check "issue time" be after "last logout time".
@@ -73,34 +73,30 @@ const __dirname = path.dirname(__filename);
 	 });
 
 	app.post('/api/user/add', async (req,res) => {
-		// console.log(req.body);
 		const result = await db.createUser(req.body);
 		res.json(result);
 	});
 
 	app.post('/api/x/:table', async (req,res) => {
-		console.log("table POST params", req.params, "query", req.query);
-		const table = req.params['table'];
-		res.json(await db.setData(req.body, table));
+		console.log("POST params", req.params, "query", req.query);
+		res.json(await db.setData(req.body, req.params['table']));
 	 });
 
-	 app.delete('/api/:table/:id', async (req,res) => {
-		console.log("table DELETE params", req.params, "query", req.query);
+	app.delete('/api/:table/:id', async (req,res) => {
+		console.log("DELETE params", req.params, "query", req.query);
 		res.json(await db.deleteData(req.params["table"], req.params["id"]));
 	});
+
+	app.get('/api/:table', auth, async (req,res) => {
+	 console.log("GET params", req.params, "query", req.query);
+	 res.json(await db.getData(req.params['table'], req.query['id']));
+ });
 
 	app.post('/api/work/add', async (req,res) => {
 		console.log(req.body);
 		const result = await db.createWork(req.body);
 		res.json(result);
 	 });
-
-	 app.get('/api/get/:table', auth, async (req,res) => {
-		console.log("table GET params", req.params, "query", req.query);
-		const id = parseInt(req.query['id']);
-		const table = req.params['table'];
-		res.json(await db.getData(table, id));
-	});
 
 	app.listen(port);
 	// console.log(`Running at port ${port}`);

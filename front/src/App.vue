@@ -80,7 +80,7 @@
         <template #dropdown>
           <el-dropdown-menu>
               <el-dropdown-item>Профиль</el-dropdown-item>
-              <el-dropdown-item>Выйти</el-dropdown-item>              
+              <el-dropdown-item @click="callLogout">Выйти</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -133,6 +133,11 @@ export default defineComponent({
     })
      console.log("app → setup");
      const dataReady = ref(false);
+
+     const callLogout  = async() => {
+        console.log("performing logout...");
+        await store.logout();
+     };
      // const isAuth =  ref(store.state.user && Object.keys(store.state.user).length);
      // if (!isAuth.value) {
      //   console.log("no user");
@@ -140,6 +145,7 @@ export default defineComponent({
      // }
      // console.log("auth:", store.actions.isAuth());
      return {
+       callLogout,
        dataReady,
        state: store.state,
        // isAuth,

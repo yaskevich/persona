@@ -9,6 +9,11 @@ const state = reactive({
   error: "",
 });
 
+const logout = async() => {
+  localStorage.setItem("token", "");
+  state.user  = {};
+}
+
 const getUser = async() => {
     if(state.token) {
       try {
@@ -119,6 +124,7 @@ const getData = async(table: string, id?: string): Promise<any> => {
 
 export default {
   // state: readonly(state),
+  logout, 
   initUser,
   postData,
   getUser,

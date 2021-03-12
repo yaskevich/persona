@@ -10,14 +10,15 @@ const state = reactive({
 });
 
 const getUser = async() => {
-  if (!state.user.hasOwnProperty("email")) {
-    axios.get("/api/user")
-        .then((response) => {
-            state.user = response.data;
-        })
-        .catch((errors) => {
-            console.log(errors);
-        })
+    if(state.token) {
+      try {
+        const config = { headers: { Authorization: "Bearer " + state.token }, };
+        const response = await axios.get("/api/user/info", config);
+        state.user = response.data;
+      } catch (error) {
+        console.log("Cannot get user", error)
+        return error;
+      }
   }
 };
 

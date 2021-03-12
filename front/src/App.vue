@@ -1,5 +1,5 @@
 <template>
-
+<div id="main" v-if="dataReady">
 <el-container style="border: 1px solid #eee">
   <el-aside width="200px" style="background-color: rgb(238, 241, 246);text-align:left;">
     <el-menu :default-openeds="['1', '3']">
@@ -101,17 +101,40 @@
     </el-main>
   </el-container>
 </el-container>
+</div>
+<div v-else>
+    <!-- {{$config.locale.loading}} -->
+    загрузка...
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, onBeforeMount, ref } from 'vue';
 // import Home from './components/Home.vue';
+import store from "./store";
 
 export default defineComponent({
   name: 'App',
-  components: {
-    // Home
-  }
+  setup() {
+     onBeforeMount(async() => {
+       await store.getUser();
+       // document.title = $primevue.config.locale.hi;
+       // if (errors.features && errors.features.value) {
+       //     console.log("error", errors.features);
+       // }
+       dataReady.value = true;
+       console.log('app → mounted!')
+    })
+     console.log("app → setup");
+     const dataReady = ref(false);
+     const isAuth =  ref(store.state.user && Object.keys(store.state.user).length);
+     // console.log("auth:", store.actions.isAuth());
+     return {
+       dataReady,
+       isAuth,
+       state: store.state,
+     };
+    },
 })
 </script>
 

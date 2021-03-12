@@ -147,7 +147,7 @@ export default {
     return res.rows;
 	},
 	async getUserDataByID(id){
-		const res = await pool.query(`SELECT * FROM users where id = $1`, [id]);
+		const res = await pool.query(selectables["users"] + "WHERE id = $1", [id]);
 		return res.rows[0];
 	},
 	async getUserData(email, pwd){

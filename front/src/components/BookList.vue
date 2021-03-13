@@ -4,7 +4,6 @@
 </template>
 
 <script lang="ts">
-// import { ElForm } from 'element-plus';
 import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
 import { ElForm } from 'element-plus';
 import router from "../router";
@@ -18,7 +17,8 @@ export default defineComponent({
 
     onBeforeMount(async() => {
       const result = await store.getData("books");
-      if("data" in result) {
+      console.log(result);
+      if("data" in result && !("error" in result.data)) {
         if(Object.keys(result.data).length) {
           books.push(...result.data);
         } else {

@@ -102,7 +102,7 @@ const getData = async(table: string, id?: string): Promise<any> => {
     const config = { headers: { Authorization: "Bearer " + state.token }, "params": {} };
      if(id) { config["params"] = { id: id }; }
      console.log("send query", table);
-     const response = await axios.get("/api/get/" + table, config);
+     const response = await axios.get("/api/" + table, config);
      console.log(response.data);
      return response;
    } catch (error) {

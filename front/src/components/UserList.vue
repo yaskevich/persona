@@ -23,16 +23,7 @@
       </el-radio-group>
     </el-form-item>
 
-  <el-form-item>
-    <el-select v-model="form.privs" placeholder="Select" value-key>
-      <el-option
-        v-for="item in options"
-        :key="item.value"
-        :label="item.label"
-        :value="item.value">
-      </el-option>
-    </el-select>
-  </el-form-item>
+
 
     <el-button type="primary" @click="resetForm">Очистить</el-button>
     <el-button type="primary" @click="confirm">Добавить</el-button>
@@ -58,7 +49,7 @@ import store from "../store";
 export default defineComponent({
   setup() {
     const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
-    const form  = reactive({ firstname: '', lastname: '', email: '', sex : '2', privs: 1 });
+    const form  = reactive({ firstname: '', lastname: '', email: '', sex : '2', privs: 5 });
     const users = reactive([]);
 
     onBeforeMount(async() => {
@@ -66,21 +57,10 @@ export default defineComponent({
       // if (response.data && Object.keys(response.data).length) {
       if("data" in result) {
         users.push(...result.data);
-        form.privs = 5;
+      } else {
+        form.privs = 1; // create admin on first run
       }
     });
-
-    const options = [{
-          value: 1,
-          label: 'Администратор (жрец)'
-        }, {
-          value: 3,
-          label: 'Модератор (воин)'
-        }, {
-          value: 5,
-          label: 'Редактор (крестьянин)'
-        }
-      ];
 
     const resetForm = () => {
       formRef.value?.resetFields();
@@ -119,13 +99,13 @@ export default defineComponent({
     };
 
     return {
-      options,
       resetForm,
       confirm,
       formRef,
       rules,
       form,
-      users
+      users,
+      options: store.state.options
     };
   },
 });

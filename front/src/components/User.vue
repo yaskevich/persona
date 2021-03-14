@@ -4,14 +4,31 @@
   </div> -->
     <el-form label-width="120px" v-model="user" :inline="true">
       <!-- label="Имя" -->
-      <el-form-item prop="firstName">
+      <el-form-item prop="firstname">
       <el-input placeholder="Имя" v-model="user.firstname" class="text-input" prop="firstName"></el-input>
       </el-form-item>
-    <el-input placeholder="Отчество" v-model="user.patroname" class="text-input"></el-input>
-    <el-input placeholder="Фамилия" v-model="user.lastname" class="text-input"></el-input>
+    <!-- <el-input placeholder="Отчество" v-model="user.patroname" class="text-input"></el-input> -->
+    <el-form-item prop="lastname">
+      <el-input placeholder="Фамилия" v-model="user.lastname" class="text-input"></el-input>
+    </el-form-item>
     <!-- <el-input placeholder="Фамилия при рождении" v-model="form.lastName2" class="text-input"></el-input> -->
     <!-- <el-input placeholder="Wikidata ID" prop="wikidata" v-model="user.wikidata" class="text-input"></el-input> -->
     <!-- <el-form-item label="Пол"> -->
+
+
+    <el-form-item>
+      <el-select v-model="user.privs" placeholder="Select" value-key>
+        <el-option
+          v-for="item in options"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+    </el-form-item>
+
+
+
     <el-form-item>
       <el-radio-group v-model="user.sex">
         <el-radio label="1">Мужчина</el-radio>
@@ -52,7 +69,7 @@ export default {
         console.log(result);
     };
 
-    return {onSubmit, user};
+    return {onSubmit, user, options: store.state.options};
   },
   components: {
 

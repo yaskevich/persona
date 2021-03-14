@@ -7,6 +7,17 @@ const state = reactive({
   user: {},
   test: "ok",
   error: "",
+  options: [{
+        value: 1,
+        label: 'Администратор', //  (жрец)
+      }, {
+        value: 3,
+        label: 'Модератор', //  (воин)
+      }, {
+        value: 5,
+        label: 'Редактор', //  (крестьянин)
+      }
+    ]
 });
 
 const logout = async() => {

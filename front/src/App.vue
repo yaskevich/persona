@@ -15,7 +15,13 @@
          </div>
          <router-view /> -->
          <router-link to="/">
-          <el-menu-item index="1-1">Главная</el-menu-item>
+           <el-menu-item index="1-1">Обзор</el-menu-item>
+          </router-link>
+         <router-link to="/">
+           <el-menu-item index="1-32">Типы</el-menu-item>
+          </router-link>
+         <router-link to="/">
+           <el-menu-item index="1-31">События</el-menu-item>
           </router-link>
           <router-link to="/persons">
             <el-menu-item index="1-7">Персоналии</el-menu-item>
@@ -33,6 +39,9 @@
           </router-link>
           <router-link to="/logs">
             <el-menu-item index="1-21">Действия</el-menu-item>
+          </router-link>
+          <router-link to="/settings">
+            <el-menu-item index="1-22">Проект</el-menu-item>
           </router-link>
         </el-menu-item-group>
         <!-- <el-submenu index="1-4">

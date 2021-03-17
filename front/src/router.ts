@@ -4,6 +4,7 @@ import User from './components/User.vue';
 import UserList from './components/UserList.vue';
 import PersonList from './components/PersonList.vue';
 import Person from './components/Person.vue';
+import Work from './components/Work.vue';
 import WorkList from './components/WorkList.vue';
 import BookList from './components/BookList.vue';
 import Book from './components/Book.vue';
@@ -64,14 +65,14 @@ const routes = [
 		name: 'BookList',
 	},
 	{
-		path: '/book/:id',
-		component: Book,
-		name: 'Book',
+		path: '/work/:id',
+		component: Work,
+		name: 'work',
 	},
 	{
-		path: '/book',
-		component: Book,
-		name: 'Book',
+		path: '/work',
+		component: Work,
+		name: 'work',
 	},
 
 ];

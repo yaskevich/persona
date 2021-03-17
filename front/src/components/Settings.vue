@@ -1,10 +1,11 @@
 <template>
     <el-form label-width="120px" v-model="settings" :inline="true">
+      Основная персона
       <el-form-item>
       <el-select
           v-model="settings.persona"
           filterable
-          placeholder="Основная персона"
+          placeholder="Персоны"
           >
           <el-option
             v-for="item in persons"

@@ -39,6 +39,12 @@ const pool = new Pool();
 )`;
 // `ALTER TABLE users RENAME COLUMN passdata TO _passhash`;
 `ALTER TABLE users OWNER TO ${process.env.PGUSER}`;
+`CREATE TABLE settings (
+	persona_id integer not null
+)`;
+`ALTER TABLE settings OWNER TO ${process.env.PGUSER}`;
+
+
 
 const qry = await pool.query(`SELECT
 	table_name, column_name, ordinal_position, column_default, is_nullable, data_type

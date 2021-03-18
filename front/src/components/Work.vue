@@ -8,6 +8,7 @@
       <el-input placeholder="Тип" v-model="work.genre" class="text-input"></el-input>
     </el-form-item>
     <el-form-item>
+      <el-button type="primary" @click="setDefaultAuthor" v-if="persons.length && persona_id">Автор – {{persons.filter(x=>x.id === persona_id)[0].value}}</el-button>
     <el-select
         v-model="work.authors"
         filterable
@@ -22,6 +23,7 @@
         </el-option>
       </el-select>
     </el-form-item>
+
     <!-- <el-button type="primary" @click="resetForm">Очистить</el-button> -->
     <el-button type="primary" @click="confirm">Сохранить</el-button>
   </el-form>
@@ -39,6 +41,7 @@ export default defineComponent({
 
     const work  = ref({});
     const works = reactive([]);
+    const persona_id = ref();
     const persons = ref([]);
     const vuerouter = useRoute();
     const id = vuerouter.params.id;
@@ -61,11 +64,18 @@ export default defineComponent({
       const personsData = await store.getData("persons");
       persons.value = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
       console.log(persons);
+
+      const settingsData = await store.getData("settings");
+      persona_id.value = settingsData.data[0].persona_id;
     });
 
     // const resetForm = () => {
     //   formRef.value?.resetFields();
     // };
+
+    const setDefaultAuthor = () => {
+      work.value.authors = [persona_id.value];
+    };
 
     const confirm = () => {
       formRef.value?.validate(async(valid) => {
@@ -95,12 +105,14 @@ export default defineComponent({
 
     return {
       // resetForm,
+      setDefaultAuthor,
       confirm,
       formRef,
       rules,
       work,
       works,
       persons,
+      persona_id
     };
   },
 });

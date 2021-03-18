@@ -115,6 +115,8 @@ export default {
 							// console.log(`${key}${data[key]}`, typeof data[key]);
 							record[key] = data[key] === null || (typeof data[key] === 'string' && !data[key]) ?
 														'null' : parseInt(data[key], 10);
+						} else if (dbData[key]["data_type"] === "ARRAY" && data[key].length) {
+									record[key] = "'{" + data[key].join(",") + "}'";
 						} else { // string
 							// trim
 							if (data[key]) {

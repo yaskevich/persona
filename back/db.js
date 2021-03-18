@@ -27,6 +27,7 @@ const pool = new Pool();
 	title text not null,
 	genre text
 )`;
+`ALTER TABLE works ADD authors integer[] NULL`;
 `ALTER TABLE works OWNER TO ${process.env.PGUSER}`;
 `CREATE TABLE users (
 	id SERIAL PRIMARY KEY,

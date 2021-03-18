@@ -8,12 +8,18 @@
   </div>
 
   <el-row v-for="(value, key) in works"  :gutter="20" :key="key">
-    <el-col :span="12"><div class="grid-content bg-purple">
+    <el-col :span="16"><div class="grid-content bg-purple">
       {{value.title}}
     </div></el-col>
-    <el-col :span="12"><div class="grid-content bg-purple-light">
+    <el-col :span="4"><div class="grid-content bg-purple-light">
       {{value.genre}}
     </div></el-col>
+    <el-col :span="4"><div class="grid-content bg-purple">
+      <router-link :to="'/work/' + value.id">
+      <el-button type="text" size="mini" icon="el-icon-edit" plain class="full-width"></el-button>
+    </router-link>
+    </div></el-col>
+
   </el-row>
 </template>
 

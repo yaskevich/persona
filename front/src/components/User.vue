@@ -43,6 +43,8 @@ import { ref } from 'vue';
 import { onBeforeMount } from 'vue';
 import store from "../store";
 import { useRoute } from 'vue-router';
+import router from "../router";
+
 export default {
   name: "User",
   props: {

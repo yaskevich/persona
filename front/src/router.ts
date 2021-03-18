@@ -65,16 +65,15 @@ const routes = [
 		name: 'BookList',
 	},
 	{
-		path: '/work/:id',
+		path: '/work/:id?',
 		component: Work,
-		name: 'work',
+		name: 'Work',
 	},
 	{
-		path: '/work',
-		component: Work,
-		name: 'work',
+		path: '/book/:id?',
+		component: Book,
+		name: 'Book',
 	},
-
 ];
 
 const router = createRouter({

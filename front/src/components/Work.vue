@@ -1,21 +1,30 @@
 <template>
-  <div>
-    Произведение
-  </div>
-  <el-form :model="work" ref="formRef" label-width="100px" :rules="rules" :inline="true">
+  <div>Произведение</div>
+  <el-form :model="work" ref="formRef" label-width="100px" :rules="rules">
     <el-form-item prop="title">
       <el-input placeholder="Название" v-model="work.title" class="text-input"></el-input>
     </el-form-item>
-
     <el-form-item prop="genre">
       <el-input placeholder="Тип" v-model="work.genre" class="text-input"></el-input>
     </el-form-item>
-
-    <el-button type="primary" @click="resetForm">Очистить</el-button>
-    <el-button type="primary" @click="confirm">Добавить</el-button>
+    <el-form-item>
+    <el-select
+        v-model="work.authors"
+        filterable
+        multiple
+        placeholder="Персоны"
+        >
+        <el-option
+          v-for="item in persons"
+          :key="item.id"
+          :label="item.value"
+          :value="item.id">
+        </el-option>
+      </el-select>
+    </el-form-item>
+    <!-- <el-button type="primary" @click="resetForm">Очистить</el-button> -->
+    <el-button type="primary" @click="confirm">Сохранить</el-button>
   </el-form>
-
-
 </template>
 
 <script lang="ts">
@@ -44,7 +53,6 @@ export default defineComponent({
         }
       }
 
-
       const resultWorks = await store.getData("works");
       if("data" in resultWorks) {
         works.push(...resultWorks.data);
@@ -55,18 +63,17 @@ export default defineComponent({
       console.log(persons);
     });
 
-    const resetForm = () => {
-      formRef.value?.resetFields();
-    };
+    // const resetForm = () => {
+    //   formRef.value?.resetFields();
+    // };
 
     const confirm = () => {
       formRef.value?.validate(async(valid) => {
         if (valid) {
-          const result = await store.postData("works", form);
+          const result = await store.postData("works", work.value);
           console.log(result);
-          if("data" in result && "id" in result.data) {
-            works.unshift({...form});
-            formRef.value?.resetFields();
+          if(!("data" in result && "id" in result.data)) {
+            console.log("error!");
           }
         }  else{
           return false;
@@ -74,7 +81,6 @@ export default defineComponent({
       });
     };
 
-    const form  = reactive({ title: '', genre: ''});
     const  rules = {
       title: [
         { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
@@ -88,7 +94,7 @@ export default defineComponent({
 
 
     return {
-      resetForm,
+      // resetForm,
       confirm,
       formRef,
       rules,

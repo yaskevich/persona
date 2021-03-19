@@ -20,7 +20,7 @@
          <router-link to="/tags">
            <el-menu-item index="1-32">Типы</el-menu-item>
           </router-link>
-         <router-link to="/">
+         <router-link to="/events">
            <el-menu-item index="1-31">События</el-menu-item>
           </router-link>
           <router-link to="/persons">

@@ -12,6 +12,7 @@ import LogList from './components/LogList.vue';
 import Login from './components/Login.vue';
 import Settings from './components/Settings.vue';
 import Tags from './components/Tags.vue';
+import EventList from './components/EventList.vue';
 
 const routes = [
 	{
@@ -28,6 +29,11 @@ const routes = [
 		path: '/tags',
 		name: 'Tags',
 		component: Tags,
+	},
+	{
+		path: '/events',
+		name: 'EventList',
+		component: EventList,
 	},
 	{
 		path: '/user/:id',

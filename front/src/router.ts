@@ -13,6 +13,7 @@ import Login from './components/Login.vue';
 import Settings from './components/Settings.vue';
 import Tags from './components/Tags.vue';
 import EventList from './components/EventList.vue';
+import Event from './components/Event.vue';
 
 const routes = [
 	{
@@ -85,6 +86,11 @@ const routes = [
 		path: '/book/:id?',
 		component: Book,
 		name: 'Book',
+	},
+	{
+		path: '/event/:id?',
+		component: Event,
+		name: 'Event',
 	},
 ];
 

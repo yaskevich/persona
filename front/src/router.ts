@@ -11,6 +11,7 @@ import Book from './components/Book.vue';
 import LogList from './components/LogList.vue';
 import Login from './components/Login.vue';
 import Settings from './components/Settings.vue';
+import Tags from './components/Tags.vue';
 
 const routes = [
 	{
@@ -22,6 +23,11 @@ const routes = [
 		path: '/settings',
 		name: 'Settings',
 		component: Settings,
+	},
+	{
+		path: '/tags',
+		name: 'Tags',
+		component: Tags,
 	},
 	{
 		path: '/user/:id',

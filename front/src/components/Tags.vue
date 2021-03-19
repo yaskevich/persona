@@ -1,4 +1,5 @@
 <template>
+  Типы событий
   <el-tree
     :data="data"
     node-key="id"
@@ -12,7 +13,24 @@
     draggable
     :allow-drop="allowDrop"
     :allow-drag="allowDrag">
+    <template #default="{ node, data }">
+       <span class="custom-tree-node">
+         <span>{{ node.label }}</span>
+         <span>
+           <el-dropdown>
+             <i class="el-icon-link"></i>
+             <template #dropdown>
+               <el-dropdown-menu>
+                   <el-dropdown-item>Создать</el-dropdown-item>
+                   <el-dropdown-item>Удалить</el-dropdown-item>
+               </el-dropdown-menu>
+             </template>
+           </el-dropdown>
+         </span>
+       </span>
+     </template>
   </el-tree>
+  <el-button type="primary" @click="confirm">Сохранить</el-button>
 </template>
 
 
@@ -54,10 +72,106 @@ export default defineComponent({
     // };
 
 
+    const handleDragStart = (node, ev) => {
+        console.log('drag start', node);
+    };
+
+    const handleDragEnter = (draggingNode, dropNode, ev) => {
+        console.log('tree drag enter: ', dropNode.label);
+    };
+    const handleDragLeave = (draggingNode, dropNode, ev) => {
+        console.log('tree drag leave: ', dropNode.label);
+    };
+    const handleDragOver = (draggingNode, dropNode, ev) => {
+        console.log('tree drag over: ', dropNode.label);
+    };
+    const handleDragEnd = (draggingNode, dropNode, dropType, ev) => {
+        console.log('tree drag end: ', dropNode && dropNode.label, dropType);
+    };
+    const handleDrop = (draggingNode, dropNode, dropType, ev) => {
+        console.log('tree drop: ', dropNode.label, dropType);
+    };
+    const allowDrop = (draggingNode, dropNode, type) => {
+        if (dropNode.data.label === 'Level two 3-1') {
+          return type !== 'inner';
+        } else {
+          return true;
+        }
+    };
+    const allowDrag = (draggingNode) => {
+        return draggingNode.data.label.indexOf('Level three 3-1-1') === -1;
+    };
+    const confirm =() => {
+      console.log("data", data);
+      console.log(JSON.stringify(data));
+    };
+
+    const data = [{
+         label: 'Level one 1',
+         children: [{
+           label: 'Level two 1-1',
+           children: [{
+             label: 'Level three 1-1-1'
+           }]
+         }]
+       }, {
+         label: 'Level one 2',
+         children: [{
+           label: 'Level two 2-1',
+           children: [{
+             label: 'Level three 2-1-1'
+           }]
+         }, {
+           label: 'Level two 2-2',
+           children: [{
+             label: 'Level three 2-2-1'
+           }]
+         }]
+       }, {
+         label: 'Level one 3',
+         children: [{
+           label: 'Level two 3-1',
+           children: [{
+             label: 'Level three 3-1-1'
+           }]
+         }, {
+           label: 'Level two 3-2',
+           children: [{
+             label: 'Level three 3-2-1'
+           }]
+         }]
+       }];
+
+
     return {
+      confirm,
+      handleDragStart,
+      handleDragEnter,
+      handleDragLeave,
+      handleDragOver,
+      handleDragEnd,
+      handleDrop,
+      allowDrop,
+      allowDrag,
+      data,
+      defaultProps: {
+          children: 'children',
+          label: 'label'
+        },
       formRef,
       form
     };
   },
 });
 </script>
+
+<style>
+  .custom-tree-node {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    padding-right: 8px;
+  }
+</style>

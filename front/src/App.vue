@@ -17,7 +17,7 @@
          <router-link to="/">
            <el-menu-item index="1-1">Обзор</el-menu-item>
           </router-link>
-         <router-link to="/">
+         <router-link to="/tags">
            <el-menu-item index="1-32">Типы</el-menu-item>
           </router-link>
          <router-link to="/">

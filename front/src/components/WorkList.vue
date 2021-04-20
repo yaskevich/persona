@@ -10,7 +10,8 @@
   <el-row v-for="(value, key) in works"  :gutter="20" :key="key">
     <el-col :span="16"><div class="grid-content bg-purple">
       <span v-for="(id, index) in value.authors" :key="index" style="font-style:italic;font-size: .7rem;">
-        {{persons.filter(x=>x.id === id).map(x=>x.value).join(',') }}
+        <span v-if="index">,</span>
+        {{persons.filter(x=>x.id === id).map(x=>x.value).shift() }}
       </span>
       {{value.title}}
     </div></el-col>

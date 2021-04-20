@@ -34,6 +34,7 @@ import { ElForm } from 'element-plus';
 import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
 import store from "../store";
 import { useRoute } from 'vue-router';
+import router from "../router";
 
 export default defineComponent({
   setup() {
@@ -84,6 +85,9 @@ export default defineComponent({
           console.log(result);
           if(!("data" in result && "id" in result.data)) {
             console.log("error!");
+          } else {
+            console.log("go to /works");
+            router.push("/works")
           }
         }  else{
           return false;

@@ -25,7 +25,10 @@
     </el-form-item>
 
     <!-- <el-button type="primary" @click="resetForm">Очистить</el-button> -->
+    <el-space wrap>
     <el-button type="primary" @click="confirm">Сохранить</el-button>
+    <el-button type="danger" @click="deleteWork" v-if="work.id">Удалить</el-button>
+    </el-space>
   </el-form>
 </template>
 
@@ -86,13 +89,21 @@ export default defineComponent({
           if(!("data" in result && "id" in result.data)) {
             console.log("error!");
           } else {
-            console.log("go to /works");
+            // console.log("go to /works");
             router.push("/works")
           }
         }  else{
           return false;
         }
       });
+    };
+
+    const deleteWork = async () => {
+      // console.log(work.value.id);
+      const result = await store.deleteById("works", work.value.id);
+      if("data" in result && "id" in result.data){
+        router.push("/works")
+      }
     };
 
     const  rules = {
@@ -116,7 +127,8 @@ export default defineComponent({
       work,
       works,
       persons,
-      persona_id
+      persona_id,
+      deleteWork,
     };
   },
 });

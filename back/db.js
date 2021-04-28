@@ -25,9 +25,9 @@ const pool = new Pool();
 `CREATE TABLE works (
 	id SERIAL PRIMARY KEY,
 	title text not null,
-	genre text
+	genre text,
+	authors integer[] NULL
 )`;
-`ALTER TABLE works ADD authors integer[] NULL`;
 `ALTER TABLE works OWNER TO ${process.env.PGUSER}`;
 `CREATE TABLE users (
 	id SERIAL PRIMARY KEY,
@@ -44,6 +44,16 @@ const pool = new Pool();
 	persona_id integer not null
 )`;
 `ALTER TABLE settings OWNER TO ${process.env.PGUSER}`;
+
+`CREATE TABLE books (
+	id SERIAL PRIMARY KEY,
+	title text not null,
+	published integer not null,
+	editors integer[] NULL,
+	works integer[] NULL
+)`;
+
+`ALTER TABLE books OWNER TO ${process.env.PGUSER}`;
 
 
 

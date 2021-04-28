@@ -46,7 +46,7 @@
     </el-select>
   </el-form-item>
   <el-form-item>
-  <el-select
+  <!-- <el-select
       v-model="form.selectedAuthors"
       multiple
       filterable
@@ -61,7 +61,7 @@
         :label="item.value"
         :value="item.id">
       </el-option>
-    </el-select>
+    </el-select>  -->
   </el-form-item>
 
     <el-button type="primary" @click="resetForm">Очистить</el-button>
@@ -84,13 +84,13 @@ export default defineComponent({
     let persons = [];
     const loading = ref(false);
     const editors = ref([]);
-    const authors = ref([]);
+    // const authors = ref([]);
 
     onBeforeMount(async() => {
       const personsData = await store.getData("persons");
       persons = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
       editors.value  = persons;
-      authors.value  = persons;
+      // authors.value  = persons;
 
       const worksData = await store.getData("works");
       works.value  = worksData.data;
@@ -113,13 +113,13 @@ export default defineComponent({
       loading.value = false;
     };
 
-    const getAuthors = (query) => {
-      console.log(query);
-      const re  = new RegExp(query, "i");
-      loading.value = true;
-      authors.value = persons.filter(x => re.test(x.value));
-      loading.value = false;
-    };
+    // const getAuthors = (query) => {
+    //   console.log(query);
+    //   const re  = new RegExp(query, "i");
+    //   loading.value = true;
+    //   authors.value = persons.filter(x => re.test(x.value));
+    //   loading.value = false;
+    // };
 
     const resetForm = () => {
       formRef.value?.resetFields();
@@ -159,8 +159,8 @@ export default defineComponent({
     };
 
     return {
-      getAuthors,
-      authors,
+      // getAuthors,
+      // authors,
       editors,
       getEditors,
       getWorks,

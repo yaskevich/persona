@@ -131,13 +131,11 @@ export default defineComponent({
       formRef.value?.validate(async(valid) => {
         if (valid) {
           // console.log("form", form);
-          // const result = {"data": []}; // await store.postData("books", book.value);
           const result = await store.postData("books", form);
           console.log(result);
           if(!("data" in result && "id" in result.data)) {
             console.log("error!");
           } else {
-            // console.log("go to /works");
             router.push("/books")
           }
         }  else{

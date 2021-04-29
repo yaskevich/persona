@@ -4,13 +4,13 @@
     <el-input placeholder="Название" v-model="form.title" class="text-input"></el-input>
   </el-form-item>
 
-  <el-form-item prop="year">
-    <el-input placeholder="Год" v-model.number="form.year" class="text-input"></el-input>
+  <el-form-item prop="published">
+    <el-input placeholder="Год" v-model.number="form.published" class="text-input"></el-input>
   </el-form-item>
 
 <el-form-item>
   <el-select
-      v-model="form.selectedWorks"
+      v-model="form.works"
       multiple
       filterable
       remote
@@ -20,7 +20,7 @@
       :remote-method="getWorks"
       :loading="loading">
       <el-option
-        v-for="item in works"
+        v-for="item in worksAll"
         :key="item.id"
         :label="item.title"
         :value="item.id">
@@ -29,7 +29,7 @@
   </el-form-item>
   <el-form-item>
   <el-select
-      v-model="form.selectedEditors"
+      v-model="form.editors"
       multiple
       filterable
       remote
@@ -38,7 +38,7 @@
       :remote-method="getEditors"
       :loading="loading">
       <el-option
-        v-for="item in editors"
+        v-for="item in editorsAll"
         :key="item.id"
         :label="item.value"
         :value="item.id">
@@ -75,25 +75,27 @@
 import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
 import { ElForm } from 'element-plus';
 import store from "../store";
+import router from "../router";
 
 export default defineComponent({
   setup() {
     const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
-    const form  = reactive({ title: '', year: '', selectedWorks: [], selectedEditors: [], selectedAuthors: []});
-    const works = ref([]);
+    // const form  = reactive({ title: '', published: '', works: [], editors: [], selectedAuthors: []});
+    const form  = reactive({ title: '', published: '', editors: [], works: [], });
+    const worksAll = ref([]);
     let persons = [];
     const loading = ref(false);
-    const editors = ref([]);
+    const editorsAll = ref([]);
     // const authors = ref([]);
 
     onBeforeMount(async() => {
       const personsData = await store.getData("persons");
       persons = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
-      editors.value  = persons;
+      editorsAll.value  = persons;
       // authors.value  = persons;
 
       const worksData = await store.getData("works");
-      works.value  = worksData.data;
+      worksAll.value  = worksData.data;
     });
     const getWorks = async(query) => {
       console.log(query);
@@ -101,7 +103,7 @@ export default defineComponent({
       loading.value = true;
 
       const worksData = await store.getData("works");
-      works.value = worksData.data.filter(x => re.test(x.title));
+      worksAll.value = worksData.data.filter(x => re.test(x.title));
       loading.value = false;
     };
 
@@ -109,7 +111,7 @@ export default defineComponent({
       console.log(query);
       const re  = new RegExp(query, "i");
       loading.value = true;
-      editors.value = persons.filter(x => re.test(x.value));
+      editorsAll.value = persons.filter(x => re.test(x.value));
       loading.value = false;
     };
 
@@ -124,23 +126,20 @@ export default defineComponent({
     const resetForm = () => {
       formRef.value?.resetFields();
     };
+
     const confirm = () => {
-      formRef.value?.validate((valid) => {
+      formRef.value?.validate(async(valid) => {
         if (valid) {
-          // do
-          console.log("here", form);
-          // return false;
-
-          // axios.post('/api/work/add', form)
-          //   .then(function (response) {
-          //     console.log(response);
-          //     works.unshift({...form});
-          //     formRef.value?.resetFields();
-          //   })
-          //   .catch(function (error) {
-          //     console.log(error);
-          //   });
-
+          // console.log("form", form);
+          // const result = {"data": []}; // await store.postData("books", book.value);
+          const result = await store.postData("books", form);
+          console.log(result);
+          if(!("data" in result && "id" in result.data)) {
+            console.log("error!");
+          } else {
+            // console.log("go to /works");
+            router.push("/books")
+          }
         }  else{
           return false;
         }
@@ -152,7 +151,7 @@ export default defineComponent({
         { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
         { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' }
       ],
-      year: [
+      published: [
         { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
         { min: 2, type: 'integer', trigger: 'blur' }
       ],
@@ -161,7 +160,7 @@ export default defineComponent({
     return {
       // getAuthors,
       // authors,
-      editors,
+      editorsAll,
       getEditors,
       getWorks,
       loading,
@@ -170,7 +169,7 @@ export default defineComponent({
       formRef,
       rules,
       form,
-      works
+      worksAll
     };
   },
 });

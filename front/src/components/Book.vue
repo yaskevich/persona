@@ -65,30 +65,43 @@
   </el-form-item>
 
     <el-button type="primary" @click="resetForm">Очистить</el-button>
-    <el-button type="primary" @click="confirm">Добавить</el-button>
+    <el-button type="primary" @click="confirm">{{form.id? "Сохранить": "Добавить"}}</el-button>
 
 </el-form>
 </template>
 
 <script lang="ts">
 // import { ElForm } from 'element-plus';
-import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
+import { defineComponent, ref, onBeforeMount, ComponentPublicInstance } from 'vue';
 import { ElForm } from 'element-plus';
 import store from "../store";
 import router from "../router";
+import { useRoute } from 'vue-router';
 
 export default defineComponent({
   setup() {
     const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
     // const form  = reactive({ title: '', published: '', works: [], editors: [], selectedAuthors: []});
-    const form  = reactive({ title: '', published: '', editors: [], works: [], });
+    const form  = ref({ title: '', published: '', editors: [], works: [], });
     const worksAll = ref([]);
     let persons = [];
     const loading = ref(false);
     const editorsAll = ref([]);
     // const authors = ref([]);
+    const vuerouter = useRoute();
+    const id = vuerouter.params.id;
 
     onBeforeMount(async() => {
+      console.log("router id", id);
+
+      if (id) {
+        const result = await store.getData("books", id);
+        if("data" in result) {
+          form.value = result.data[0];
+          console.log("this book", form);
+        }
+      }
+
       const personsData = await store.getData("persons");
       persons = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
       editorsAll.value  = persons;
@@ -97,6 +110,7 @@ export default defineComponent({
       const worksData = await store.getData("works");
       worksAll.value  = worksData.data;
     });
+
     const getWorks = async(query) => {
       console.log(query);
       const re  = new RegExp(query, "i");
@@ -130,8 +144,8 @@ export default defineComponent({
     const confirm = () => {
       formRef.value?.validate(async(valid) => {
         if (valid) {
-          // console.log("form", form);
-          const result = await store.postData("books", form);
+          console.log("form", form);
+          const result = await store.postData("books", form.value);
           console.log(result);
           if(!("data" in result && "id" in result.data)) {
             console.log("error!");

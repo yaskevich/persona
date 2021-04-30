@@ -15,7 +15,7 @@
       <el-input
         type="textarea"
         autosize
-        placeholder="Пастернак пишет письмо Александру Сергеевичу Пушкину, т.к. еще не знает о его трагической гибели на дуэли с Дантесом"
+        placeholder="Пастернак пишет письмо Маяковскому"
         v-model="event.firstname">
       </el-input>
     </el-form-item>
@@ -33,12 +33,13 @@
       </el-input>
     </el-form-item>
 
-    <el-form-item label="Участники">
+    <el-form-item label="Связи">
+        <el-space  direction="horizontal" style="display:flex;" wrap size="large">
       <el-select
           v-model="event.participants"
           filterable
           multiple
-          placeholder="Персоны"
+          placeholder="Участники"
           >
           <el-option
             v-for="item in persons"
@@ -47,10 +48,8 @@
             :value="item.id">
           </el-option>
         </el-select>
-    </el-form-item>
 
-    <el-form-item label="Упомянуты">
-        <el-select v-model="event.mentions" filterable multiple placeholder="Персоны">
+        <el-select v-model="event.mentions" filterable multiple placeholder="Упомянуты">
             <el-option
               v-for="item in persons"
               :key="item.id"
@@ -58,9 +57,7 @@
               :value="item.id">
             </el-option>
           </el-select>
-    </el-form-item>
 
-    <el-form-item label="Произведения">
         <el-select v-model="event.works" multiple filterable placeholder="Произведения">
             <el-option
               v-for="item in works"
@@ -69,6 +66,16 @@
               :value="item.id">
             </el-option>
           </el-select>
+
+        <el-select v-model="event.books" multiple filterable placeholder="Издания">
+            <el-option
+              v-for="item in books"
+              :key="item.id"
+              :label="item.title"
+              :value="item.id">
+            </el-option>
+          </el-select>
+      </el-space>
     </el-form-item>
 
     <!-- :on-preview="handlePreview"
@@ -119,11 +126,12 @@ export default {
   },
   setup() {
 
-    let event = ref({works: [], participants: [], mentions: []});
+    let event = ref({works: [], participants: [], mentions: [], books: []});
     const vuerouter = useRoute();
     const id = vuerouter.params.id;
     const persons = ref([]);
     const works = ref([]);
+    const books = ref([]);
 
     onBeforeMount(async() => {
       const result = await store.getData("events", id);
@@ -139,6 +147,11 @@ export default {
         works.value = resultWorks.data;
       }
 
+      const resultBooks = await store.getData("books");
+      if("data" in resultBooks) {
+        books.value = resultBooks.data;
+      }
+
     });
 
     const onSubmit = async() => {
@@ -148,7 +161,7 @@ export default {
         console.log(result);
     };
 
-    return {onSubmit, event, options: store.state.options, persons, works};
+    return {onSubmit, event, options: store.state.options, persons, works, books, };
   },
   components: {
 

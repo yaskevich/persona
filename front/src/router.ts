@@ -12,8 +12,8 @@ import LogList from './components/LogList.vue';
 import Login from './components/Login.vue';
 import Settings from './components/Settings.vue';
 import Tags from './components/Tags.vue';
-import EventList from './components/EventList.vue';
-import Event from './components/Event.vue';
+import FactList from './components/FactList.vue';
+import Fact from './components/Fact.vue';
 
 const routes = [
 	{
@@ -32,9 +32,9 @@ const routes = [
 		component: Tags,
 	},
 	{
-		path: '/events',
-		name: 'EventList',
-		component: EventList,
+		path: '/facts',
+		name: 'FactList',
+		component: FactList,
 	},
 	{
 		path: '/user/:id',
@@ -88,9 +88,9 @@ const routes = [
 		name: 'Book',
 	},
 	{
-		path: '/event/:id?',
-		component: Event,
-		name: 'Event',
+		path: '/fact/:id?',
+		component: Fact,
+		name: 'Fact',
 	},
 ];
 

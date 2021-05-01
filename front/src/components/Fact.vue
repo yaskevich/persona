@@ -1,14 +1,14 @@
 <template>
-    <el-form label-width="120px" v-model="event">
+    <el-form label-width="120px" v-model="fact">
       <el-form-item prop="date" label="Дата">
-        <el-input placeholder="10.05.1928" v-model="event.firstname" class="text-input" prop="firstName"></el-input>
+        <el-input placeholder="10.05.1928" v-model="fact.firstname" class="text-input" prop="firstName"></el-input>
       </el-form-item>
-      <el-form-item prop="tags" label="Теги">
-        <el-input placeholder="переписка (БП_отправитель)" v-model="event.firstname"></el-input>
+      <el-form-item prop="tags" label="Деятельность">
+        <el-input placeholder="переписка (БП_отправитель)" v-model="fact.firstname"></el-input>
       </el-form-item>
 
       <el-form-item label="Источники">
-        <el-input placeholder="■" v-model="event.firstname"></el-input>
+        <el-input placeholder="■" v-model="fact.firstname"></el-input>
       </el-form-item>
 
     <el-form-item label="Описание">
@@ -16,12 +16,12 @@
         type="textarea"
         autosize
         placeholder="Пастернак пишет письмо Маяковскому"
-        v-model="event.firstname">
+        v-model="fact.firstname">
       </el-input>
     </el-form-item>
 
     <el-form-item label="Место">
-      <el-input placeholder="Пекин" v-model="event.firstname"></el-input>
+      <el-input placeholder="Пекин" v-model="fact.firstname"></el-input>
     </el-form-item>
 
     <el-form-item label="Примечание">
@@ -29,14 +29,14 @@
         type="textarea"
         autosize
         placeholder="Был солнечный день"
-        v-model="event.firstname">
+        v-model="fact.firstname">
       </el-input>
     </el-form-item>
 
     <el-form-item label="Связи">
         <el-space  direction="horizontal" style="display:flex;" wrap size="large">
       <el-select
-          v-model="event.participants"
+          v-model="fact.participants"
           filterable
           multiple
           placeholder="Участники"
@@ -49,7 +49,7 @@
           </el-option>
         </el-select>
 
-        <el-select v-model="event.mentions" filterable multiple placeholder="Упомянуты">
+        <el-select v-model="fact.mentions" filterable multiple placeholder="Упомянуты">
             <el-option
               v-for="item in persons"
               :key="item.id"
@@ -58,7 +58,7 @@
             </el-option>
           </el-select>
 
-        <el-select v-model="event.works" multiple filterable placeholder="Произведения">
+        <el-select v-model="fact.works" multiple filterable placeholder="Произведения">
             <el-option
               v-for="item in works"
               :key="item.id"
@@ -67,7 +67,7 @@
             </el-option>
           </el-select>
 
-        <el-select v-model="event.books" multiple filterable placeholder="Издания">
+        <el-select v-model="fact.books" multiple filterable placeholder="Издания">
             <el-option
               v-for="item in books"
               :key="item.id"
@@ -126,7 +126,7 @@ export default {
   },
   setup() {
 
-    let event = ref({works: [], participants: [], mentions: [], books: []});
+    let fact = ref({works: [], participants: [], mentions: [], books: []});
     const vuerouter = useRoute();
     const id = vuerouter.params.id;
     const persons = ref([]);
@@ -134,7 +134,7 @@ export default {
     const books = ref([]);
 
     onBeforeMount(async() => {
-      const result = await store.getData("events", id);
+      const result = await store.getData("facts", id);
       if("data" in result) {
         console.log("ok");
       }
@@ -156,12 +156,12 @@ export default {
 
     const onSubmit = async() => {
       // form.validate();
-        console.log('save:', event.value);
-        const result = await store.postData("events", event.value);
+        console.log('save:', fact.value);
+        const result = await store.postData("facts", fact.value);
         console.log(result);
     };
 
-    return {onSubmit, event, options: store.state.options, persons, works, books, };
+    return {onSubmit, fact, options: store.state.options, persons, works, books, };
   },
   components: {
 

@@ -18,10 +18,10 @@
            <el-menu-item index="1-1">Обзор</el-menu-item>
           </router-link>
          <router-link to="/tags">
-           <el-menu-item index="1-32">Типы</el-menu-item>
+           <el-menu-item index="1-32">Деятельность</el-menu-item>
           </router-link>
-         <router-link to="/events">
-           <el-menu-item index="1-31">События</el-menu-item>
+         <router-link to="/facts">
+           <el-menu-item index="1-31">Факты</el-menu-item>
           </router-link>
           <router-link to="/persons">
             <el-menu-item index="1-7">Персоналии</el-menu-item>

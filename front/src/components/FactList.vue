@@ -1,5 +1,5 @@
 <template>
-  События
+  Факты
   <el-button type="primary" @click="openForm">Добавить</el-button>
 </template>
 
@@ -13,14 +13,14 @@ export default defineComponent({
   setup() {
     const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
 
-    const events = reactive([]);
+    const facts = reactive([]);
 
     onBeforeMount(async() => {
-      const result = await store.getData("events");
+      const result = await store.getData("facts");
       console.log(result);
       if("data" in result && !("error" in result.data)) {
         if(Object.keys(result.data).length) {
-          events.push(...result.data);
+          facts.push(...result.data);
         } else {
           console.log("table is empty");
         }
@@ -29,14 +29,14 @@ export default defineComponent({
 
 
     const openForm = () => {
-      router.push("/event/")
+      router.push("/fact/")
     };
 
 
     return {
       openForm,
       formRef,
-      events
+      facts
     };
   },
 });

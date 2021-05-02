@@ -21,8 +21,8 @@
              <i class="el-icon-link"></i>
              <template #dropdown>
                <el-dropdown-menu>
-                   <el-dropdown-item>Создать</el-dropdown-item>
-                   <el-dropdown-item>Удалить</el-dropdown-item>
+                   <el-dropdown-item>Добавить соседний пункт</el-dropdown-item>
+                   <el-dropdown-item>Удалить данный пункт</el-dropdown-item>
                </el-dropdown-menu>
              </template>
            </el-dropdown>
@@ -106,41 +106,23 @@ export default defineComponent({
       console.log(JSON.stringify(data));
     };
 
-    const data = [{
-         label: 'Level one 1',
-         children: [{
-           label: 'Level two 1-1',
-           children: [{
-             label: 'Level three 1-1-1'
-           }]
-         }]
-       }, {
-         label: 'Level one 2',
-         children: [{
-           label: 'Level two 2-1',
-           children: [{
-             label: 'Level three 2-1-1'
-           }]
-         }, {
-           label: 'Level two 2-2',
-           children: [{
-             label: 'Level three 2-2-1'
-           }]
-         }]
-       }, {
-         label: 'Level one 3',
-         children: [{
-           label: 'Level two 3-1',
-           children: [{
-             label: 'Level three 3-1-1'
-           }]
-         }, {
-           label: 'Level two 3-2',
-           children: [{
-             label: 'Level three 3-2-1'
-           }]
-         }]
-       }];
+    const data = [
+      {
+         label: 'Корреспонденция', id: 1,
+         children: [
+           { label: 'Исходящая', id: 2 },
+           { label: 'Входящая', id: 3 }
+         ]
+      },
+      {
+         label: 'Личная жизнь', id: 4,
+         children: [
+           { label: 'Путешествия', id: 5 },
+           { label: 'Семья', id: 6 }
+         ]
+      },
+
+    ];
 
 
     return {

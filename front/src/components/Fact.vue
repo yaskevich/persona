@@ -4,7 +4,8 @@
         <el-input placeholder="10.05.1928" v-model="fact.firstname" class="text-input" prop="firstName"></el-input>
       </el-form-item>
       <el-form-item prop="tags" label="Деятельность">
-        <el-input placeholder="переписка (БП_отправитель)" v-model="fact.firstname"></el-input>
+        <!-- <el-input placeholder="переписка (БП_отправитель)" v-model="fact.firstname"></el-input> -->
+        <el-cascader :options="acts" clearable :props="{ multiple: true, }" placeholder="Вид(ы) деятельности"></el-cascader>
       </el-form-item>
 
       <el-form-item label="Источники">
@@ -133,6 +134,25 @@ export default {
     const works = ref([]);
     const books = ref([]);
 
+
+    const acts =  [
+          {
+             label: 'Корреспонденция', id: 1,
+             children: [
+               { label: 'Исходящая', id: 2 },
+               { label: 'Входящая', id: 3 }
+             ]
+          },
+          {
+             label: 'Личная жизнь', id: 4,
+             children: [
+               { label: 'Путешествия', id: 5 },
+               { label: 'Семья', id: 6 }
+             ]
+          },
+
+        ];
+
     onBeforeMount(async() => {
       const result = await store.getData("facts", id);
       if("data" in result) {
@@ -161,7 +181,7 @@ export default {
         console.log(result);
     };
 
-    return {onSubmit, fact, options: store.state.options, persons, works, books, };
+    return {onSubmit, fact, options: store.state.options, persons, works, books, acts, };
   },
   components: {
 

@@ -55,6 +55,15 @@ const pool = new Pool();
 
 `ALTER TABLE books OWNER TO ${process.env.PGUSER}`;
 
+`CREATE TABLE IF NOT EXISTS acts (
+	id SERIAL PRIMARY KEY,
+	title text not null,
+	parent integer
+)`;
+
+`ALTER TABLE acts OWNER TO ${process.env.PGUSER}`;
+// the table should have at least 1 item to enable UI
+`INSERT INTO acts (title) VALUES('test')`;
 
 
 const qry = await pool.query(`SELECT

@@ -112,7 +112,8 @@ export default {
 			const params  = idInt ?
 				[selectables[table] + "WHERE id = $1", [idInt]]
 				:
-				[selectables[table] + (table === "settings" ? "": "ORDER BY id DESC")];
+				// [selectables[table] + (["settings", "acts"].includes(table) ? "": "ORDER BY id DESC")];
+				[selectables[table]];
 			const result  = await pool.query(...params);
 			return result.rows;
 		}

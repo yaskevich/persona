@@ -50,7 +50,7 @@
                  <el-dropdown-item @click="addItem(node, data)">Добавить соседний пункт</el-dropdown-item>
                  <el-dropdown-item @click="addItem(node, data, true)">Добавить вложенный пункт</el-dropdown-item>
                  <el-dropdown-item @click="renameItem(node, data)">Переименовать</el-dropdown-item>
-                 <el-dropdown-item v-if="!data.children.length" @click="removeItem(node, data)"><strong>Удалить этот пункт</strong></el-dropdown-item>
+                 <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>Удалить этот пункт</strong></el-dropdown-item>
                </el-dropdown-menu>
              </template>
            </el-dropdown>

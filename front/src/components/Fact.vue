@@ -4,7 +4,7 @@
          <el-space  direction="horizontal" style="display:flex;" wrap size="large">
             <el-date-picker v-model="fact.timestamp" type="datetime" placeholder="Техническое время" :shortcuts="shortcuts"></el-date-picker>
             <!-- <el-input placeholder="переписка (БП_отправитель)" v-model="fact.firstname"></el-input> -->
-            <el-cascader :options="acts" clearable :props="{ multiple: true, }" placeholder="Вид(ы) деятельности"></el-cascader>
+            <el-cascader :options="acts" clearable filterable :props="{ multiple: true, value: 'id', label: 'title' }" placeholder="Вид(ы) деятельности"></el-cascader>
          </el-space>
       </el-form-item>
       <el-form-item prop="date" label="Дата">
@@ -106,7 +106,7 @@
    </el-form>
 </template>
 <script>
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 import { onBeforeMount } from 'vue';
 import store from "../store";
 import { useRoute } from 'vue-router';
@@ -123,25 +123,7 @@ export default {
     const persons = ref([]);
     const works = ref([]);
     const books = ref([]);
-
-
-    const acts =  [
-          {
-             label: 'Корреспонденция', id: 1,
-             children: [
-               { label: 'Исходящая', id: 2 },
-               { label: 'Входящая', id: 3 }
-             ]
-          },
-          {
-             label: 'Личная жизнь', id: 4,
-             children: [
-               { label: 'Путешествия', id: 5 },
-               { label: 'Семья', id: 6 }
-             ]
-          },
-
-        ];
+    const acts = reactive([]);
 
     const shortcuts = [{
          text: '1920',
@@ -171,6 +153,13 @@ export default {
       const resultBooks = await store.getData("books");
       if("data" in resultBooks) {
         books.value = resultBooks.data;
+      }
+
+      const resultActs = await store.getData("acts");
+      if("data" in result) {
+        const nested = store.nest(resultActs.data)
+        console.log("nest", nested);
+        acts.push(...nested);
       }
 
     });

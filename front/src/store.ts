@@ -139,8 +139,11 @@ const getData = async(table: string, id?: string): Promise<any> => {
 
 const nest = (xx:any, id = null, y = 'parent') =>
     xx.filter((x:any)  => x[y] === id)
-    .map((x:any) => ({ ...x, children: nest(xx, x.id) }));
-
+    .map((x:any) => ({ ...x, ...leaf(xx, x.id) }));
+const leaf = (a:any, b:any): Object  =>  {
+    const res  = nest(a, b);
+    return res.length ? {children: res} : {};
+};
 
 export default {
   // state: readonly(state),

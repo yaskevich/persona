@@ -9,13 +9,13 @@ const state = reactive({
   error: "",
   options: [{
         value: 1,
-        label: 'Администратор', //  (жрец)
+        label: 'Администратор',
       }, {
         value: 3,
-        label: 'Модератор', //  (воин)
+        label: 'Модератор',
       }, {
         value: 5,
-        label: 'Редактор', //  (крестьянин)
+        label: 'Редактор',
       }
     ]
 });
@@ -78,7 +78,7 @@ const postData = async(table: string, data: Object): Promise<any> => {
   if (state.token) {
     try {
       const config = { headers: { Authorization: "Bearer " + state.token } };
-      console.log("send query", table);
+      console.log(`POST ${table}`);
       const response = await axios.post('/api/x/'+ table, data, config);
       console.log("store:response", response.data);
       return response;
@@ -112,7 +112,7 @@ const getData = async(table: string, id?: string): Promise<any> => {
     try {
     const config = { headers: { Authorization: "Bearer " + state.token }, "params": {} };
      if(id) { config["params"] = { id: id }; }
-     console.log("send query", table);
+     console.log(`GET ${table}`);
      const response = await axios.get("/api/" + table, config);
      console.log(response.data);
      return response;
@@ -137,6 +137,11 @@ const getData = async(table: string, id?: string): Promise<any> => {
   //   console.log(error);
   // });
 
+const nest = (xx:any, id = null, y = 'parent') =>
+    xx.filter((x:any)  => x[y] === id)
+    .map((x:any) => ({ ...x, children: nest(xx, x.id) }));
+
+
 export default {
   // state: readonly(state),
   logout,
@@ -146,6 +151,7 @@ export default {
   doLogin,
   getData,
   deleteById,
+  nest,
   // doLogout,
   // getData
   state: state,

@@ -23,8 +23,9 @@
 
   Типы событий
   <el-tree
-    :data="data"
+    :data="acts"
     node-key="id"
+    :props="{ label: 'title', }"
     default-expand-all
     @node-drag-start="handleDragStart"
     @node-drag-enter="handleDragEnter"
@@ -47,9 +48,9 @@
              <template #dropdown>
                <el-dropdown-menu>
                  <el-dropdown-item @click="addItem(node, data)">Добавить соседний пункт</el-dropdown-item>
-                 <el-dropdown-item @click="addChild(node, data)">Добавить вложенный пункт</el-dropdown-item>
+                 <el-dropdown-item @click="addItem(node, data, true)">Добавить вложенный пункт</el-dropdown-item>
                  <el-dropdown-item @click="renameItem(node, data)">Переименовать</el-dropdown-item>
-                 <el-dropdown-item v-if="!data.children" @click="removeItem(node, data)"><strong>Удалить данный пункт</strong></el-dropdown-item>
+                 <el-dropdown-item v-if="!data.children.length" @click="removeItem(node, data)"><strong>Удалить этот пункт</strong></el-dropdown-item>
                </el-dropdown-menu>
              </template>
            </el-dropdown>
@@ -57,7 +58,6 @@
        </span>
      </template>
   </el-tree>
-  <el-button type="primary" @click="confirm">Сохранить</el-button>
 </template>
 
 
@@ -70,41 +70,26 @@ import store from "../store";
 export default defineComponent({
   setup() {
     const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
-    const form  = reactive({ title: '', year: '', selectedWorks: [], selectedEditors: [], selectedAuthors: []});
+    const form  = reactive({ title: '', year: '', selectedWorks: [], selectedEditors: [], selectedAuthors: [] });
     const dialogData = reactive({ visible: false, text: "", caption: "", func: null, id: 0 });
     const dialogInputRef = ref(null);
-    // const works = ref([]);
-    // let persons = [];
+    const acts = reactive([]);
+
     // const loading = ref(false);
-    // const editors = ref([]);
-    // const authors = ref([]);
+
 
     onBeforeMount(async() => {
-      // const personsData = await store.getData("persons");
-      // persons = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
-      // editors.value  = persons;
-      // authors.value  = persons;
-      //
-      // const worksData = await store.getData("works");
-      // works.value  = worksData.data;
+      const result = await store.getData("acts");
+      if("data" in result) {
+        const nested = store.nest(result.data)
+        // console.log("nest", nested);
+        acts.push(...nested);
+      }
     });
-
-
-    // const getWorks = async(query) => {
-    //   console.log(query);
-    //   const re  = new RegExp(query, "i");
-    //   loading.value = true;
-    //
-    //   const worksData = await store.getData("works");
-    //   works.value = worksData.data.filter(x => re.test(x.title));
-    //   loading.value = false;
-    // };
-
 
     const handleDragStart = (node, ev) => {
         console.log('drag start', node);
     };
-
     const handleDragEnter = (draggingNode, dropNode, ev) => {
         console.log('tree drag enter: ', dropNode.label);
     };
@@ -130,84 +115,76 @@ export default defineComponent({
     const allowDrag = (draggingNode) => {
         return draggingNode.data.label.indexOf('Level three 3-1-1') === -1;
     };
-    const confirm =() => {
-      console.log("data", data);
-      console.log(JSON.stringify(data));
-    };
 
-    let data = reactive([
-      {
-         label: 'Корреспонденция', id: 1,
-         children: [
-           { label: 'Исходящая', id: 2 },
-           { label: 'Входящая', id: 3 }
-         ]
-      },
-      {
-         label: 'Личная жизнь', id: 4,
-         children: [
-           { label: 'Путешествия', id: 5 },
-           { label: 'Семья', id: 6 }
-         ]
-      },
-    ]);
-
-    const addItem = (node, datum) => {
+    const addItem = (node, datum, childmode) => {
       console.log(node, datum);
       dialogData.visible = true;
-      dialogData.caption = "Добавить соседний пункт";
-      dialogData.id = node.id;
-      dialogData.func = function() {
-        const newChild = { id: id++, label: dialogData.text, children: [] };
-        if (!datum.children) {
-          datum.children = [];
-        }
-        if(node?.parent?.data?.children) {
-          node.parent.data.children.push(newChild);
+      dialogData.caption = `Добавить ${childmode? 'вложенный' : 'соседний'} пункт`;
+      dialogData.id = datum.id;
+      dialogData.func = async function() {
+        console.log("!!", node, datum);
+        const parent_id = node?.parent?.data?.id || null;
+        console.log("parent", node?.parent?.data?.id, parent_id);
+        console.log(("acts", { "title":  dialogData.text, "parent": parent_id }));
+        const result = await store.postData("acts", { "title":  dialogData.text, "parent": childmode? datum.id : parent_id });
+        console.log(result);
+        if(!("data" in result && "id" in result.data)) {
+          console.log("error!");
         } else {
-          data.push(newChild);
+          const newChild = { id: result.data.id, title: dialogData.text, children: [] };
+          if(childmode){
+            console.log("childmode");
+            if(!datum.children) {
+              datum.children = [];
+            }
+            datum.children.push(newChild);
+          } else{
+            if(parent_id) {
+              console.log("push1");
+              node.parent.data.children.push(newChild);
+            } else{
+              console.log("push2", newChild);
+              acts.push(newChild);
+            }
+          }
+          dialogData.text = "";
         }
-      };
-    };
-
-    let id = 1000;
-
-    const addChild = (node, datum) => {
-      // console.log(node, datum);
-      dialogData.visible = true;
-      dialogData.id = node.id;
-      dialogData.caption = "Добавить вложенный пункт";
-      dialogData.func = function() {
-        const newChild = { id: id++, label: dialogData.text, children: [] };
-        if (!datum.children) {
-          datum.children = [];
-        }
-        datum.children.push(newChild);
       };
     };
 
     const renameItem = (node, datum) => {
       // console.log(node, datum);
       dialogData.visible = true;
-      dialogData.caption = `Переименовать пункт «${datum.label}»`;
-      dialogData.id = node.id;
-      dialogData.func = function() {
+      dialogData.caption = `Переименовать «${datum.title}»`;
+      dialogData.id = datum.id;
+      dialogData.func = async() =>  {
         const parent = node.parent;
         const children = parent.data.children || parent.data;
         const index = children.findIndex(d => d.id === datum.id);
-        children[index].label = dialogData.text;
+        children[index].title = dialogData.text;
+        const result = await store.postData("acts", { "title": dialogData.text, "id": datum.id, });
+        console.log(result);
+
+        if(("data" in result && "id" in result.data)) {
+          dialogData.text = "";
+        } else {
+          console.log("error!");
+        }
       };
     };
 
-    const removeItem = (node, datum) => {
+    const removeItem = async(node, datum) => {
       // console.log(node, datum);
-      if(datum.children) {
+      if(datum.children.length) {
         console.log("cannot delete non-empty slot!");
       } else {
-        const parent = node.parent;
-        const children = parent.data.children || parent.data;
-        const index = children.findIndex(d => d.id === datum.id);
-        children.splice(index, 1);
+        const result = await store.deleteById("acts", datum.id);
+        if("data" in result && "id" in result.data){
+          const parent = node.parent;
+          const children = parent.data.children || parent.data;
+          const index = children.findIndex(d => d.id === datum.id);
+          children.splice(index, 1);
+        }
       }
     };
 
@@ -216,17 +193,15 @@ export default defineComponent({
       dialogData.visible = false;
       if (e === true) {
         dialogData.func();
-        dialogData.text = "";
       }
     };
 
     const onDialogOpened = () => {
       dialogInputRef.value.focus();
-    }
+    };
 
     return {
       onDialogOpened,
-      confirm,
       handleDragStart,
       handleDragEnter,
       handleDragLeave,
@@ -235,22 +210,17 @@ export default defineComponent({
       handleDrop,
       allowDrop,
       allowDrag,
-      data,
-      defaultProps: {
-          children: 'children',
-          label: 'label'
-        },
       formRef,
       form,
       addItem,
-      addChild,
       renameItem,
       removeItem,
       dialogData,
       handleClose,
       dialogInputRef,
+      acts,
     };
-  },
+  }
 });
 </script>
 

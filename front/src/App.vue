@@ -17,6 +17,9 @@
          <router-link to="/">
            <el-menu-item index="1-1">Обзор</el-menu-item>
           </router-link>
+         <router-link to="/refs">
+           <el-menu-item index="1-42">Библиография</el-menu-item>
+          </router-link>
          <router-link to="/acts">
            <el-menu-item index="1-32">Деятельность</el-menu-item>
           </router-link>

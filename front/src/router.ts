@@ -12,6 +12,7 @@ import LogList from './components/LogList.vue';
 import Login from './components/Login.vue';
 import Settings from './components/Settings.vue';
 import Acts from './components/Acts.vue';
+import Refs from './components/References.vue';
 import FactList from './components/FactList.vue';
 import Fact from './components/Fact.vue';
 
@@ -30,6 +31,11 @@ const routes = [
 		path: '/acts',
 		name: 'Acts',
 		component: Acts,
+	},
+	{
+		path: '/refs',
+		name: 'Refs',
+		component: Refs,
 	},
 	{
 		path: '/facts',

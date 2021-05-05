@@ -65,6 +65,14 @@ const pool = new Pool();
 // the table should have at least 1 item to enable UI
 `INSERT INTO acts (title) VALUES('test')`;
 
+`CREATE TABLE IF NOT EXISTS refs (
+	id SERIAL PRIMARY KEY,
+	parent integer,
+	title text,
+	content text,
+	reftype integer,
+	authors integer[] NULL
+)`;
 
 const qry = await pool.query(`SELECT
 	table_name, column_name, ordinal_position, column_default, is_nullable, data_type

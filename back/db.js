@@ -70,9 +70,14 @@ const pool = new Pool();
 	parent integer,
 	title text,
 	content text,
-	reftype integer,
+	reftype integer NOT NULL DEFAULT 0,
 	authors integer[] NULL
 )`;
+
+`ALTER TABLE refs OWNER TO ${process.env.PGUSER}`;
+// the table should have at least 1 item to enable UI
+`INSERT INTO refs (title) VALUES('test')`;
+
 
 const qry = await pool.query(`SELECT
 	table_name, column_name, ordinal_position, column_default, is_nullable, data_type

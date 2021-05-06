@@ -15,12 +15,18 @@ import Acts from './components/Acts.vue';
 import Refs from './components/References.vue';
 import FactList from './components/FactList.vue';
 import Fact from './components/Fact.vue';
+import Profile from './components/Profile.vue';
 
 const routes = [
 	{
 		path: '/',
 		name: 'Home',
 		component: Home,
+	},
+	{
+		path: '/profile',
+		name: 'Profile',
+		component: Profile,
 	},
 	{
 		path: '/settings',

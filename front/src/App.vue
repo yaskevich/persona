@@ -91,7 +91,7 @@
         <i class="el-icon-setting" style="margin-right: 15px"></i>
         <template #dropdown>
           <el-dropdown-menu>
-              <el-dropdown-item>Профиль</el-dropdown-item>
+              <el-dropdown-item><router-link to="/profile">Профиль</router-link></el-dropdown-item>
               <el-dropdown-item @click="callLogout">Выйти</el-dropdown-item>
           </el-dropdown-menu>
         </template>

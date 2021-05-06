@@ -21,14 +21,14 @@
     </template>
   </el-dialog>
 
-  Типы событий
+  Библиография
   <el-tree
     :data="refs"
     node-key="id"
     :props="{ label: 'title', }"
     default-expand-all
     :expand-on-click-node="false"
-    style="max-width:1000px;"
+    style="max-width:500px;"
     >
     <template #default="{ node, data }">
        <span class="custom-tree-node">
@@ -63,44 +63,43 @@ export default defineComponent({
     const form  = reactive({ title: '', year: '', selectedWorks: [], selectedEditors: [], selectedAuthors: [] });
     const dialogData = reactive({ visible: false, text: "", caption: "", func: null, id: 0 });
     const dialogInputRef = ref(null);
-    // const refs = reactive([]);
+    const refs = reactive([]);
 
-    const refs =  [
-              {
-                 title: 'Полное собрание сочинений', id: 1,
-                 children: [
-                   { title: 'Том 8', id: 2, children: [
-                     { title: 'Часть 1', id: 6,  children: [
-                       { title: 'М.: СЛОВО/SLOVO, 2004 г.', id: 13, children: [
-                          { title: 'C. 115', id: 14 }
-                       ] }
-                     ]
-                   }
-                   ]
-                   },
-                 ]
-              },
-              // Райт Р. Все лучшие воспоминания // Уч. зап. Тартус. гос. ун-та. Труды по рус. и слав. фил. IX. Литературоведение. Вып. 184. Тарту: Тарт. гос. ун-т, 1966. C. 284
-              {
-                 title: 'Уч. зап. Тартус. гос. ун-та. Труды по рус. и слав. фил. IX. Литературоведение.', id: 4,
-                 children: [
-                   { title: 'Вып. 184', id: 6, children: [{ title: 'C. 284', id: 24 }] }
-                 ]
-              },
-
-            ];
+    // const refs =  [
+    //           {
+    //              title: 'Полное собрание сочинений', id: 1,
+    //              children: [
+    //                { title: 'Том 8', id: 2, children: [
+    //                  { title: 'Часть 1', id: 6,  children: [
+    //                    { title: 'М.: СЛОВО/SLOVO, 2004 г.', id: 13, children: [
+    //                       { title: 'C. 115', id: 14 }
+    //                    ] }
+    //                  ]
+    //                }
+    //                ]
+    //                },
+    //              ]
+    //           },
+    //           {
+    //              title: 'Уч. зап. Тартус. гос. ун-та. Труды по рус. и слав. фил. IX. Литературоведение.', id: 4,
+    //              children: [
+    //                { title: 'Вып. 184', id: 6, children: [{ title: 'C. 284', id: 24 }] }
+    //              ]
+    //           },
+    //
+    //         ];
 
     // const loading = ref(false);
 
 
-    // onBeforeMount(async() => {
-    //   const result = await store.getData("refs");
-    //   if("data" in result) {
-    //     const nested = store.nest(result.data)
-    //     // console.log("nest", nested);
-    //     refs.push(...nested);
-    //   }
-    // });
+    onBeforeMount(async() => {
+      const result = await store.getData("refs");
+      if("data" in result) {
+        const nested = store.nest(result.data)
+        // console.log("nest", nested);
+        refs.push(...nested);
+      }
+    });
 
     const addItem = (node, datum, childmode) => {
       console.log(node, datum);

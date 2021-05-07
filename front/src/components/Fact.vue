@@ -91,6 +91,7 @@
                </div>
             </template>
          </el-upload>
+         <el-button type="danger" @click="dialogVisible=true">Выбрать источники</el-button>
       </el-form-item>
       <!-- <el-form-item>
          <el-select v-model="user.privs" placeholder="Select" value-key>
@@ -104,11 +105,28 @@
          </el-form-item> -->
       <el-button type="primary" @click="onSubmit">Сохранить</el-button>
    </el-form>
+   <el-dialog
+   title="Источники"
+   v-model="dialogVisible"
+   width="30%"
+   :before-close="handleClose"
+   >
+     <span>This is a message</span>
+     <References/>
+     <template #footer>
+      <span class="dialog-footer">
+
+         <el-button @click="handleClose">Отмена</el-button>
+         <el-button type="primary" @click="handleClose(true)">Сохранить</el-button>
+      </span>
+     </template>
+   </el-dialog>
 </template>
 <script>
 import { ref, reactive } from 'vue';
 import { onBeforeMount } from 'vue';
 import store from "../store";
+import References from "./References.vue";
 import { useRoute } from 'vue-router';
 
 export default {
@@ -124,6 +142,8 @@ export default {
     const works = ref([]);
     const books = ref([]);
     const acts = reactive([]);
+
+    const dialogVisible = ref(false);
 
     const shortcuts = [{
          text: '1920',
@@ -171,10 +191,18 @@ export default {
         console.log(result);
     };
 
-    return {onSubmit, fact, options: store.state.options, persons, works, books, acts, shortcuts, };
+    const handleClose = () => {
+      // console.log("close", e);
+      dialogVisible.value = false;
+
+    };
+
+
+
+    return {onSubmit, fact, options: store.state.options, persons, works, books, acts, shortcuts, dialogVisible, handleClose,  };
   },
   components: {
-
+     References
   }
 };
 </script>

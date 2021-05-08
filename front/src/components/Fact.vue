@@ -5,30 +5,23 @@
             <el-date-picker v-model="fact.timestamp" type="datetime" placeholder="Техническое время" :shortcuts="shortcuts"></el-date-picker>
             <!-- <el-input placeholder="переписка (БП_отправитель)" v-model="fact.firstname"></el-input> -->
             <el-cascader :options="acts" clearable filterable :props="{ multiple: true, value: 'id', label: 'title' }" placeholder="Вид(ы) деятельности"></el-cascader>
+            <el-button type="danger" @click="dialogVisible=true">Выбрать источники</el-button>
          </el-space>
       </el-form-item>
       <el-form-item prop="date" label="Дата">
          <el-input placeholder="10.05.1928" v-model="fact.date" class="text-input" prop="date"></el-input>
       </el-form-item>
-      <el-form-item label="Источники">
+      <el-form-item label="Деятель">
          <el-input placeholder="■" v-model="fact.firstname"></el-input>
+      </el-form-item>
+      <el-form-item label="Место">
+         <el-input placeholder="Пекин" v-model="fact.firstname"></el-input>
       </el-form-item>
       <el-form-item label="Описание">
          <el-input
             type="textarea"
             autosize
             placeholder="Пастернак пишет письмо Маяковскому"
-            v-model="fact.firstname">
-         </el-input>
-      </el-form-item>
-      <el-form-item label="Место">
-         <el-input placeholder="Пекин" v-model="fact.firstname"></el-input>
-      </el-form-item>
-      <el-form-item label="Примечание">
-         <el-input
-            type="textarea"
-            autosize
-            placeholder="Был солнечный день"
             v-model="fact.firstname">
          </el-input>
       </el-form-item>
@@ -73,6 +66,14 @@
             </el-select>
          </el-space>
       </el-form-item>
+      <el-form-item label="Примечание">
+         <el-input
+            type="textarea"
+            autosize
+            placeholder="Был солнечный день"
+            v-model="fact.firstname">
+         </el-input>
+      </el-form-item>
       <!-- :on-preview="handlePreview"
          :on-remove="handleRemove"
          :file-list="fileList" -->
@@ -91,7 +92,6 @@
                </div>
             </template>
          </el-upload>
-         <el-button type="danger" @click="dialogVisible=true">Выбрать источники</el-button>
       </el-form-item>
       <!-- <el-form-item>
          <el-select v-model="user.privs" placeholder="Select" value-key>
@@ -111,8 +111,7 @@
    width="30%"
    :before-close="handleClose"
    >
-     <span>This is a message</span>
-     <References/>
+     <References :isEmbedded="true"/>
      <template #footer>
       <span class="dialog-footer">
 

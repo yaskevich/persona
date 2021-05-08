@@ -21,19 +21,29 @@
     </template>
   </el-dialog>
 
-  Библиография
+  <div v-if="!isEmbedded">
+    Библиография
+  </div>
+
   <el-tree
     :data="refs"
     node-key="id"
-    :props="{ label: 'title', }"
+    :props="{ label: 'title', disabled: 'children'}"
     default-expand-all
     :expand-on-click-node="false"
     style="max-width:500px;"
+    empty-text="..."
+    :show-checkbox="isEmbedded"
+    :check-on-click-node="true"
+    :check-strictly="true"
     >
     <template #default="{ node, data }">
        <span class="custom-tree-node">
          <span>{{ node.label }}</span>
-         <span>
+         <!-- <span v-if="isEmbedded">
+           <el-checkbox v-if="!data?.children?.length"></el-checkbox>
+         </span> -->
+         <span v-if="!isEmbedded">
            <el-dropdown >
              <i class="el-icon-s-tools"></i>
              <template #dropdown>
@@ -58,6 +68,9 @@ import { ElForm } from 'element-plus';
 import store from "../store";
 
 export default defineComponent({
+  props: {
+    isEmbedded: Boolean,
+  },
   setup() {
     const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
     const form  = reactive({ title: '', year: '', selectedWorks: [], selectedEditors: [], selectedAuthors: [] });

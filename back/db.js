@@ -71,7 +71,7 @@ const pool = new Pool();
 	title text,
 	content text,
 	reftype integer NOT NULL DEFAULT 0,
-	pages integer[] NULL,
+	pages text[],
 	authors integer[] NULL
 )`;
 

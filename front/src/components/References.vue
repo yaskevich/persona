@@ -1,11 +1,37 @@
 <template>
   <el-dialog
-  :title="dialogData.caption"
+  title="Редактировать"
   v-model="dialogData.visible"
   width="30%"
   :before-close="handleClose"
   @opened="onDialogOpened">
     <!-- <span>This is a message</span> -->
+    <!-- <el-form-item> -->
+    <el-select
+        v-model="form.selectedAuthors"
+        multiple
+        filterable
+        remote
+        reserve-keyword
+        placeholder="Авторы"
+        :remote-method="getAuthors"
+        :loading="loading">
+        <el-option
+          v-for="item in authors"
+          :key="item.id"
+          :label="item.value"
+          :value="item.id">
+        </el-option>
+      </el-select>
+    <!-- </el-form-item> -->
+    <div>
+    Добавить страницы
+    </div>
+
+    <el-input v-model="dialogData.text"><template #prepend>С</template></el-input>
+    <el-input v-model="dialogData.text"><template #prepend>По</template></el-input>
+
+    <div>Название</div>
     <el-input
           ref="dialogInputRef"
           placeholder=""
@@ -13,6 +39,8 @@
           @keyup.enter="handleClose(Boolean(dialogData.text))"
           >
        </el-input>
+       <div>Цитата</div>
+      <el-input v-model="dialogData.text" type="textarea"></el-input>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="handleClose">Отмена</el-button>
@@ -77,6 +105,9 @@ export default defineComponent({
     const dialogData = reactive({ visible: false, text: "", caption: "", func: null, id: 0 });
     const dialogInputRef = ref(null);
     const refs = reactive([]);
+    const authors = ref([]);
+    const loading = ref(false);
+    let persons = [];
 
     // const refs =  [
     //           {
@@ -104,6 +135,13 @@ export default defineComponent({
 
     // const loading = ref(false);
 
+    const getAuthors = (query) => {
+      console.log(query);
+      const re  = new RegExp(query, "i");
+      loading.value = true;
+      authors.value = persons.filter(x => re.test(x.value));
+      loading.value = false;
+    };
 
     onBeforeMount(async() => {
       const result = await store.getData("refs");
@@ -112,6 +150,11 @@ export default defineComponent({
         // console.log("nest", nested);
         refs.push(...nested);
       }
+
+      const personsData = await store.getData("persons");
+      persons = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
+
+
     });
 
     const addItem = (node, datum, childmode) => {
@@ -209,6 +252,9 @@ export default defineComponent({
       handleClose,
       dialogInputRef,
       refs,
+      getAuthors,
+      authors,
+      loading,
     };
   }
 });

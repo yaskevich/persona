@@ -1,21 +1,27 @@
 <template>
   <el-dialog
   title="Редактировать"
-  v-model="dialogData.visible"
+  v-model="bibliodata.visible"
   width="30%"
   :before-close="handleClose"
   @opened="onDialogOpened">
-    <!-- <span>This is a message</span> -->
-    <!-- <el-form-item> -->
+
+    <el-space>
+      <el-radio-group v-model="bibliodata.reftype">
+            <el-radio-button label="0">Сведения</el-radio-button>
+            <el-radio-button label="1">Заглавие</el-radio-button>
+            <el-radio-button label="2">Финаль</el-radio-button>
+          </el-radio-group>
+    </el-space>
+    <div class="box">
     <el-select
-        v-model="form.selectedAuthors"
+        v-model="bibliodata.authors"
+        v-if="bibliodata.reftype==1"
         multiple
         filterable
-        remote
         reserve-keyword
         placeholder="Авторы"
-        :remote-method="getAuthors"
-        :loading="loading">
+        >
         <el-option
           v-for="item in authors"
           :key="item.id"
@@ -23,34 +29,70 @@
           :value="item.id">
         </el-option>
       </el-select>
-    <!-- </el-form-item> -->
+    </div>
+    <div v-if="bibliodata.reftype==2">
     <div>
-    Добавить страницы
+    Страницы
+    </div>
+    <el-tag
+      :key="entry"
+      v-for="entry in bibliodata.pages"
+      closable
+      :disable-transitions="false"
+      @close="removePage(entry)"
+    >
+    {{entry}}
+  </el-tag>
+  <el-input
+    class="input-new-tag"
+    v-if="inputVisible"
+    v-model="page"
+    ref="saveTagInput"
+    size="mini"
+    @keyup.enter="handleInputConfirm"
+    @blur="handleInputConfirm"
+  >
+  </el-input>
+<el-button v-else class="button-new-tag" size="small" @click="showInput">+ добавить</el-button>
+
+    <el-space>
+
+      <!-- <el-input v-model="bibliodata.text"><template #prepend>С</template></el-input>
+      <el-input v-model="bibliodata.text"><template #prepend>По</template></el-input> -->
+      <!-- <el-input v-model="bibliodata.text"></el-input>
+      <el-button type="primary" icon="el-icon-plus"></el-button> -->
+    </el-space>
     </div>
 
-    <el-input v-model="dialogData.text"><template #prepend>С</template></el-input>
-    <el-input v-model="dialogData.text"><template #prepend>По</template></el-input>
 
-    <div>Название</div>
+    <div class="box">
+      <span v-if="bibliodata.reftype==0">Запись</span>
+      <span v-if="bibliodata.reftype==1">Название</span>
+      <span v-if="bibliodata.reftype==2">Название-описание</span>
+
+    </div>
     <el-input
-          ref="dialogInputRef"
           placeholder=""
-          v-model="dialogData.text"
-          @keyup.enter="handleClose(Boolean(dialogData.text))"
+          v-model="bibliodata.title"
+          @keyup.enter="handleClose(Boolean(bibliodata.title))"
           >
-       </el-input>
-       <div>Цитата</div>
-      <el-input v-model="dialogData.text" type="textarea"></el-input>
+    </el-input>
+
+    <div v-if="bibliodata.reftype==2">
+          <div class="box">Цитата</div>
+          <el-input v-model="bibliodata.content" type="textarea"></el-input>
+    </div>
+
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="handleClose">Отмена</el-button>
-        <el-button type="primary" v-if="dialogData.text" @click="handleClose(true)">Сохранить</el-button>
+        <el-button type="primary" v-if="bibliodata.title" @click="handleClose(true)">Сохранить</el-button>
       </span>
     </template>
   </el-dialog>
 
   <div v-if="!isEmbedded">
-    Библиография
+    Библиографические записи
   </div>
 
   <el-tree
@@ -76,8 +118,8 @@
              <i class="el-icon-s-tools"></i>
              <template #dropdown>
                <el-dropdown-menu>
-                 <el-dropdown-item @click="addItem(node, data)">Добавить соседний пункт</el-dropdown-item>
-                 <el-dropdown-item @click="addItem(node, data, true)">Добавить вложенный пункт</el-dropdown-item>
+                 <!-- <el-dropdown-item @click="addItem(node, data)">Добавить соседний пункт</el-dropdown-item>
+                 <el-dropdown-item @click="addItem(node, data, true)">Добавить вложенный пункт</el-dropdown-item> -->
                  <el-dropdown-item @click="renameItem(node, data)">Редактировать</el-dropdown-item>
                  <!-- <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>Удалить этот пункт</strong></el-dropdown-item> -->
                </el-dropdown-menu>
@@ -91,7 +133,7 @@
 
 
 <script lang="ts">
-import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
+import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance, toRaw } from 'vue';
 import { ElForm } from 'element-plus';
 import store from "../store";
 
@@ -101,13 +143,14 @@ export default defineComponent({
   },
   setup() {
     const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
-    const form  = reactive({ title: '', year: '', selectedWorks: [], selectedEditors: [], selectedAuthors: [] });
-    const dialogData = reactive({ visible: false, text: "", caption: "", func: null, id: 0 });
-    const dialogInputRef = ref(null);
+    const bibliodata = reactive({ visible: false, title: "", content: "", id: 0 , reftype: 0, pages: [], authors: [], parent: null });
     const refs = reactive([]);
     const authors = ref([]);
     const loading = ref(false);
     let persons = [];
+    const inputVisible = ref(false);
+    const page = ref('');
+
 
     // const refs =  [
     //           {
@@ -152,105 +195,80 @@ export default defineComponent({
       }
 
       const personsData = await store.getData("persons");
-      persons = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
-
-
+      authors.value = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
+      console.log("authors", authors);
     });
-
-    const addItem = (node, datum, childmode) => {
-      console.log(node, datum);
-      dialogData.visible = true;
-      dialogData.caption = `Добавить ${childmode? 'вложенный' : 'соседний'} пункт`;
-      dialogData.id = datum.id;
-      dialogData.func = async function() {
-        console.log("!!", node, datum);
-        const parent_id = node?.parent?.data?.id || null;
-        console.log("parent", node?.parent?.data?.id, parent_id);
-        console.log(("refs", { "title":  dialogData.text, "parent": parent_id }));
-        const result = await store.postData("refs", { "title":  dialogData.text, "parent": childmode? datum.id : parent_id });
-        console.log(result);
-        if(!("data" in result && "id" in result.data)) {
-          console.log("error!");
-        } else {
-          const newChild = { id: result.data.id, title: dialogData.text, children: [] };
-          if(childmode){
-            console.log("childmode");
-            if(!datum.children) {
-              datum.children = [];
-            }
-            datum.children.push(newChild);
-          } else{
-            if(parent_id) {
-              console.log("push1");
-              node.parent.data.children.push(newChild);
-            } else{
-              console.log("push2", newChild);
-              refs.push(newChild);
-            }
-          }
-          dialogData.text = "";
-        }
-      };
-    };
 
     const renameItem = (node, datum) => {
       // console.log(node, datum);
-      dialogData.visible = true;
-      dialogData.caption = `Переименовать «${datum.title}»`;
-      dialogData.id = datum.id;
-      dialogData.func = async() =>  {
-        const parent = node.parent;
-        const children = parent.data.children || parent.data;
-        const index = children.findIndex(d => d.id === datum.id);
-        children[index].title = dialogData.text;
-        const result = await store.postData("refs", { "title": dialogData.text, "id": datum.id, });
-        console.log(result);
-
-        if(("data" in result && "id" in result.data)) {
-          dialogData.text = "";
-        } else {
-          console.log("error!");
-        }
-      };
-    };
-
-    const removeItem = async(node, datum) => {
-      // console.log(node, datum);
-      if(datum.children.length) {
-        console.log("cannot delete non-empty slot!");
-      } else {
-        const result = await store.deleteById("refs", datum.id);
-        if("data" in result && "id" in result.data){
-          const parent = node.parent;
-          const children = parent.data.children || parent.data;
-          const index = children.findIndex(d => d.id === datum.id);
-          children.splice(index, 1);
-        }
-      }
+      bibliodata.visible = true;
+      bibliodata.id = datum.id;
+      bibliodata.title = datum.title;
     };
 
     const handleClose = (e) => {
       // console.log("close", e);
-      dialogData.visible = false;
+      bibliodata.visible = false;
+      // authors: null
+      // content: null
+      // id: 1
+      // pages: null
+      // parent: null
+      // reftype: 0
+      // title: "Полное собрание сочинений. В 11 томах"
       if (e === true) {
-        dialogData.func();
+
+
+        console.log("reftype", bibliodata.reftype);
+        if (bibliodata.reftype == 0) {
+          console.log("check 0");
+          bibliodata.authors = null;
+          bibliodata.content = null;
+          bibliodata.pages = [];
+        } else if (bibliodata.reftype == 1) {
+          console.log("check 1");
+          bibliodata.content = null;
+          bibliodata.pages = [];
+        }
+
+        const datum = toRaw(bibliodata);
+        console.log("result", datum);
       }
     };
 
     const onDialogOpened = () => {
-      dialogInputRef.value.focus();
+    };
+
+    const showInput = () => {
+        inputVisible.value = true;
+    };
+
+
+    const removePage = (entry) => {
+      bibliodata.pages.splice(bibliodata.pages.indexOf(entry), 1);
+    };
+
+    const handleInputConfirm = () => {
+        if (page.value) {
+          bibliodata.pages.push(page.value);
+        }
+        inputVisible.value = false;
+        page.value = '';
     };
 
     return {
+      handleInputConfirm,
+      removePage,
+      page,
+      inputVisible,
+      showInput,
       onDialogOpened,
       formRef,
-      form,
-      addItem,
+      // addItem,
       renameItem,
-      removeItem,
-      dialogData,
+      // removeItem,
+      bibliodata,
       handleClose,
-      dialogInputRef,
       refs,
       getAuthors,
       authors,
@@ -269,4 +287,22 @@ export default defineComponent({
     font-size: 14px;
     padding-right: 8px;
   }
+  .box{
+    margin-top: 1rem;
+  }
+  .el-tag + .el-tag {
+   margin-left: 10px;
+ }
+ .button-new-tag {
+   margin-left: 10px;
+   height: 32px;
+   line-height: 30px;
+   padding-top: 0;
+   padding-bottom: 0;
+ }
+ .input-new-tag {
+   width: 90px;
+   margin-left: 10px;
+   vertical-align: bottom;
+ }
 </style>

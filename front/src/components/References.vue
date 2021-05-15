@@ -39,7 +39,7 @@
       <div>Страницы</div>
       <el-tag
         :key="entry"
-        v-for="entry in bib.pages"
+        v-for="entry in pages"
         closable
         :disable-transitions="false"
         @close="removePage(entry)">
@@ -103,13 +103,12 @@
     :show-checkbox="isEmbedded"
     :check-on-click-node="true"
     :check-strictly="true"
+    :render-content="renderNode"
     >
     <template #default="{ node, data }">
        <span class="custom-tree-node">
-         <span>{{ node.label }}</span>
-         <!-- <span v-if="isEmbedded">
-           <el-checkbox v-if="!data?.children?.length"></el-checkbox>
-         </span> -->
+         <span>{{node.label}}</span>
+         <!-- <span v-html="( node?.data?.pages?.length ? 'С. ' + node?.data?.pages?.join(', ') + ' • ' : '' ) + node.label + ( node?.data?.content ? '&nbsp;<i class=el-icon-s-comment></i>' : '' )"></span> -->
          <span v-if="!isEmbedded">
            <el-dropdown >
              <i class="el-icon-s-tools"></i>
@@ -132,12 +131,13 @@
 <script lang="ts">
 import { defineComponent, ref, reactive, onBeforeMount, toRaw } from 'vue';
 import store from "../store";
+import { ElDropdown,  ElDropdownMenu, ElDropdownItem, } from 'element-plus';
 
 export default defineComponent({
   props: {
     isEmbedded: Boolean,
   },
-  setup() {
+  setup(props) {
     const scheme  = { title: "", content: "", id: null, reftype: 0, pages: [], authors: [], parent: null, mode: 0 };
     const bib = reactive({});
     Object.assign(bib, scheme);
@@ -147,6 +147,7 @@ export default defineComponent({
     const loading = ref(false);
     const inputVisible = ref(false);
     const page = ref('');
+    const pages = reactive([]);
     let nodeRef = {};
 
     onBeforeMount(async() => {
@@ -159,13 +160,14 @@ export default defineComponent({
 
       const personsData = await store.getData("persons");
       authors.value = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
-      console.log("authors", authors);
+      // console.log("authors", authors);
     });
 
     const buildDialog = (node, datum, mode) => {
       console.log("node", node);
       nodeRef = node;
       Object.assign(bib, mode ? scheme: datum, { mode: mode });
+      Object.assign(pages, bib.pages);
       dialogVisible.value = true;
     };
 
@@ -183,6 +185,8 @@ export default defineComponent({
         console.log("check 1");
         bib.content = null;
         bib.pages = [];
+      } else {
+        bib.pages = pages;
       }
 
         const datum = toRaw(bib);
@@ -194,8 +198,8 @@ export default defineComponent({
           for (let prop in datum) {
             nodeRef.data[prop] = datum[prop];
           }
-          // const result = await store.postData("refs", datum);
-          // console.log(result);
+          const result = await store.postData("refs", datum);
+          console.log(result);
 
         } else {
           // take id from server
@@ -216,17 +220,52 @@ export default defineComponent({
 
     const handleInputConfirm = () => {
         if (page.value) {
-          bib.pages ? bib.pages.push(page.value) : bib.pages = [page.value];
+          pages.push(page.value);
         }
         inputVisible.value = false;
         page.value = '';
     };
 
+    const renderNode = (h, x) => {
+      // console.log(x.data);
+      // Because of "Non-function value encountered for default slot" warning, I wrapped everything in slot in a function
+      // However, it might be not a proper way of handling slots
+      let label  = x.data.title;
+      if(x.node?.data?.pages?.length){
+        label = 'С. ' + x.node?.data?.pages?.join(', ') + ' • ' + label;
+      }
+      if (x.node?.data?.content) {
+          label = h('span', { class: "label" ,  }, [label, h('i',  {class: "el-icon-s-comment indent"})])
+      }
+      const spans  = [label];
+
+      if (!props.isEmbedded) {
+        const dropitems = [
+          h(ElDropdownItem, {onClick: () => buildDialog(x.node, x.data)}, () => 'Редактировать'),
+          h(ElDropdownItem, {onClick: () => buildDialog(x.node, x.data, 1)}, () => 'Добавить соседний пункт')
+        ];
+
+        if (x.data.reftype != 2) {
+          dropitems.push(h(ElDropdownItem, {onClick: () => buildDialog(x.node, x.data, 2)}, () => 'Добавить вложенный пункт'))
+        }
+
+        const dropdown =  h(ElDropdown, null, {
+          default:  () =>  [ h('i',  {class: "el-icon-s-tools"}) ],
+          dropdown: () =>  [ h(ElDropdownMenu,  () => dropitems ) ]
+        });
+        spans.push(dropdown)
+      }
+
+      return h('span', { class: "custom-tree-node" ,  }, spans)
+    };
+
     return {
+      renderNode,
       dialogVisible,
       handleInputConfirm,
       removePage,
       page,
+      pages,
       inputVisible,
       showInput,
       buildDialog,
@@ -266,5 +305,8 @@ export default defineComponent({
    width: 90px;
    margin-left: 10px;
    vertical-align: bottom;
+ }
+ .indent{
+   margin-left: .25rem;
  }
 </style>

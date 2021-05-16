@@ -2,6 +2,7 @@
   <el-dialog
   title="Редактировать"
   v-model="dialogVisible"
+  @opened="onDialogOpened"
   width="30%">
 
     <el-space>
@@ -37,6 +38,7 @@
     <div v-if="bib.reftype==2">
 
       <div>Страницы</div>
+
       <el-tag
         :key="entry"
         v-for="entry in pages"
@@ -45,22 +47,25 @@
         @close="removePage(entry)">
       {{entry}}
       </el-tag>
+
       <el-input
-        class="input-new-tag"
-        v-if="inputVisible"
+        class="input-new-page"
+        v-if="pageInputVisible"
         v-model="page"
-        ref="saveTagInput"
+        ref="pageInputRef"
         size="mini"
-        @keyup.enter="handleInputConfirm"
-        @blur="handleInputConfirm">
+        @keyup.enter="confirmPageInput"
+        @blur="confirmPageInput">
       </el-input>
-      <el-button v-else class="button-new-tag" size="small" @click="showInput">+ добавить</el-button>
-      <el-space>
+
+      <el-button v-else class="button-new-tag" size="small" @click="showPageInput">+ добавить</el-button>
+
+      <!-- <el-space> -->
         <!-- <el-input v-model="bib.text"><template #prepend>С</template></el-input>
         <el-input v-model="bib.text"><template #prepend>По</template></el-input> -->
         <!-- <el-input v-model="bib.text"></el-input>
         <el-button type="primary" icon="el-icon-plus"></el-button> -->
-      </el-space>
+      <!-- </el-space> -->
 
     </div>
 
@@ -72,7 +77,7 @@
 
     </div>
 
-    <el-input v-model="bib.title"></el-input>
+    <el-input v-model="bib.title" ref="titleInputRef"></el-input>
 
     <div v-if="bib.reftype==2">
       <div class="box">Цитата</div>
@@ -82,7 +87,7 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false;">Отмена</el-button>
-        <el-button type="primary" v-if="bib.title" @click="handleClose(true)">Сохранить</el-button>
+        <el-button type="primary" v-if="bib.title||pages.length" @click="handleClose(true)">Сохранить</el-button>
       </span>
     </template>
 
@@ -105,10 +110,9 @@
     :check-strictly="true"
     :render-content="renderNode"
     >
-    <template #default="{ node, data }">
+    <!-- <template #default="{ node, data }">
        <span class="custom-tree-node">
-         <span>{{node.label}}</span>
-         <!-- <span v-html="( node?.data?.pages?.length ? 'С. ' + node?.data?.pages?.join(', ') + ' • ' : '' ) + node.label + ( node?.data?.content ? '&nbsp;<i class=el-icon-s-comment></i>' : '' )"></span> -->
+         <span v-html="( node?.data?.pages?.length ? 'С. ' + node?.data?.pages?.join(', ') + ' • ' : '' ) + node.label + ( node?.data?.content ? '&nbsp;<i class=el-icon-s-comment></i>' : '' )"></span>
          <span v-if="!isEmbedded">
            <el-dropdown >
              <i class="el-icon-s-tools"></i>
@@ -117,19 +121,19 @@
                  <el-dropdown-item @click="buildDialog(node, data, 1)">Добавить соседний пункт</el-dropdown-item>
                  <el-dropdown-item v-if="data.reftype != 2" @click="buildDialog(node, data, 2)">Добавить вложенный пункт</el-dropdown-item>
                  <el-dropdown-item @click="buildDialog(node, data)">Редактировать</el-dropdown-item>
-                 <!-- <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>Удалить этот пункт</strong></el-dropdown-item> -->
+                 <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>Удалить этот пункт</strong></el-dropdown-item>
                </el-dropdown-menu>
              </template>
            </el-dropdown>
          </span>
        </span>
-     </template>
+     </template> -->
   </el-tree>
 </template>
 
 
 <script lang="ts">
-import { defineComponent, ref, reactive, onBeforeMount, toRaw } from 'vue';
+import { defineComponent, ref, reactive, onBeforeMount, toRaw, nextTick } from 'vue';
 import store from "../store";
 import { ElDropdown,  ElDropdownMenu, ElDropdownItem, } from 'element-plus';
 
@@ -138,17 +142,20 @@ export default defineComponent({
     isEmbedded: Boolean,
   },
   setup(props) {
-    const scheme  = { title: "", content: "", id: null, reftype: 0, pages: [], authors: [], parent: null, mode: 0 };
+    const scheme  = { title: "", content: "", id: null, reftype: 0, pages: [], authors: [], parent: null };
     const bib = reactive({});
     Object.assign(bib, scheme);
     const dialogVisible  = ref(false);
     const refs = reactive([]);
     const authors = ref([]);
-    const loading = ref(false);
-    const inputVisible = ref(false);
+    const pageInputVisible = ref(false);
     const page = ref('');
-    const pages = reactive([]);
+    const pages = ref([]);
+    const action  = ref(0);
     let nodeRef = {};
+    let dataRef = {};
+    const titleInputRef = ref(null);
+    const pageInputRef  = ref(null);
 
     onBeforeMount(async() => {
       const result = await store.getData("refs");
@@ -160,22 +167,27 @@ export default defineComponent({
 
       const personsData = await store.getData("persons");
       authors.value = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
-      // console.log("authors", authors);
     });
 
-    const buildDialog = (node, datum, mode) => {
+    const buildDialog = (node, data, actionType) => {
       console.log("node", node);
       nodeRef = node;
-      Object.assign(bib, mode ? scheme: datum, { mode: mode });
-      Object.assign(pages, bib.pages);
-      dialogVisible.value = true;
+      dataRef = data;
+      Object.assign(bib, (actionType ? scheme: toRaw(data)));
+      action.value = actionType;
+      pages.value  = bib.pages?.length ? [...bib.pages] : [];
+      nextTick(() => {
+        dialogVisible.value = true;
+        // console.log("bib on show", bib);
+      })
+
     };
 
     const handleClose = async(e) => {
       console.log("close", e);
       dialogVisible.value = false;
 
-
+      console.log("bib", bib);
       if (bib.reftype == 0) {
         console.log("check 0");
         bib.authors = null;
@@ -186,60 +198,124 @@ export default defineComponent({
         bib.content = null;
         bib.pages = [];
       } else {
-        bib.pages = pages;
+        bib.pages = pages.value;
       }
 
-        const datum = toRaw(bib);
-        delete datum['children'];
-        delete datum['mode'];
+      const datum = toRaw(bib);
+      delete datum['children'];
 
-        if (datum.id) {
-          console.log("UPDATE NODE", datum);
-          for (let prop in datum) {
-            nodeRef.data[prop] = datum[prop];
-          }
-          const result = await store.postData("refs", datum);
-          console.log(result);
+      if (datum.id) {
+        // console.log("UPDATE NODE", datum);
+        for (let prop in datum) {
+          nodeRef.data[prop] = datum[prop];
+        }
+        const result = await store.postData("refs", datum);
+        console.log(result);
 
+      } else {
+        // take id from server
+        // console.log(action.value);
+        console.log("adding", (action.value == 2 ? "child": "neighbor"));
+        const parent_id = nodeRef?.parent?.data?.id || null;
+
+        if (action.value == 2) { // add child
+          datum.parent = dataRef.id
         } else {
-          // take id from server
-          console.log("mode", (bib.mode == 2 ? "child": "neighbor"));
-          console.log("node ref", nodeRef);
+          datum.parent = parent_id;
         }
 
-        console.log("result", nodeRef);
+        const result = await store.postData("refs", datum);
+        console.log(result);
+        if("data" in result && "id" in result.data) {
+          console.log("id", result.data.id);
+          datum.id = result.data.id;
+          datum.children = [];
+          if (action.value == 2) { // add child
+            console.log("dataref", dataRef);
+            dataRef?.children ? dataRef.children.push({...datum}) : dataRef.children = [{...datum}];
+          } else { // add neighbor
+            if (parent_id) {
+              console.log("to parent");
+              nodeRef.parent.data.children.push({...datum});
+            } else {
+              console.log("to root");
+              refs.push({...datum});
+            }
+
+          }
+        } else {
+          console.log("error!");
+        }
+      }
     };
 
-    const showInput = () => {
-        inputVisible.value = true;
+    const showPageInput = () => {
+        pageInputVisible.value = true;
+        nextTick(() => {
+            pageInputRef.value.focus();
+        })
     };
 
     const removePage = (entry) => {
-      bib.pages.splice(bib.pages.indexOf(entry), 1);
+      pages.value.splice(pages.value.indexOf(entry), 1);
     };
 
-    const handleInputConfirm = () => {
+    const confirmPageInput = () => {
         if (page.value) {
-          pages.push(page.value);
+          pages.value.push(page.value);
         }
-        inputVisible.value = false;
+        pageInputVisible.value = false;
         page.value = '';
+    };
+
+    const removeNode = async(node, data) => {
+      console.log("delete!");
+      if(data?.children?.length) {
+        console.log("cannot delete non-empty node!");
+      } else {
+        const result = await store.deleteById("refs", data.id);
+        if("data" in result && "id" in result.data){
+          const parent = node.parent;
+          const children = parent.data.children || parent.data;
+          const index = children.findIndex(d => d.id === data.id);
+          children.splice(index, 1);          
+        }
+      }
     };
 
     const renderNode = (h, x) => {
       // console.log(x.data);
-      // Because of "Non-function value encountered for default slot" warning, I wrapped everything in slot in a function
+      // Because of "Non-function value encountered for default slot" warning, I wrapped everything in slot with a function
       // However, it might be not a proper way of handling slots
-      let label  = x.data.title;
-      if(x.node?.data?.pages?.length){
-        label = 'С. ' + x.node?.data?.pages?.join(', ') + ' • ' + label;
+      let label  = '';
+      const labelStack = [];
+
+      if (x.node?.data?.pages?.length){
+        label = 'С. ' + x.node?.data?.pages?.join(', ');
       }
+
+      if (label && x.data.title){
+        label += ' • ';
+      }
+
+      label += x.data.title;
+
+      labelStack.push(label);
+
       if (x.node?.data?.content) {
-          label = h('span', { class: "label" ,  }, [label, h('i',  {class: "el-icon-s-comment indent"})])
+        labelStack.push (h('i',  {class: "el-icon-s-comment indent"}));
       }
-      const spans  = [label];
+
+      if (x.node?.data?.authors?.length){
+        labelStack.unshift(
+          ...Array(x.node.data.authors.length).fill(h('i',  {class: "el-icon-user-solid"}))
+        );
+      }
+
+      const spans  = [h('span', { class: "label" ,  }, [labelStack])];
 
       if (!props.isEmbedded) {
+
         const dropitems = [
           h(ElDropdownItem, {onClick: () => buildDialog(x.node, x.data)}, () => 'Редактировать'),
           h(ElDropdownItem, {onClick: () => buildDialog(x.node, x.data, 1)}, () => 'Добавить соседний пункт')
@@ -247,6 +323,10 @@ export default defineComponent({
 
         if (x.data.reftype != 2) {
           dropitems.push(h(ElDropdownItem, {onClick: () => buildDialog(x.node, x.data, 2)}, () => 'Добавить вложенный пункт'))
+        }
+
+        if (!x.node?.data?.children?.length) {
+          dropitems.push(h(ElDropdownItem, {onClick: () => removeNode(x.node, x.data)}, () => [h('strong', 'Удалить этот пункт')]))
         }
 
         const dropdown =  h(ElDropdown, null, {
@@ -259,21 +339,27 @@ export default defineComponent({
       return h('span', { class: "custom-tree-node" ,  }, spans)
     };
 
+    const onDialogOpened = () => {
+      titleInputRef.value.focus();
+    };
+
     return {
+      onDialogOpened,
+      titleInputRef,
+      pageInputRef,
       renderNode,
       dialogVisible,
-      handleInputConfirm,
+      confirmPageInput,
       removePage,
       page,
       pages,
-      inputVisible,
-      showInput,
+      pageInputVisible,
+      showPageInput,
       buildDialog,
       bib,
       handleClose,
       refs,
       authors,
-      loading,
     };
   }
 });
@@ -301,7 +387,7 @@ export default defineComponent({
    padding-top: 0;
    padding-bottom: 0;
  }
- .input-new-tag {
+ .input-new-page {
    width: 90px;
    margin-left: 10px;
    vertical-align: bottom;

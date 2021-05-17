@@ -79,6 +79,25 @@ const pool = new Pool();
 // the table should have at least 1 item to enable UI
 `INSERT INTO refs (title) VALUES('test')`;
 
+`CREATE TABLE IF NOT EXISTS facts (
+	id SERIAL PRIMARY KEY,
+	stamp timestamp,
+	agent integer NOT NULL,
+	datedesc text,
+	place text,
+	title text,
+	acts integer[] NULL,
+	persons1 integer[] NULL,
+	persons2 integer[] NULL,
+	works integer[] NULL,
+	books integer[] NULL,
+	refs integer[] NULL,
+	comment text,
+	media integer
+)`;
+
+`ALTER TABLE facts OWNER TO ${process.env.PGUSER}`;
+
 
 const qry = await pool.query(`SELECT
 	table_name, column_name, ordinal_position, column_default, is_nullable, data_type

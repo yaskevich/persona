@@ -98,6 +98,7 @@
   </div>
 
   <el-tree
+    ref="treeRef"
     :data="refs"
     node-key="id"
     :props="{ label: 'title', disabled: 'children'}"
@@ -135,7 +136,7 @@
 <script lang="ts">
 import { defineComponent, ref, reactive, onBeforeMount, toRaw, nextTick } from 'vue';
 import store from "../store";
-import { ElDropdown,  ElDropdownMenu, ElDropdownItem, } from 'element-plus';
+import { ElDropdown,  ElDropdownMenu, ElDropdownItem, ElMessage,  } from 'element-plus';
 
 export default defineComponent({
   props: {
@@ -156,11 +157,12 @@ export default defineComponent({
     let dataRef = {};
     const titleInputRef = ref(null);
     const pageInputRef  = ref(null);
+    const treeRef  = ref(null);
 
     onBeforeMount(async() => {
       const result = await store.getData("refs");
       if("data" in result) {
-        const nested = store.nest(result.data)
+        const nested = store.nest(result.data.sort((a, b) => a.id.toString().localeCompare(b.id.toString())));
         // console.log("nest", nested);
         refs.push(...nested);
       }
@@ -202,7 +204,7 @@ export default defineComponent({
       }
 
       const datum = toRaw(bib);
-      delete datum['children'];
+      // delete datum['children'];
 
       if (datum.id) {
         // console.log("UPDATE NODE", datum);
@@ -210,39 +212,41 @@ export default defineComponent({
           nodeRef.data[prop] = datum[prop];
         }
         const result = await store.postData("refs", datum);
-        console.log(result);
-
+        if(!("data" in result && "id" in result.data)) {
+          console.log("error!");
+        }
+        // console.log(result);
       } else {
         // take id from server
         // console.log(action.value);
-        console.log("adding", (action.value == 2 ? "child": "neighbor"));
+        // console.log("adding", (action.value == 2 ? "child": "neighbor"));
         const parent_id = nodeRef?.parent?.data?.id || null;
 
         if (action.value == 2) { // add child
-          datum.parent = dataRef.id
+          datum.parent = dataRef.id;
         } else {
           datum.parent = parent_id;
         }
 
         const result = await store.postData("refs", datum);
-        console.log(result);
+        // console.log(result);
         if("data" in result && "id" in result.data) {
-          console.log("id", result.data.id);
+          // console.log("id", result.data.id);
           datum.id = result.data.id;
-          datum.children = [];
-          if (action.value == 2) { // add child
-            console.log("dataref", dataRef);
-            dataRef?.children ? dataRef.children.push({...datum}) : dataRef.children = [{...datum}];
-          } else { // add neighbor
-            if (parent_id) {
-              console.log("to parent");
-              nodeRef.parent.data.children.push({...datum});
-            } else {
-              console.log("to root");
-              refs.push({...datum});
-            }
-
-          }
+          // datum.children = [];
+          treeRef.value.append({...datum}, datum.parent);
+         //  if (action.value == 2) { // add child
+         //    console.log("dataref", dataRef);
+         //    dataRef?.children ? dataRef.children.push({...datum}) : dataRef.children = [{...datum}];
+         //  } else { // add neighbor
+         //    if (parent_id) {
+         //      console.log("to parent");
+         //      nodeRef.parent.data.children.push({...datum});
+         //    } else {
+         //      console.log("to root");
+         //      refs.push({...datum});
+         //    }
+         // }
         } else {
           console.log("error!");
         }
@@ -268,17 +272,24 @@ export default defineComponent({
         page.value = '';
     };
 
-    const removeNode = async(node, data) => {
-      console.log("delete!");
+    const removeNode = async(node, data, bb) => {
+      console.log("delete!", bb, data?.children?.length);
       if(data?.children?.length) {
         console.log("cannot delete non-empty node!");
+        ElMessage({
+              message: "Нельзя удалить пункт с вложенными элементами",
+              type: "warning",
+              showClose: true,
+              center: true
+            });
       } else {
         const result = await store.deleteById("refs", data.id);
         if("data" in result && "id" in result.data){
-          const parent = node.parent;
-          const children = parent.data.children || parent.data;
-          const index = children.findIndex(d => d.id === data.id);
-          children.splice(index, 1);          
+          treeRef.value.remove(node);
+          // const parent = node.parent;
+          // const children = parent.data.children || parent.data;
+          // const index = children.findIndex(d => d.id === data.id);
+          // children.splice(index, 1);
         }
       }
     };
@@ -325,9 +336,10 @@ export default defineComponent({
           dropitems.push(h(ElDropdownItem, {onClick: () => buildDialog(x.node, x.data, 2)}, () => 'Добавить вложенный пункт'))
         }
 
-        if (!x.node?.data?.children?.length) {
-          dropitems.push(h(ElDropdownItem, {onClick: () => removeNode(x.node, x.data)}, () => [h('strong', 'Удалить этот пункт')]))
-        }
+        // if (!x.node?.data?.children?.length) {
+        // if (!x.data?.children?.length) {
+        dropitems.push(h(ElDropdownItem, { onClick: () => removeNode(x.node, x.data), divided:true }, () => [h('strong', 'Удалить этот пункт')]))
+        // }
 
         const dropdown =  h(ElDropdown, null, {
           default:  () =>  [ h('i',  {class: "el-icon-s-tools"}) ],
@@ -336,7 +348,12 @@ export default defineComponent({
         spans.push(dropdown)
       }
 
+      // if (!x.data?.children?.length) {
+      //   spans.push(h('i',  {class: "el-icon-delete-solid"}));
+      // }
+
       return h('span', { class: "custom-tree-node" ,  }, spans)
+
     };
 
     const onDialogOpened = () => {
@@ -344,6 +361,7 @@ export default defineComponent({
     };
 
     return {
+      treeRef,
       onDialogOpened,
       titleInputRef,
       pageInputRef,

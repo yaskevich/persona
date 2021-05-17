@@ -139,8 +139,10 @@ import store from "../store";
 import { ElDropdown,  ElDropdownMenu, ElDropdownItem, ElMessage,  } from 'element-plus';
 
 export default defineComponent({
+  name: "References",
   props: {
     isEmbedded: Boolean,
+    checks: Array,
   },
   setup(props) {
     const scheme  = { title: "", content: "", id: null, reftype: 0, pages: [], authors: [], parent: null };
@@ -272,8 +274,8 @@ export default defineComponent({
         page.value = '';
     };
 
-    const removeNode = async(node, data, bb) => {
-      console.log("delete!", bb, data?.children?.length);
+    const removeNode = async(node, data) => {
+      // console.log("delete!");
       if(data?.children?.length) {
         console.log("cannot delete non-empty node!");
         ElMessage({
@@ -360,7 +362,17 @@ export default defineComponent({
       titleInputRef.value.focus();
     };
 
+    const getCheckedItems = () => {
+      return treeRef.value.getCheckedKeys();
+    };
+
+    const setCheckedItems = (keys) => {
+      return treeRef.value.setCheckedKeys(keys);
+    };
+
     return {
+      setCheckedItems,
+      getCheckedItems,
       treeRef,
       onDialogOpened,
       titleInputRef,

@@ -5,14 +5,22 @@
             <el-date-picker v-model="fact.timestamp" type="datetime" placeholder="Техническое время" :shortcuts="shortcuts"></el-date-picker>
             <!-- <el-input placeholder="переписка (БП_отправитель)" v-model="fact.firstname"></el-input> -->
             <el-cascader :options="acts" clearable filterable :props="{ multiple: true, value: 'id', label: 'title' }" placeholder="Вид(ы) деятельности"></el-cascader>
-            <el-button type="danger" @click="dialogVisible=true">Выбрать источники</el-button>
+            <el-select
+                v-model="fact.agent"
+                filterable
+                placeholder="Деятель"
+                >
+                <el-option
+                  v-for="item in persons"
+                  :key="item.id"
+                  :label="item.value"
+                  :value="item.id">
+                </el-option>
+              </el-select>
          </el-space>
       </el-form-item>
       <el-form-item prop="date" label="Дата">
          <el-input placeholder="10.05.1928" v-model="fact.date" class="text-input" prop="date"></el-input>
-      </el-form-item>
-      <el-form-item label="Деятель">
-         <el-input placeholder="■" v-model="fact.firstname"></el-input>
       </el-form-item>
       <el-form-item label="Место">
          <el-input placeholder="Пекин" v-model="fact.firstname"></el-input>
@@ -74,6 +82,11 @@
             v-model="fact.firstname">
          </el-input>
       </el-form-item>
+      <el-form-item label="Источники">
+         <el-space  direction="horizontal" style="display:flex;" wrap size="large">
+            <el-button type="primary" @click="dialogVisible=true;">Выбрать</el-button>
+         </el-space>
+      </el-form-item>
       <!-- :on-preview="handlePreview"
          :on-remove="handleRemove"
          :file-list="fileList" -->
@@ -111,12 +124,11 @@
    width="30%"
    :before-close="handleClose"
    >
-     <References :isEmbedded="true"/>
+     <References :isEmbedded="true" ref="bibRef"></References>
      <template #footer>
       <span class="dialog-footer">
-
          <el-button @click="handleClose">Отмена</el-button>
-         <el-button type="primary" @click="handleClose(true)">Сохранить</el-button>
+         <el-button type="primary" @click="handleClose(true)">Подтвердить</el-button>
       </span>
      </template>
    </el-dialog>
@@ -129,40 +141,46 @@ import References from "./References.vue";
 import { useRoute } from 'vue-router';
 
 export default {
-  name: "User",
+  name: "Fact",
   props: {
     // datum: Object,
   },
   setup() {
-    let fact = ref({ works: [], participants: [], mentions: [], books: [], date: '', timestamp: null, });
-    const vuerouter = useRoute();
-    const id = vuerouter.params.id;
-    const persons = ref([]);
-    const works = ref([]);
-    const books = ref([]);
-    const acts = reactive([]);
+   const vuerouter = useRoute();
+   const id = vuerouter.params.id;
+   const fact = reactive({ works: [], participants: [], mentions: [], books: [], date: '', timestamp: null, agent: null});
+   const persons  = ref([]);
+   const works    = ref([]);
+   const books    = ref([]);
+   const acts     = ref([]);
+   const dialogVisible = ref(false);
+   const bibRef = ref(null);
 
-    const dialogVisible = ref(false);
-
-    const shortcuts = [{
-         text: '1920',
-         value: (() => new Date(1920, 1, 1, 9, 0, 0))(),
-      }, {
-         text: '1940',
-         value: (() => new Date(1940, 1, 1, 9, 0, 0))(),
-      }, {
-         text: '1960',
-         value: (() => new Date(1960, 1, 1, 9, 0, 0))(),
-      }];
+   const shortcuts = [{
+      text: '1920',
+      value: (() => new Date(1920, 1, 1, 9, 0, 0))(),
+   }, {
+      text: '1940',
+      value: (() => new Date(1940, 1, 1, 9, 0, 0))(),
+   }, {
+      text: '1960',
+      value: (() => new Date(1960, 1, 1, 9, 0, 0))(),
+   }];
 
     onBeforeMount(async() => {
+
+      const resultSettings = await store.getData("settings");
+      if("data" in resultSettings) {
+          fact.agent = resultSettings.data[0]["persona_id"];
+      }
+
       const result = await store.getData("facts", id);
       if("data" in result) {
         console.log("ok");
       }
       const personsData = await store.getData("persons");
       persons.value = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
-      console.log(persons);
+      // console.log(persons);
 
       const resultWorks = await store.getData("works");
       if("data" in resultWorks) {
@@ -178,7 +196,7 @@ export default {
       if("data" in result) {
         const nested = store.nest(resultActs.data)
         console.log("nest", nested);
-        acts.push(...nested);
+        acts.value = [...nested];
       }
 
     });
@@ -192,13 +210,13 @@ export default {
 
     const handleClose = () => {
       // console.log("close", e);
+      const keys  = bibRef.value.getCheckedItems();
+      console.log("keys", keys);
       dialogVisible.value = false;
 
     };
 
-
-
-    return {onSubmit, fact, options: store.state.options, persons, works, books, acts, shortcuts, dialogVisible, handleClose,  };
+    return { bibRef, onSubmit, fact, options: store.state.options, persons, works, books, acts, shortcuts, dialogVisible, handleClose,  };
   },
   components: {
      References

@@ -12,6 +12,8 @@ import pg from 'pg';
 import pgFormat from 'pg-format';
 const { Pool } = pg;
 const pool = new Pool();
+// prevent formatting as a timestamp with zone
+pg.types.setTypeParser(1114, (x) => x);
 
 `CREATE TABLE persons (
 	id SERIAL PRIMARY KEY,

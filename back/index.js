@@ -1,18 +1,20 @@
 'use strict';
 
-import dotenv from 'dotenv';
-dotenv.config();
 import path from 'path';
 import express from 'express';
 import compression from 'compression';
 import bodyParser from 'body-parser';
 import passport from 'passport';
-import passportJWT from "passport-jwt";
+import passportJWT from 'passport-jwt';
 import jwt from 'jsonwebtoken';
 import db from './db.js';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+if (!process.env.JWT_SECRET){
+	console.error('Error: secret key should be provided in dotenv config!');
+	process.exit(1);
+}
 
 (async () => {
 	const app = express();
@@ -22,21 +24,23 @@ const __dirname = path.dirname(__filename);
 
 	const createToken = (user) => {
 	  return jwt.sign({
-	    iss: 'yaskevich',
+	    iss: 'persona',
 	    sub: user.id,
 	    iat: new Date().getTime(),
 	    exp: new Date().setDate(new Date().getDate() + 1)
 	  }, process.env.JWT_SECRET);
 	};
 
-	const strategy  = new JWTStrategy({
-		  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-		  secretOrKey   : process.env.JWT_SECRET
-		}, function (jwtPayload, done) {
-		  return db.getUserDataByID(jwtPayload.sub)
-		    .then(user => { return done(null, user); })
-			  .catch(err => { return done(err); });
-		});
+	const strategy  = new JWTStrategy(
+		{
+			jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+			secretOrKey   : process.env.JWT_SECRET
+		},
+		(jwtPayload, done) =>
+			db.getUserDataByID(jwtPayload.sub)
+				.then(user => { return done(null, user); })
+				.catch(err => { return done(err); })
+		);
 
 	passport.use(strategy);
 	const auth = passport.authenticate('jwt', {session: false});
@@ -49,54 +53,48 @@ const __dirname = path.dirname(__filename);
 	app.use(express.static('public'));
 
 	app.post('/api/user/login', async(req, res) => {
-		const userData = await db.getUserData(req.body["email"], req.body["password"]);
-		if (userData && Object.keys(userData).length && !userData.hasOwnProperty("error") ) {
-			console.log(req.body["email"], "<SUCCESS>");
+		const userData = await db.getUserData(req.body['email'], req.body['password']);
+		if (userData && Object.keys(userData).length && !userData.hasOwnProperty('error') ) {
+			console.log(req.body['email'], '<SUCCESS>');
 			const token = createToken(userData);
-			userData["token"] = token;
+			userData['token'] = token;
 			res.json(userData);
 		} else {
-			console.log(`login attempt as [${req.body["email"]}]•[${req.body["password"]}]►${userData.error}◄`);
+			console.log(`login attempt as [${req.body['email']}]•[${req.body['password']}]►${userData.error}◄`);
 			res.json(userData);
 		}
 	});
 
-	app.get('/api/user/logout', (req, res) => {
-		console.log("logging out");
-		// You can add "issue time" to token and maintain "last logout time" for each user on the server.
-		// When you check token validity, also check "issue time" be after "last logout time".
+	app.get('/api/user/logout', auth, async(req, res) => {
+		console.log('logging out');
+		// You can add 'issue time' to token and maintain 'last logout time' for each user on the server.
+		// When you check token validity, also check 'issue time' be after 'last logout time'.
 		// res.redirect('/login');
 	});
 
-	app.get('/api/user/info', auth, async (req,res) => {
+	app.get('/api/user/info', auth, async(req,res) => {
 		res.json(req.user);
 	 });
 
-	app.post('/api/user/add', async (req,res) => {
+	app.post('/api/user/add', auth, async(req,res) => {
 		const result = await db.createUser(req.body);
 		res.json(result);
 	});
 
-	app.post('/api/x/:table', async (req,res) => {
-		console.log("POST params", req.params, "query", req.query);
+	app.post('/api/x/:table', auth, async(req,res) => {
+		console.log('POST params', req.params, 'query', req.query);
 		res.json(await db.setData(req.body, req.params['table']));
 	 });
 
-	app.delete('/api/:table/:id', async (req,res) => {
-		console.log("DELETE params", req.params, "query", req.query);
-		res.json(await db.deleteData(req.params["table"], req.params["id"]));
+	app.delete('/api/:table/:id', auth, async(req,res) => {
+		console.log('DELETE params', req.params, 'query', req.query);
+		res.json(await db.deleteData(req.params['table'], req.params['id']));
 	});
 
-	app.get('/api/:table', auth, async (req,res) => {
-	 console.log("GET params", req.params, "query", req.query);
+	app.get('/api/:table', auth, async(req,res) => {
+	 // console.log('GET params', req.params, 'query', req.query);
 	 res.json(await db.getData(req.params['table'], req.query['id']));
  });
-
-	app.post('/api/work/add', async (req,res) => {
-		console.log(req.body);
-		const result = await db.createWork(req.body);
-		res.json(result);
-	 });
 
 	app.listen(port);
 	// console.log(`Running at port ${port}`);

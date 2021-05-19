@@ -1,7 +1,11 @@
 'use strict';
 
 import dotenv from 'dotenv';
-dotenv.config();
+const configLoaded = dotenv.config();
+if (configLoaded.error) {
+  console.error(configLoaded.error.toString());
+	process.exit(1);
+}
 import bcrypt from 'bcrypt';
 const saltRounds = 8;
 

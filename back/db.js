@@ -160,6 +160,7 @@ export default {
 	},
 	async setData(data, table){
 		// console.log(data);
+		let mustRun = true;
 		if (table in dbStructure) {
 			const dbData = dbStructure[table];
 			// console.log("data", data, dbData);
@@ -195,6 +196,18 @@ export default {
 			let query  = '';
 			if ("id" in meta && meta.id){
 				const pairs  = Object.keys(record).map(key => `${key} = ${record[key]}`).join(", ");
+				const query0 = `SELECT ${Object.keys(record).join(', ')} FROM ${table} WHERE id = ${meta.id}`;
+				try {
+					const res = await pool.query(query0);
+					const stored = res.rows[0];
+					delete data.id;
+					if (JSON.stringify(data) === JSON.stringify(stored)) {
+						mustRun = false;
+					}
+				} catch (error) {
+					return {"error": error};
+				}
+
 				query  = `UPDATE ${table} SET ${pairs} WHERE id = ${meta.id} RETURNING id`;
 				// const res = await pool.query('UPDATE persons SET firstName = $2, lastname = $3, patroname = $4, sex = $5, wikidata = $6 WHERE id = $1', [data.id, data.firstname, data.lastname, data.patroname, data.sex, data.wikidata]);
 			} else {
@@ -202,11 +215,16 @@ export default {
 				// const res = await pool.query(`INSERT INTO persons (firstName, lastname, patroname, sex, wikidata) VALUES($1, $2, $3, $4, $5) RETURNING id`, [data.firstName, data.lastName, data.patroName, data.sex, data.wikidata||null]);
 			}
 			console.log(query);
-			try {
-				const res = await pool.query(query);
-				return res.rows[0];
-			} catch (error) {
-				return {"error": error};
+			if(mustRun) {
+				try {
+					const res = await pool.query(query);
+					return res.rows[0];
+				} catch (error) {
+					return {"error": error};
+				}
+			} else {
+				console.log("...");
+				return { id:meta.id };
 			}
 		}  else {
 			return {"error": "bad query"};

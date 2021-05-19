@@ -1,10 +1,10 @@
 <template>
    <el-form label-width="120px" v-model="fact">
-      <el-form-item prop="timestamp" label="">
+      <el-form-item prop="stamp" label="">
          <el-space  direction="horizontal" style="display:flex;" wrap size="large">
-            <el-date-picker v-model="fact.timestamp" type="datetime" placeholder="Техническое время" :shortcuts="shortcuts"></el-date-picker>
+            <el-date-picker v-model="timestamp" format="YYYY.MM.DD HH:mm" type="datetime" placeholder="Техническое время" :shortcuts="shortcuts"></el-date-picker>
             <!-- <el-input placeholder="переписка (БП_отправитель)" v-model="fact.firstname"></el-input> -->
-            <el-cascader :options="acts" clearable filterable :props="{ multiple: true, value: 'id', label: 'title' }" placeholder="Вид(ы) деятельности"></el-cascader>
+            <el-cascader v-model="fact.acts"  :options="acts" clearable filterable :props="{ emitPath: false, multiple: true, value: 'id', label: 'title' }" placeholder="Вид(ы) деятельности"></el-cascader>
             <el-select
                 v-model="fact.agent"
                 filterable
@@ -19,24 +19,24 @@
               </el-select>
          </el-space>
       </el-form-item>
-      <el-form-item prop="date" label="Дата">
-         <el-input placeholder="10.05.1928" v-model="fact.date" class="text-input" prop="date"></el-input>
+      <el-form-item prop="datedesc" label="Дата">
+         <el-input placeholder="10.05.1928" v-model="fact.datedesc" class="text-input" prop="datedesc"></el-input>
       </el-form-item>
       <el-form-item label="Место">
-         <el-input placeholder="Пекин" v-model="fact.firstname"></el-input>
+         <el-input placeholder="Пекин" v-model="fact.place"></el-input>
       </el-form-item>
       <el-form-item label="Описание">
          <el-input
             type="textarea"
             autosize
             placeholder="Пастернак пишет письмо Маяковскому"
-            v-model="fact.firstname">
+            v-model="fact.title">
          </el-input>
       </el-form-item>
       <el-form-item label="Связи">
          <el-space  direction="horizontal" style="display:flex;" wrap size="large">
             <el-select
-               v-model="fact.participants"
+               v-model="fact.persons1"
                filterable
                multiple
                placeholder="Участники"
@@ -48,7 +48,7 @@
                   :value="item.id">
                </el-option>
             </el-select>
-            <el-select v-model="fact.mentions" filterable multiple placeholder="Упомянуты">
+            <el-select v-model="fact.persons2" filterable multiple placeholder="Упомянуты">
                <el-option
                   v-for="item in persons"
                   :key="item.id"
@@ -79,7 +79,7 @@
             type="textarea"
             autosize
             placeholder="Был солнечный день"
-            v-model="fact.firstname">
+            v-model="fact.comment">
          </el-input>
       </el-form-item>
       <el-form-item label="Источники">
@@ -91,7 +91,7 @@
          :on-remove="handleRemove"
          :file-list="fileList" -->
       <el-form-item prop="file" label="Медиафайл">
-         <el-upload
+         <!-- <el-upload
             class="upload-demo"
             drag
             action="https://jsonplaceholder.typicode.com/posts/"
@@ -104,7 +104,7 @@
                   Размер файла не больше 500кб
                </div>
             </template>
-         </el-upload>
+         </el-upload> -->
       </el-form-item>
       <!-- <el-form-item>
          <el-select v-model="user.privs" placeholder="Select" value-key>
@@ -134,11 +134,12 @@
    </el-dialog>
 </template>
 <script>
-import { ref, reactive } from 'vue';
+import { ref, reactive, toRaw } from 'vue';
 import { onBeforeMount } from 'vue';
 import store from "../store";
 import References from "./References.vue";
 import { useRoute } from 'vue-router';
+import router from "../router";
 
 export default {
   name: "Fact",
@@ -148,7 +149,8 @@ export default {
   setup() {
    const vuerouter = useRoute();
    const id = vuerouter.params.id;
-   const fact = reactive({ works: [], participants: [], mentions: [], books: [], date: '', timestamp: null, agent: null});
+   const timestamp = ref();
+   const fact = reactive({ works: [], persons1: [], persons2: [], books: [], acts: [], datedesc: '', title: '', stamp: null, agent: null, media: null, refs: [] });
    const persons  = ref([]);
    const works    = ref([]);
    const books    = ref([]);
@@ -168,6 +170,17 @@ export default {
    }];
 
     onBeforeMount(async() => {
+
+      console.log("router id", id);
+      if(id) {
+        const result = await store.getData("facts", id);
+        if("data" in result) {
+           const data = result.data[0];
+          Object.assign(fact, data);
+          timestamp.value = fact.stamp;
+          console.log("fact", fact);
+        }
+      }
 
       const resultSettings = await store.getData("settings");
       if("data" in resultSettings) {
@@ -196,27 +209,42 @@ export default {
       if("data" in result) {
         const nested = store.nest(resultActs.data)
         console.log("nest", nested);
-        acts.value = [...nested];
+        acts.value = toRaw(nested);
       }
 
     });
 
     const onSubmit = async() => {
       // form.validate();
-        console.log('save:', fact.value);
-        const result = await store.postData("facts", fact.value);
-        console.log(result);
+      // console.log(typeof fact.stamp === "string" ? fact.stamp: fact.stamp.toISOString().replace('T',' ').replace('Z',''));
+      // console.log('val:', typeof timestamp.value);
+
+      if(timestamp.value && typeof timestamp.value === 'object') {
+         console.log("process date");
+         const dt  = timestamp.value;
+         dt.setMinutes( dt.getMinutes() - dt.getTimezoneOffset() );
+         fact.stamp = dt.toISOString();
+      }
+      console.log('save:', toRaw(fact));
+      const result = await store.postData("facts", fact);
+      console.log(result);
+
+      if(!("data" in result && "id" in result.data)) {
+       console.log("error!");
+      } else {
+       router.push("/facts")
+      }
     };
 
     const handleClose = () => {
       // console.log("close", e);
-      const keys  = bibRef.value.getCheckedItems();
-      console.log("keys", keys);
+      fact.refs  = bibRef.value.getCheckedItems();
+      console.log("keys", fact.refs);
       dialogVisible.value = false;
 
     };
 
-    return { bibRef, onSubmit, fact, options: store.state.options, persons, works, books, acts, shortcuts, dialogVisible, handleClose,  };
+    return { timestamp, bibRef, onSubmit, fact, persons, works, books, acts, shortcuts, dialogVisible, handleClose,  };
   },
   components: {
      References

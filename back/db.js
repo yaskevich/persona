@@ -104,6 +104,17 @@ pg.types.setTypeParser(1114, (x) => x);
 
 `ALTER TABLE facts OWNER TO ${process.env.PGUSER}`;
 
+`CREATE TABLE IF NOT EXISTS logs (
+	id SERIAL PRIMARY KEY,
+	created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+	user_id integer not null,
+	data0 json,
+	data1 json,
+	table_name text not null,
+	record_id integer not null
+)`;
+
+`ALTER TABLE log OWNER TO ${process.env.PGUSER}`;
 
 const qry = await pool.query(`SELECT
 	table_name, column_name, ordinal_position, column_default, is_nullable, data_type

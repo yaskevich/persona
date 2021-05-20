@@ -83,12 +83,12 @@ if (!process.env.JWT_SECRET){
 
 	app.post('/api/x/:table', auth, async(req,res) => {
 		console.log('POST params', req.params, 'query', req.query);
-		res.json(await db.setData(req.body, req.params['table']));
+		res.json(await db.setData(req.body, req.params['table'], req.user));
 	 });
 
 	app.delete('/api/:table/:id', auth, async(req,res) => {
 		console.log('DELETE params', req.params, 'query', req.query);
-		res.json(await db.deleteData(req.params['table'], req.params['id']));
+		res.json(await db.deleteData(req.params['table'], req.params['id'], req.user));
 	});
 
 	app.get('/api/:table', auth, async(req,res) => {

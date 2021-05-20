@@ -144,7 +144,7 @@ for (let table of Object.keys(dbStructure)) {
 // console.log(dbStructure);
 
 export default {
-	async deleteData(table, id) {
+	async deleteData(table, id, user) {
 		const idInt  = parseInt(id, 10);
 		if (table in dbStructure && idInt) {
 			try {
@@ -169,7 +169,7 @@ export default {
 		}
 		return {"error": "bad query"};
 	},
-	async setData(data, table){
+	async setData(data, table, user){
 		// console.log(data);
 		if (table in dbStructure) {
 			const dbData = dbStructure[table];

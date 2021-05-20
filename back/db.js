@@ -204,13 +204,16 @@ export default {
 				}
 			}
 			let query  = '';
+			let stored = {};
+			delete data.id;
+
 			if ("id" in meta && meta.id){
 				const pairs  = Object.keys(record).map(key => `${key} = ${record[key]}`).join(", ");
 				const sel = `SELECT ${Object.keys(record).join(', ')} FROM ${table} WHERE id = ${meta.id}`;
 				try {
 					const res = await pool.query(sel);
-					const stored = res.rows[0];
-					delete data.id;
+					stored = res.rows[0];
+
 					if (JSON.stringify(data) !== JSON.stringify(stored)) {
 						query = `UPDATE ${table} SET ${pairs} WHERE id = ${meta.id} RETURNING id`;
 					}
@@ -226,9 +229,14 @@ export default {
 			     await pool.query('BEGIN')
 			     try {
 						 // console.log(query);
-						 const res = await pool.query(query);
-			       await pool.query('COMMIT')
-						 return res.rows[0];
+						 const queryResult = await pool.query(query);
+						 const resultId = queryResult.rows[0]["id"];
+						 const logQuery = `INSERT INTO logs (user_id, table_name, record_id, data0, data1) VALUES($1, $2, $3, $4, $5) RETURNING id`;
+						 const logResult  = await pool.query(logQuery, [user.id, table, resultId, stored, data]);
+						 // console.log(logQuery, logResult);
+						 // return resultId;
+						 await pool.query('COMMIT');
+						 return queryResult.rows[0];
 			     } catch (error) {
 						 return {"error": error};
 			       await pool.query('ROLLBACK');

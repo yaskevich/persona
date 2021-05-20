@@ -160,7 +160,6 @@ export default {
 	},
 	async setData(data, table){
 		// console.log(data);
-		let mustRun = true;
 		if (table in dbStructure) {
 			const dbData = dbStructure[table];
 			// console.log("data", data, dbData);
@@ -196,32 +195,36 @@ export default {
 			let query  = '';
 			if ("id" in meta && meta.id){
 				const pairs  = Object.keys(record).map(key => `${key} = ${record[key]}`).join(", ");
-				const query0 = `SELECT ${Object.keys(record).join(', ')} FROM ${table} WHERE id = ${meta.id}`;
+				const sel = `SELECT ${Object.keys(record).join(', ')} FROM ${table} WHERE id = ${meta.id}`;
 				try {
-					const res = await pool.query(query0);
+					const res = await pool.query(sel);
 					const stored = res.rows[0];
 					delete data.id;
-					if (JSON.stringify(data) === JSON.stringify(stored)) {
-						mustRun = false;
+					if (JSON.stringify(data) !== JSON.stringify(stored)) {
+						query = `UPDATE ${table} SET ${pairs} WHERE id = ${meta.id} RETURNING id`;
 					}
 				} catch (error) {
 					return {"error": error};
 				}
-
-				query  = `UPDATE ${table} SET ${pairs} WHERE id = ${meta.id} RETURNING id`;
-				// const res = await pool.query('UPDATE persons SET firstName = $2, lastname = $3, patroname = $4, sex = $5, wikidata = $6 WHERE id = $1', [data.id, data.firstname, data.lastname, data.patroname, data.sex, data.wikidata]);
 			} else {
 				query  = `INSERT INTO ${table} (${Object.keys(record).join(', ')}) VALUES(${Object.values(record).join(', ')}) RETURNING id`;
-				// const res = await pool.query(`INSERT INTO persons (firstName, lastname, patroname, sex, wikidata) VALUES($1, $2, $3, $4, $5) RETURNING id`, [data.firstName, data.lastName, data.patroName, data.sex, data.wikidata||null]);
 			}
-			console.log(query);
-			if(mustRun) {
+
+			if(query) {
 				try {
-					const res = await pool.query(query);
-					return res.rows[0];
-				} catch (error) {
-					return {"error": error};
-				}
+			     await pool.query('BEGIN')
+			     try {
+						 // console.log(query);
+						 const res = await pool.query(query);
+			       await pool.query('COMMIT')
+						 return res.rows[0];
+			     } catch (error) {
+						 return {"error": error};
+			       await pool.query('ROLLBACK');
+			     }
+			   } catch(error){
+					  return {"error": error};
+				 }
 			} else {
 				console.log("...");
 				return { id:meta.id };
@@ -230,12 +233,7 @@ export default {
 			return {"error": "bad query"};
 		}
 	},
-	async createWork(data){
-		// settings table_name// add default author in authors
-		// years??
-		const res = await pool.query(`INSERT INTO works (title, genre) VALUES($1, $2) RETURNING id`, [data.title, data.genre]);
-    return res.rows;
-	},
+
 	async getUserDataByID(id){
 		const res = await pool.query(selectables["users"] + "WHERE id = $1", [id]);
 		return res.rows[0];

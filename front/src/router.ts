@@ -15,6 +15,7 @@ import Acts from './components/Acts.vue';
 import Refs from './components/References.vue';
 import FactList from './components/FactList.vue';
 import Fact from './components/Fact.vue';
+import Log from './components/Log.vue';
 import Profile from './components/Profile.vue';
 
 const routes = [
@@ -103,6 +104,11 @@ const routes = [
 		path: '/fact/:id?',
 		component: Fact,
 		name: 'Fact',
+	},
+	{
+		path: '/log/:id?',
+		component: Log,
+		name: 'Log',
 	},
 ];
 

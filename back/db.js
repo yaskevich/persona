@@ -148,11 +148,26 @@ export default {
 		const idInt  = parseInt(id, 10);
 		if (table in dbStructure && idInt) {
 			try {
-				const res = await pool.query(`DELETE FROM ${table} WHERE id=${id} RETURNING id`);
-				return res.rows[0];
-			} catch (error) {
-				return {"error": error};
-			}
+				 await pool.query('BEGIN')
+				 try {
+					 const selectResult = await pool.query(`${selectables[table]} WHERE id = ${id}`);
+					 const stored = selectResult.rows[0];
+					 delete stored.id;
+
+					 const queryResult = await pool.query(`DELETE FROM ${table} WHERE id=${id} RETURNING id`);
+					 const resultId = queryResult.rows[0]["id"];
+					 const logQuery = 'INSERT INTO logs (user_id, table_name, record_id, data0) VALUES($1, $2, $3, $4) RETURNING id';
+
+					 const logResult  = await pool.query(logQuery, [user.id, table, idInt, stored]);
+					 await pool.query('COMMIT');
+					 return queryResult.rows[0];
+				 } catch (error) {
+					 return {"error": error};
+					 await pool.query('ROLLBACK');
+				 }
+			 } catch(error){
+					return {"error": error};
+			 }
 		}
 		return {"error": "bad query"};
 	},

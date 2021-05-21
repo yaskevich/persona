@@ -145,6 +145,23 @@ const leaf = (a:any, b:any): Object  =>  {
     return res.length ? {children: res} : {};
 };
 
+interface keyable {
+    [key: string]: any
+}
+
+const classify = (x:keyable) => {
+  if (x.data1 && Object.keys(x.data1).length){
+    return x.data0 && Object.keys(x.data0).length ? "Изменение" : "Создание";
+  } else {
+    return "Удаление";
+  }
+};
+
+const dateToString = (x:string) => {
+  const dt  = new Date(x);
+  return dt.toLocaleString('ru-RU');
+}
+
 export default {
   // state: readonly(state),
   logout,
@@ -155,6 +172,8 @@ export default {
   getData,
   deleteById,
   nest,
+  classify,
+  dateToString,
   // doLogout,
   // getData
   state: state,

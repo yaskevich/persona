@@ -10,7 +10,7 @@
     </el-col>
     <el-col :span="10">
       <div class="grid-content bg-purple">
-        {{showDate(value.created)}}
+        {{store.dateToString(value.created)}}
       </div>
     </el-col>
     <el-col :span="4">
@@ -21,7 +21,7 @@
     <el-col :span="4">
       <div class="grid-content">
         <router-link :to="'/log/' + value.id">
-        <el-button>{{classify(value)}}</el-button>
+        <el-button>{{store.classify(value)}}</el-button>
         </router-link>
       </div>
     </el-col>
@@ -48,25 +48,16 @@ export default defineComponent({
 
       const resultLogs = await store.getData("logs");
       if("data" in resultLogs) {
-        logs.push(...resultLogs.data.sort((a, b) => b.id.toString().localeCompare(a.id.toString())));
+        logs.push(...resultLogs.data.sort((a, b) => b.id - a.id));
       }
 
     });
 
-    const classify = (x) => {
-      if (x.data1 && Object.keys(x.data1).length){
-        return x.data0 && Object.keys(x.data0).length ? "Изменение" : "Создание";
-      } else {
-        return "Удаление";
-      }
-    };
 
-    const showDate = (x) => {
-      const dt  = new Date(x);
-      return dt.toLocaleString('ru-RU');
-    }
 
-    return { users, logs, classify, showDate }
+
+
+    return { users, logs, store, }
   }
 })
 </script>

@@ -22,20 +22,23 @@
   </el-dialog>
 
   Типы событий
+  <!--
+  @node-drag-start="handleDragStart"
+  @node-drag-enter="handleDragEnter"
+  @node-drag-leave="handleDragLeave"
+  @node-drag-over="handleDragOver"
+  @node-drag-end="handleDragEnd"
+  :allow-drop="allowDrop"
+  :allow-drag="allowDrag"
+ -->
   <el-tree
     :data="acts"
     node-key="id"
     :props="{ label: 'title', }"
     default-expand-all
-    @node-drag-start="handleDragStart"
-    @node-drag-enter="handleDragEnter"
-    @node-drag-leave="handleDragLeave"
-    @node-drag-over="handleDragOver"
-    @node-drag-end="handleDragEnd"
     @node-drop="handleDrop"
     draggable
-    :allow-drop="allowDrop"
-    :allow-drag="allowDrag"
+
     :expand-on-click-node="false"
     style="max-width:350px;"
     >
@@ -50,7 +53,7 @@
                  <el-dropdown-item @click="addItem(node, data)">Добавить соседний пункт</el-dropdown-item>
                  <el-dropdown-item @click="addItem(node, data, true)">Добавить вложенный пункт</el-dropdown-item>
                  <el-dropdown-item @click="renameItem(node, data)">Переименовать</el-dropdown-item>
-                 <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>Удалить этот пункт</strong></el-dropdown-item>
+                 <!-- <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>Удалить этот пункт</strong></el-dropdown-item> -->
                </el-dropdown-menu>
              </template>
            </el-dropdown>
@@ -87,34 +90,47 @@ export default defineComponent({
       }
     });
 
-    const handleDragStart = (node, ev) => {
-        console.log('drag start', node);
-    };
-    const handleDragEnter = (draggingNode, dropNode, ev) => {
-        console.log('tree drag enter: ', dropNode.label);
-    };
-    const handleDragLeave = (draggingNode, dropNode, ev) => {
-        console.log('tree drag leave: ', dropNode.label);
-    };
-    const handleDragOver = (draggingNode, dropNode, ev) => {
-        console.log('tree drag over: ', dropNode.label);
-    };
-    const handleDragEnd = (draggingNode, dropNode, dropType, ev) => {
-        console.log('tree drag end: ', dropNode && dropNode.label, dropType);
-    };
-    const handleDrop = (draggingNode, dropNode, dropType, ev) => {
-        console.log('tree drop: ', dropNode.label, dropType);
-    };
-    const allowDrop = (draggingNode, dropNode, type) => {
-        if (dropNode.data.label === 'Level two 3-1') {
-          return type !== 'inner';
-        } else {
-          return true;
+    // const handleDragStart = (node, ev) => {
+    //     console.log('drag start', node);
+    // };
+    // const handleDragEnter = (draggingNode, dropNode, ev) => {
+    //     console.log('tree drag enter: ', dropNode.label);
+    // };
+    // const handleDragLeave = (draggingNode, dropNode, ev) => {
+    //     console.log('tree drag leave: ', dropNode.label);
+    // };
+    // const handleDragOver = (draggingNode, dropNode, ev) => {
+    //     console.log('tree drag over: ', dropNode.label);
+    // };
+    // const handleDragEnd = (draggingNode, dropNode, dropType, ev) => {
+    //     console.log('tree drag end: ', dropNode && dropNode.label, dropType);
+    // };
+    const handleDrop = async(draggingNode, dropNode, dropType, ev) => {
+        // console.log('tree drop: ', dropNode.label, dropNode.data.id);
+        // console.log("dropType", dropType);
+        // console.log("dropNode", dropNode);
+        // console.log("draggingNode", draggingNode.label, draggingNode.data.id);
+        console.log(`${draggingNode.label}  ${draggingNode.data.id} ${dropType} ${dropNode.label} ${dropNode.data.id}`);
+
+        const parent_id = dropType === "inner" ? dropNode.data.id : dropNode.data.parent;
+        const result = await store.postData("acts", { "id":  draggingNode.data.id, "parent": parent_id });
+        // console.log(result);
+        if(!("data" in result && "id" in result.data)) {
+          console.log("error!");
         }
+
     };
-    const allowDrag = (draggingNode) => {
-        return draggingNode.data.label.indexOf('Level three 3-1-1') === -1;
-    };
+    // const allowDrop = (draggingNode, dropNode, type) => {
+    //     if (dropNode.data.label === 'Level two 3-1') {
+    //       return type !== 'inner';
+    //     } else {
+    //       return true;
+    //     }
+    // };
+    // const allowDrag = (draggingNode) => {
+        // return draggingNode.data.label.indexOf('Level three 3-1-1') === -1;
+        // return true;
+    // };
 
     const addItem = (node, datum, childmode) => {
       console.log(node, datum);
@@ -202,14 +218,14 @@ export default defineComponent({
 
     return {
       onDialogOpened,
-      handleDragStart,
-      handleDragEnter,
-      handleDragLeave,
-      handleDragOver,
-      handleDragEnd,
+      // handleDragStart,
+      // handleDragEnter,
+      // handleDragLeave,
+      // handleDragOver,
+      // handleDragEnd,
       handleDrop,
-      allowDrop,
-      allowDrag,
+      // allowDrop,
+      // allowDrag,
       formRef,
       form,
       addItem,

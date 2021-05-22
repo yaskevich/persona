@@ -85,6 +85,7 @@
       <el-form-item label="Источники">
          <el-space  direction="horizontal" style="display:flex;" wrap size="large">
             <el-button type="primary" @click="dialogVisible=true;">Выбрать</el-button>
+            <div v-if="fact.refs.length">Выбрано: {{fact.refs.length}}</div>
          </el-space>
       </el-form-item>
       <!-- :on-preview="handlePreview"
@@ -123,6 +124,7 @@
    v-model="dialogVisible"
    width="30%"
    :before-close="handleClose"
+   @opened="dialogOpened"
    >
      <References :isEmbedded="true" ref="bibRef"></References>
      <template #footer>
@@ -244,7 +246,11 @@ export default {
 
     };
 
-    return { timestamp, bibRef, onSubmit, fact, persons, works, books, acts, shortcuts, dialogVisible, handleClose,  };
+    const dialogOpened = () => {
+      bibRef.value.setCheckedItems(fact.refs);
+    };
+
+    return { timestamp, bibRef, onSubmit, fact, persons, works, books, acts, shortcuts, dialogVisible, handleClose, dialogOpened, };
   },
   components: {
      References

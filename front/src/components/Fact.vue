@@ -85,7 +85,7 @@
       <el-form-item label="Источники">
          <el-space  direction="horizontal" style="display:flex;" wrap size="large">
             <el-button type="primary" @click="dialogVisible=true;">Выбрать</el-button>
-            <div v-if="fact.refs.length">Выбрано: {{fact.refs.length}}</div>
+            <div v-if="fact.refs?.length">Выбрано: {{fact.refs.length}}</div>
          </el-space>
       </el-form-item>
       <!-- :on-preview="handlePreview"
@@ -117,7 +117,14 @@
            </el-option>
          </el-select>
          </el-form-item> -->
-      <el-button type="primary" @click="onSubmit">Сохранить</el-button>
+      <el-button type="primary" @click="onSubmit" v-if="timestamp">Сохранить</el-button>
+      <div v-else>
+         <el-alert
+           title="Сохранение недоступно, если пункт «Техническое время» не заполнен"
+           type="info"
+           effect="dark">
+         </el-alert>
+      </div>
    </el-form>
    <el-dialog
    title="Источники"

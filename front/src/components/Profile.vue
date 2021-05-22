@@ -6,15 +6,15 @@
   </div>
 </el-space>
   <el-form :model="form" ref="formRef" label-width="100px" :rules="rules">
-    <el-form-item prop="firstname">
+    <el-form-item prop="firstname" label="Имя">
       <el-input placeholder="Имя" v-model="form.firstname" class="text-input"></el-input>
     </el-form-item>
 
-    <el-form-item prop="lastname">
+    <el-form-item prop="lastname" label="Фамилия">
       <el-input placeholder="Фамилия" v-model="form.lastname" class="text-input"></el-input>
     </el-form-item>
 
-    <el-form-item prop="email">
+    <el-form-item prop="email" label="Эл. почта">
       <el-input placeholder="Эл. почта" v-model="form.email" class="text-input"></el-input>
     </el-form-item>
 
@@ -37,34 +37,33 @@ import store from "../store";
 
 export default defineComponent({
   name: "Profile",
-
   setup() {
 
     const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
-    let users = reactive([]);
-    let form = store.state.user;
+    const users = ref([]);
+    const form = reactive({});
+    Object.assign (form, store.state.user);
     const rights = store.state.options.filter (x => x.value === form.privs)[0]["label"];
 
     onBeforeMount(async() => {
-
-      console.log(store.state.user);
-
+      // console.log(store.state.user);
       const result = await store.getData("users");
       if("data" in result) {
         console.log(result.data);
-          users = result.data;
+          users.value = result.data;
       }
     });
 
     const confirm = () => {
       formRef.value?.validate(async(valid) => {
-
-        if (valid) {
-          // return false;
-          // const result = await store.initUser(form);
-          // console.log(result);
-          // users.unshift({...form});
-        }  else{
+        if(valid) {
+          // console.log("user form", form);
+          const result = await store.postData("users", form);
+          console.log(result);
+          if("data" in result && "id" in result.data) {
+            Object.assign (store.state.user, form);
+          }
+        } else{
           console.log("form not valid");
           return false;
         }
@@ -86,7 +85,7 @@ export default defineComponent({
        ]
     };
 
-    return { users, form, rules, confirm, rights, };
+    return { users, form, rules, confirm, rights, formRef, };
   }
 });
 </script>

@@ -83,6 +83,9 @@ if (!process.env.JWT_SECRET){
 
 	app.post('/api/x/:table', auth, async(req,res) => {
 		console.log('POST params', req.params, 'query', req.query);
+		if (req.params['table'] === "users" && (!(req.user.id === req.body.id || req.user.privs == 1))){
+			return res.json({"error": "privs"});
+		}
 		res.json(await db.setData(req.body, req.params['table'], req.user));
 	 });
 

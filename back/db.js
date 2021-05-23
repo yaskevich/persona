@@ -2,10 +2,13 @@
 
 import dotenv from 'dotenv';
 const configLoaded = dotenv.config();
-if (configLoaded.error) {
+
+// if it is not run under PM2 and dotenv config is not provided
+if (!process.env.NODE_ENV && configLoaded.error) {
   console.error(configLoaded.error.toString());
 	process.exit(1);
 }
+
 import bcrypt from 'bcrypt';
 const saltRounds = 8;
 
@@ -19,112 +22,127 @@ const pool = new Pool();
 // prevent formatting as a timestamp with zone
 pg.types.setTypeParser(1114, (x) => x);
 
-`CREATE TABLE persons (
-	id SERIAL PRIMARY KEY,
-	firstName text not null,
-	lastName varchar,
-	patroName text,
-	sex integer,
-	wikidata integer
-)`;
-`ALTER TABLE persons OWNER TO ${process.env.PGUSER}`;
-`CREATE TABLE works (
-	id SERIAL PRIMARY KEY,
-	title text not null,
-	genre text,
-	authors integer[] NULL
-)`;
-`ALTER TABLE works OWNER TO ${process.env.PGUSER}`;
-`CREATE TABLE users (
-	id SERIAL PRIMARY KEY,
-	firstname text not null,
-	lastname text not null,
-	email text not null,
-	sex integer not null,
-	privs integer not null,
-	_passhash text not null
-)`;
-// `ALTER TABLE users RENAME COLUMN passdata TO _passhash`;
-`ALTER TABLE users OWNER TO ${process.env.PGUSER}`;
-`CREATE TABLE settings (
-	persona_id integer not null
-)`;
-`ALTER TABLE settings OWNER TO ${process.env.PGUSER}`;
-
-`CREATE TABLE books (
-	id SERIAL PRIMARY KEY,
-	title text not null,
-	published integer not null,
-	editors integer[] NULL,
-	works integer[] NULL
-)`;
-
-`ALTER TABLE books OWNER TO ${process.env.PGUSER}`;
-
-`CREATE TABLE IF NOT EXISTS acts (
-	id SERIAL PRIMARY KEY,
-	title text not null,
-	parent integer
-)`;
-
-`ALTER TABLE acts OWNER TO ${process.env.PGUSER}`;
-// the table should have at least 1 item to enable UI
-`INSERT INTO acts (title) VALUES('test')`;
-
-`CREATE TABLE IF NOT EXISTS refs (
-	id SERIAL PRIMARY KEY,
-	parent integer,
-	title text,
-	content text,
-	reftype integer NOT NULL DEFAULT 0,
-	pages text[],
-	authors integer[] NULL
-)`;
-
-`ALTER TABLE refs OWNER TO ${process.env.PGUSER}`;
-// the table should have at least 1 item to enable UI
-`INSERT INTO refs (title) VALUES('test')`;
-
-`CREATE TABLE IF NOT EXISTS facts (
-	id SERIAL PRIMARY KEY,
-	stamp timestamp,
-	agent integer NOT NULL,
-	datedesc text,
-	place text,
-	title text,
-	acts integer[] NULL,
-	persons1 integer[] NULL,
-	persons2 integer[] NULL,
-	works integer[] NULL,
-	books integer[] NULL,
-	refs integer[] NULL,
-	comment text,
-	media integer
-)`;
-
-`ALTER TABLE facts OWNER TO ${process.env.PGUSER}`;
-
-`CREATE TABLE IF NOT EXISTS logs (
-	id SERIAL PRIMARY KEY,
-	created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-	user_id integer not null,
-	data0 json,
-	data1 json,
-	table_name text not null,
-	record_id integer not null
-)`;
-
-`ALTER TABLE log OWNER TO ${process.env.PGUSER}`;
-
-const qry = await pool.query(`SELECT
-	table_name, column_name, ordinal_position, column_default, is_nullable, data_type
+const databaseQuery = `SELECT	table_name, column_name, ordinal_position,
+	column_default, is_nullable, data_type
 	FROM information_schema.columns
 	WHERE table_schema = 'public'
-	ORDER BY table_name, ordinal_position`);
+	ORDER BY table_name, ordinal_position`;
+
+const tablesQueries = [
+	`CREATE TABLE IF NOT EXISTS persons (
+		id SERIAL PRIMARY KEY,
+		firstName text not null,
+		lastName varchar,
+		patroName text,
+		sex integer,
+		wikidata integer
+	)`,
+	`ALTER TABLE persons OWNER TO ${process.env.PGUSER}`,
+	`CREATE TABLE IF NOT EXISTS works (
+		id SERIAL PRIMARY KEY,
+		title text not null,
+		genre text,
+		authors integer[] NULL
+	)`,
+	`ALTER TABLE works OWNER TO ${process.env.PGUSER}`,
+	`CREATE TABLE IF NOT EXISTS users (
+		id SERIAL PRIMARY KEY,
+		firstname text not null,
+		lastname text not null,
+		email text not null,
+		sex integer not null,
+		privs integer not null,
+		_passhash text not null
+	)`,
+	// `ALTER TABLE users RENAME COLUMN passdata TO _passhash`;
+	`ALTER TABLE users OWNER TO ${process.env.PGUSER}`,
+	`CREATE TABLE IF NOT EXISTS settings (
+		persona_id integer not null
+	)`,
+	`ALTER TABLE settings OWNER TO ${process.env.PGUSER}`,
+	`CREATE TABLE books (
+		id SERIAL PRIMARY KEY,
+		title text not null,
+		published integer not null,
+		editors integer[] NULL,
+		works integer[] NULL
+	)`,
+	`ALTER TABLE books OWNER TO ${process.env.PGUSER}`,
+	`CREATE TABLE IF NOT EXISTS acts (
+		id SERIAL PRIMARY KEY,
+		title text not null,
+		parent integer
+	)`,
+	`ALTER TABLE acts OWNER TO ${process.env.PGUSER}`,
+	// the table should have at least 1 item to enable UI
+	`INSERT INTO acts (title) VALUES('test')`,
+
+	`CREATE TABLE IF NOT EXISTS refs (
+		id SERIAL PRIMARY KEY,
+		parent integer,
+		title text,
+		content text,
+		reftype integer NOT NULL DEFAULT 0,
+		pages text[],
+		authors integer[] NULL
+	)`,
+
+	`ALTER TABLE refs OWNER TO ${process.env.PGUSER}`,
+	// the table should have at least 1 item to enable UI
+	`INSERT INTO refs (title) VALUES('test')`,
+	`CREATE TABLE IF NOT EXISTS facts (
+		id SERIAL PRIMARY KEY,
+		stamp timestamp,
+		agent integer NOT NULL,
+		datedesc text,
+		place text,
+		title text,
+		acts integer[] NULL,
+		persons1 integer[] NULL,
+		persons2 integer[] NULL,
+		works integer[] NULL,
+		books integer[] NULL,
+		refs integer[] NULL,
+		comment text,
+		media integer
+	)`,
+	`ALTER TABLE facts OWNER TO ${process.env.PGUSER}`,
+	`CREATE TABLE IF NOT EXISTS logs (
+		id SERIAL PRIMARY KEY,
+		created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+		user_id integer not null,
+		data0 json,
+		data1 json,
+		table_name text not null,
+		record_id integer not null
+	)`,
+	`ALTER TABLE logs OWNER TO ${process.env.PGUSER}`,
+];
+
+let tablesResult = await pool.query(databaseQuery);
+
+if(!tablesResult.rows.length) {
+	console.log("initializing database: started");
+	try {
+		 await pool.query('BEGIN')
+		 try {
+				for(let i = 0; i < tablesQueries.length; i++){
+		 			await pool.query(tablesQueries[i]);
+		 		}
+				await pool.query('COMMIT');
+				tablesResult = await pool.query(databaseQuery);
+				console.log("initializing database: done");
+		 } catch (error) {
+			 await pool.query('ROLLBACK');
+		 }
+	 } catch(error) {
+		 	console.log("initializing database: error\n", error);
+	 }
+}
 
 const dbStructure = {};
 
-for(let row of qry.rows) {
+for(let row of tablesResult.rows) {
 	dbStructure[row.table_name] ?
 		dbStructure[row.table_name][row.column_name] = row
 		:

@@ -69,8 +69,16 @@ const initUser = async(data: Object): Promise<any> => {
      console.log("Cannot get", error);
      return error;
    }
+ } else {
+   try {
+     const response = await axios.post('/api/user/reg', data);
+     console.log(response.data);
+     return response;
+  } catch (error) {
+    console.log("Cannot get", error);
+    return error;
+  }
  }
- console.log("No token. Fail.");
 };
 
 const postData = async(table: string, data: Object): Promise<any> => {

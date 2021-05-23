@@ -113,9 +113,15 @@
   </el-container>
 </el-container>
   </div>
-  <div v-else>
-    Пользователь не авторизован!
+  <div v-else style="margin-top:4rem;">
+    <div>Авторизация пользователя</div>
+    <!-- Пользователь не авторизован! -->
     <Login/>
+    <el-divider><i class="el-icon-star-on"></i></el-divider>
+    <div>или</div>
+
+    <h2>Регистрация новой учетной записи</h2>
+    <Profile/>
   </div>
 </div>
 <div v-else>
@@ -130,6 +136,7 @@ import { defineComponent, onBeforeMount, ref } from 'vue';
 // import router from "./router";
 import store from "./store";
 import Login from './components/Login.vue';
+import Profile from './components/Profile.vue';
 
 export default defineComponent({
   name: 'App',
@@ -169,7 +176,8 @@ export default defineComponent({
       }
     },
     components: {
-      Login
+      Login,
+      Profile,
     }
 })
 </script>

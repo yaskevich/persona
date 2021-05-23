@@ -1,7 +1,7 @@
 <template>
 
    <el-space direction="vertical">
-  <div>
+  <div v-if="rights">
 {{form.firstname}} {{form.lastname}} ● {{rights}}
   </div>
 </el-space>
@@ -18,14 +18,18 @@
       <el-input placeholder="Эл. почта" v-model="form.email" class="text-input"></el-input>
     </el-form-item>
 
-    <el-form-item>
+    <el-form-item prop="sex">
       <el-radio-group v-model="form.sex">
         <el-radio :label="1">Мужчина</el-radio>
         <el-radio :label="2">Женщина</el-radio>
       </el-radio-group>
     </el-form-item>
-
-    <el-button type="primary" @click="confirm">Сохранить</el-button>
+    <el-alert v-if="infoAlert"
+    :title="infoAlert"
+    type="success"
+    effect="dark">
+  </el-alert>
+    <el-button v-else type="primary" @click="confirm">{{isRegistered?"Сохранить": "Отправить заявку"}}</el-button>
 
 
   </el-form>
@@ -42,26 +46,39 @@ export default defineComponent({
     const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
     const users = ref([]);
     const form = reactive({});
-    Object.assign (form, store.state.user);
-    const rights = store.state.options.filter (x => x.value === form.privs)[0]["label"];
+    const isRegistered = ref(Boolean(Object.keys(store.state.user).length));
+    let rights;
+    const infoAlert = ref('');
+
+    if (isRegistered.value) {
+        Object.assign (form, store.state.user);
+        rights = store.state.options.filter (x => x.value === form.privs)[0]["label"];
+    }
 
     onBeforeMount(async() => {
       // console.log(store.state.user);
-      const result = await store.getData("users");
-      if("data" in result) {
-        console.log(result.data);
-          users.value = result.data;
+      if (isRegistered.value) {
+        const result = await store.getData("users");
+        if("data" in result) {
+          console.log(result.data);
+            users.value = result.data;
+        }
       }
     });
 
     const confirm = () => {
       formRef.value?.validate(async(valid) => {
         if(valid) {
-          // console.log("user form", form);
-          const result = await store.postData("users", form);
-          console.log(result);
-          if("data" in result && "id" in result.data) {
-            Object.assign (store.state.user, form);
+          if(isRegistered.value){
+            const result = await store.postData("users", form);
+            if("data" in result && "id" in result.data) {
+              Object.assign (store.state.user, form);
+            }
+          } else {
+            const result = await store.initUser(form);
+            if("data" in result && "id" in result.data) {
+              infoAlert.value = "Заявка сохранена. После одобрения модератором будет выслано письмо с паролем."
+            }
           }
         } else{
           console.log("form not valid");
@@ -81,11 +98,14 @@ export default defineComponent({
       ],
        email: [
            { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
-         { type: 'email', message: 'Please input correct email address', trigger: ['blur', 'change'] }
+         { type: 'email', message: 'Введите корректный адрес электронной почты', trigger: ['blur', 'change'] }
+       ],
+       sex: [
+           { required: true, message: 'Выберите пол', trigger: 'change' }
        ]
     };
 
-    return { users, form, rules, confirm, rights, formRef, };
+    return { users, form, rules, confirm, rights, formRef, isRegistered, infoAlert, };
   }
 });
 </script>

@@ -58,8 +58,9 @@ const tablesQueries = [
 	// `ALTER TABLE users RENAME COLUMN passdata TO _passhash`;
 	`ALTER TABLE users OWNER TO ${process.env.PGUSER}`,
 	`CREATE TABLE IF NOT EXISTS settings (
-		persona_id integer not null
+		persona integer not null default 1
 	)`,
+	`INSERT INTO settings (persona) VALUES(1)`,
 	`ALTER TABLE settings OWNER TO ${process.env.PGUSER}`,
 	`CREATE TABLE books (
 		id SERIAL PRIMARY KEY,

@@ -1,7 +1,7 @@
 <template>
-    <el-form label-width="120px" v-model="settings" :inline="true">
-      Основная персона
-      <el-form-item>
+    <el-form label-width="320px" :model="settings" ref="formRef" :rules="rules">
+
+      <el-form-item label="Основная персона">
       <el-select
           v-model="settings.persona"
           filterable
@@ -15,10 +15,16 @@
           </el-option>
         </el-select>
       </el-form-item>
-     <el-button type="primary" @click="onSubmit">Сохранить</el-button>
+
+      <el-form-item prop="title" label="Название проекта">
+        <el-input placeholder="..." v-model="settings.title" class="text-input"></el-input>
+      </el-form-item>
+
+     <el-button type="primary" @click="confirm">Сохранить</el-button>
     </el-form>
 </template>
-<script>
+
+<script lang="ts">
 import { ref } from 'vue';
 import { onBeforeMount } from 'vue';
 import store from "../store";
@@ -26,7 +32,7 @@ export default {
   name: "Settings",
 
   setup() {
-
+    const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
     let settings = ref({});
     let persons = ref([]);
 
@@ -37,19 +43,35 @@ export default {
 
       const result = await store.getData("settings");
       if("data" in result) {
-        console.log(result.data);
-          settings.value.persona = result.data[0]["persona_id"];
+        console.log("settings", result.data);
+          settings.value = result.data[0];
       }
+      console.log("settings", settings.value);
     });
 
-    const onSubmit = async() => {
-      // form.validate();
-        // console.log('save:', user.value);
-        // const result = await store.postData("users", user.value);
-        // console.log(result);
+
+    const confirm = () => {
+      formRef.value?.validate(async(valid) => {
+        if(valid) {
+          console.log('save:', settings.value);
+          const result = await store.postData("settings", Object.assign({"id": 1}, settings.value));
+          console.log(result);
+        } else{
+          console.log("form not valid");
+          return false;
+        }
+      });
     };
 
-    return {onSubmit, settings, persons};
+
+
+    const  rules = {
+      title: [
+        { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' }
+      ],
+    };
+
+    return { confirm, settings, persons, rules, formRef, };
   },
   components: {
 

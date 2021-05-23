@@ -8,7 +8,7 @@
       <el-input placeholder="Тип" v-model="work.genre" class="text-input"></el-input>
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" @click="setDefaultAuthor" v-if="persons.length && persona_id">Автор – {{persons.filter(x=>x.id === persona_id)[0].value}}</el-button>
+      <el-button type="primary" @click="setDefaultAuthor" v-if="persons.length && mainperson">Автор – {{persons.filter(x=>x.id === mainperson)[0].value}}</el-button>
     <el-select
         v-model="work.authors"
         filterable
@@ -45,7 +45,7 @@ export default defineComponent({
 
     const work  = ref({});
     const works = reactive([]);
-    const persona_id = ref();
+    const mainperson = ref();
     const persons = ref([]);
     const vuerouter = useRoute();
     const id = vuerouter.params.id;
@@ -70,7 +70,7 @@ export default defineComponent({
       console.log(persons);
 
       const settingsData = await store.getData("settings");
-      persona_id.value = settingsData.data[0].persona_id;
+      mainperson.value = settingsData.data[0].persona;
     });
 
     // const resetForm = () => {
@@ -78,7 +78,7 @@ export default defineComponent({
     // };
 
     const setDefaultAuthor = () => {
-      work.value.authors = [persona_id.value];
+      work.value.authors = [mainperson.value];
     };
 
     const confirm = () => {
@@ -127,7 +127,7 @@ export default defineComponent({
       work,
       works,
       persons,
-      persona_id,
+      mainperson,
       deleteWork,
     };
   },

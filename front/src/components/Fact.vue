@@ -193,7 +193,7 @@ export default {
 
       const resultSettings = await store.getData("settings");
       if("data" in resultSettings) {
-          fact.agent = resultSettings.data[0]["persona_id"];
+          fact.agent = resultSettings.data[0]["persona"];
       }
 
       const result = await store.getData("facts", id);

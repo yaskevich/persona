@@ -76,8 +76,13 @@ if (!process.env.JWT_SECRET){
 		res.json(req.user);
 	 });
 
+	app.post('/api/user/reg', async(req,res) => {
+		const result = await db.createUser(Object.assign({"privs": 5}, req.body), false);
+		res.json(result);
+	});
+
 	app.post('/api/user/add', auth, async(req,res) => {
-		const result = await db.createUser(req.body);
+		const result = await db.createUser(req.body, true);
 		res.json(result);
 	});
 

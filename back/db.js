@@ -52,7 +52,8 @@ const tablesQueries = [
 		email text not null,
 		sex integer not null,
 		privs integer not null,
-		_passhash text not null
+		_passhash text not null,
+		activated BOOLEAN NOT NULL DEFAULT FALSE
 	)`,
 	// `ALTER TABLE users RENAME COLUMN passdata TO _passhash`;
 	`ALTER TABLE users OWNER TO ${process.env.PGUSER}`,
@@ -287,7 +288,7 @@ export default {
 	},
 
 	async getUserDataByID(id){
-		const res = await pool.query(selectables["users"] + "WHERE id = $1", [id]);
+		const res = await pool.query(selectables["users"] + "WHERE id = $1 AND activated = TRUE", [id]);
 		return res.rows[0];
 	},
 	async getUserData(email, pwd){
@@ -295,29 +296,47 @@ export default {
 		else if (!pwd) { return {"error": "password"}; }
 
 		// console.log("email/pwd", email, pwd);
-		const res = await pool.query(`SELECT * FROM users where email = $1`, [email]);
+		const res = await pool.query(`SELECT * FROM users WHERE email = $1`, [email]);
 		if (res.rows.length){
 			const data = res.rows[0];
 			// console.log("userdata", data);
 			// console.log("pass/hash", pwd, data._passhash);
-			const result = await bcrypt.compare(pwd, data._passhash);
-			delete data._passhash;
-			// console.log("pass/hash result", result);
-			return result ? data : {"error": "password"};
+			if (data.activated) {
+				const result = await bcrypt.compare(pwd, data._passhash);
+				delete data._passhash;
+				// console.log("pass/hash result", result);
+				return result ? data : {"error": "password"};
+			} else {
+				return {"error": "user status"};
+			}
 		} else {
 			 return {"error": "email"};
 		}
 
 		return {"error": "unknown"};
 	},
-	async createUser(data){
-		console.log("create user");
+	async createUser(data, isActivated = false){
+		console.log("create user", data);
+		const usersData = await pool.query(`SELECT * FROM users`);
+		if(usersData.rows.length) {
+			if (usersData.rows.filter(x=> x.email == data.email).length) {
+					return {"error": "email not unique"};
+			}
+		} else {
+			// if users table is empty it means it is first run and we have to create admin user
+			data.privs = 1;
+			isActivated = true;
+			console.log("create admin");
+		}
 		const pwd  = passGen.generate(passOptions);
 		console.log("make hash");
 		const hash = await bcrypt.hash(pwd, saltRounds);
 		console.log("ready");
 		// console.log(pwd, hash);
-		const res = await pool.query(`INSERT INTO users (firstname, lastname, email, sex, privs, _passhash) VALUES($1, $2, $3, $4, $5, $6) RETURNING id`, [data.firstname, data.lastname, data.email, data.sex, data.privs, hash]);
-    return res.rows;
+		const result = await pool.query(`INSERT INTO users (firstname, lastname, email, sex, privs, _passhash, activated) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id`, [data.firstname, data.lastname, data.email, data.sex, data.privs, hash, isActivated]);
+		if (result.rows.length === 1) {
+			return { "message": pwd };
+		}
+    return {"error": "user"};
 	},
 };

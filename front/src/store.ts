@@ -1,11 +1,10 @@
 import { reactive } from "vue";
 import axios from "axios";
 // import router from "./router";
-
+import project from '../package.json'
 const state = reactive({
   token: localStorage.getItem('token') || '',
   user: {},
-  test: "ok",
   error: "",
   options: [{
         value: 1,
@@ -177,4 +176,5 @@ export default {
   // doLogout,
   // getData
   state: state,
+  version: project.version,
 };

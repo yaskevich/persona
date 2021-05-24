@@ -11,12 +11,8 @@ import Book from './components/Book.vue';
 import LogList from './components/LogList.vue';
 import Login from './components/Login.vue';
 import Settings from './components/Settings.vue';
-import Acts from './components/Acts.vue';
-import Refs from './components/References.vue';
 import FactList from './components/FactList.vue';
-import Fact from './components/Fact.vue';
 import Log from './components/Log.vue';
-import Profile from './components/Profile.vue';
 
 const routes = [
 	{
@@ -27,7 +23,7 @@ const routes = [
 	{
 		path: '/profile',
 		name: 'Profile',
-		component: Profile,
+		component: () => import('./components/Profile.vue'),
 	},
 	{
 		path: '/settings',
@@ -37,12 +33,12 @@ const routes = [
 	{
 		path: '/acts',
 		name: 'Acts',
-		component: Acts,
+		component: () => import('./components/Acts.vue'),
 	},
 	{
 		path: '/refs',
 		name: 'Refs',
-		component: Refs,
+		component: () => import('./components/References.vue'),
 	},
 	{
 		path: '/facts',
@@ -102,8 +98,8 @@ const routes = [
 	},
 	{
 		path: '/fact/:id?',
-		component: Fact,
 		name: 'Fact',
+		component: () => import('./components/Fact.vue'),
 	},
 	{
 		path: '/log/:id?',

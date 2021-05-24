@@ -10,6 +10,11 @@
     Издания: {{data.books}}
   </div>
 
+  <el-divider></el-divider>
+  <div>
+    <small>Версия: {{version}}</small>
+  </div>
+
 </div>
 </template>
 
@@ -19,43 +24,24 @@ import store from "../store";
 
 export default defineComponent({
   name: 'Home',
-
   setup: () => {
     const data = reactive({});
 
     onBeforeMount(async() => {
-      data["persons"] = (await store.getData("persons")).data.length;
-      data["works"] = (await store.getData("works")).data.length;;
-      data["books"] = (await store.getData("books")).data.length;;
+      [data["persons"], data["works"], data["books"]] = (await Promise.all(
+        [ store.getData("persons"),
+          store.getData("works"),
+          store.getData("books"),
+        ])
+      ).map(x => x.data.length);
+
     });
 
-
-    return { data }
+    return { data, version: store.version }
   }
 })
 </script>
 
 <style scoped>
 
-
-.box {
-max-width:400px;
-margin:auto;
-/* border: 1px solid red; */
-}
-a {
-  color: #42b983;
-}
-
-label {
-  margin: 0 0.5em;
-  font-weight: bold;
-}
-
-code {
-  background-color: #eee;
-  padding: 2px 4px;
-  border-radius: 4px;
-  color: #304455;
-}
 </style>

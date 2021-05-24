@@ -228,9 +228,13 @@ export default {
 								} else {
 									record[key] = "null";
 								}
-						} else { // string
+						} else if (dbData[key]["data_type"] === "boolean") {
+								record[key] = Boolean(data[key]);
+						}
+						 else { // string
 							// trim
 							if (data[key]) {
+
 								data[key] = data[key].trim();
 							}
 							// check for well-formed string && prevent SQLi

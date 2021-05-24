@@ -26,7 +26,8 @@
     </el-form-item>
     <el-alert v-if="infoAlert"
     :title="infoAlert"
-    type="success"
+    :center="true"
+    type="error"
     effect="dark">
   </el-alert>
     <el-button v-else type="primary" @click="confirm">{{isRegistered?"Сохранить": "Отправить заявку"}}</el-button>
@@ -35,8 +36,8 @@
   </el-form>
 </template>
 <script lang="ts">
-import { ElForm } from 'element-plus';
-import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
+import { ElForm, ElMessageBox,   } from 'element-plus';
+import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance, h } from 'vue';
 import store from "../store";
 
 export default defineComponent({
@@ -76,9 +77,23 @@ export default defineComponent({
             }
           } else {
             const result = await store.initUser(form);
-            if("data" in result && "id" in result.data) {
-              infoAlert.value = "Заявка сохранена. После одобрения модератором будет выслано письмо с паролем."
+            if("data" in result) {
+              if ("error" in result.data) {
+              infoAlert.value = result.data.error;
+            } else if ("message" in result.data) {
+              ElMessageBox({
+                    message: h('div', null, [
+                      h('p', null, [h('span', null, 'После одобрения заявки модератором Вы получите доступ к интерфейсу редактирования по паролю')]),
+                      h('p', null, [h('b', { style: 'color: teal' }, result.data.message)]),
+                    ]),
+                    title: "Заявка отправлена",
+                    type: "success",
+                    showClose: true,
+                    center: true
+                  });
+              formRef.value?.resetFields();
             }
+          }
           }
         } else{
           console.log("form not valid");

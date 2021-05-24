@@ -20,8 +20,7 @@
       </span>
     </template>
   </el-dialog>
-
-  Типы событий
+  <h3>Типы событий</h3>
   <!--
   @node-drag-start="handleDragStart"
   @node-drag-enter="handleDragEnter"
@@ -53,7 +52,7 @@
                  <el-dropdown-item @click="addItem(node, data)">Добавить соседний пункт</el-dropdown-item>
                  <el-dropdown-item @click="addItem(node, data, true)">Добавить вложенный пункт</el-dropdown-item>
                  <el-dropdown-item @click="renameItem(node, data)">Переименовать</el-dropdown-item>
-                 <!-- <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>Удалить этот пункт</strong></el-dropdown-item> -->
+                 <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>Удалить этот пункт</strong></el-dropdown-item>
                </el-dropdown-menu>
              </template>
            </el-dropdown>
@@ -63,9 +62,7 @@
   </el-tree>
 </template>
 
-
 <script lang="ts">
-// import { ElForm } from 'element-plus';
 import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
 import { ElForm } from 'element-plus';
 import store from "../store";
@@ -82,7 +79,7 @@ export default defineComponent({
 
 
     onBeforeMount(async() => {
-      const result = await store.getData("acts");
+      const result: Object = await store.getData("acts");
       if("data" in result) {
         const nested = store.nest(result.data)
         // console.log("nest", nested);
@@ -113,7 +110,7 @@ export default defineComponent({
         console.log(`${draggingNode.label}  ${draggingNode.data.id} ${dropType} ${dropNode.label} ${dropNode.data.id}`);
 
         const parent_id = dropType === "inner" ? dropNode.data.id : dropNode.data.parent;
-        const result = await store.postData("acts", { "id":  draggingNode.data.id, "parent": parent_id });
+        const result = await store.postData("acts", { "id":  draggingNode.data.id, "title": draggingNode.label, "parent": parent_id });
         // console.log(result);
         if(!("data" in result && "id" in result.data)) {
           console.log("error!");
@@ -141,7 +138,7 @@ export default defineComponent({
         console.log("!!", node, datum);
         const parent_id = node?.parent?.data?.id || null;
         console.log("parent", node?.parent?.data?.id, parent_id);
-        console.log(("acts", { "title":  dialogData.text, "parent": parent_id }));
+        console.log("acts", { "title":  dialogData.text, "parent": parent_id });
         const result = await store.postData("acts", { "title":  dialogData.text, "parent": childmode? datum.id : parent_id });
         console.log(result);
         if(!("data" in result && "id" in result.data)) {

@@ -3,7 +3,7 @@
   <div id="main" v-if="dataReady">
     <div v-if="loggedIn">
       <el-container>
-        <el-aside width="210px" >
+        <el-aside width="210px" style="overflow-y: hidden;" >
           <el-menu @select="selMenu" :collapse="false" class="el-menu-vertical-demo">
             <el-submenu v-for="(v, k) in menuScheme" :index="String(k)" :key="k">
               <template #title><i :class="v.icon"></i><span>{{v.title}}</span></template>

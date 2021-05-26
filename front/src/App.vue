@@ -142,7 +142,7 @@ export default defineComponent({
 </script>
 
 <style>
- #app, textarea, .el-dropdown-menu__item, .el-select-dropdown__item {
+ #app, textarea, .el-dropdown-menu__item, .el-select-dropdown__item, .el-popper {
      font-family: Avenir, Helvetica, Arial, sans-serif;
      -webkit-font-smoothing: antialiased;
      -moz-osx-font-smoothing: grayscale;

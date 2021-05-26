@@ -1,5 +1,6 @@
 <template>
-    <el-form label-width="320px" :model="settings" ref="formRef" :rules="rules">
+    <MainTitle title="Проект" :callback="confirm" text="Сохранить"></MainTitle>
+    <el-form label-width="220px" :model="settings" ref="formRef" :rules="rules">
 
       <el-form-item label="Основная персона">
       <el-select
@@ -20,14 +21,14 @@
         <el-input placeholder="..." v-model="settings.title" class="text-input"></el-input>
       </el-form-item>
 
-     <el-button type="primary" @click="confirm">Сохранить</el-button>
     </el-form>
 </template>
 
 <script lang="ts">
-import { ref } from 'vue';
-import { onBeforeMount } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import store from "../store";
+import MainTitle from './MainTitle.vue';
+
 export default {
   name: "Settings",
 
@@ -74,7 +75,7 @@ export default {
     return { confirm, settings, persons, rules, formRef, };
   },
   components: {
-
+    MainTitle,
   }
 };
 </script>

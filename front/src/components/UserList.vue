@@ -1,7 +1,6 @@
 <template>
-  <div>
-    Пользователи
-  </div>
+  <MainTitle title="Пользователи" :callback="confirm"></MainTitle>
+
   <el-form :model="form" ref="formRef" label-width="100px" :rules="rules" :inline="true">
     <el-form-item prop="firstname">
       <el-input placeholder="Имя" v-model="form.firstname" class="text-input"></el-input>
@@ -15,7 +14,6 @@
       <el-input placeholder="Эл. почта" v-model="form.email" class="text-input"></el-input>
     </el-form-item>
 
-
     <el-form-item>
       <el-radio-group v-model="form.sex">
         <el-radio label="1">Мужчина</el-radio>
@@ -23,10 +21,8 @@
       </el-radio-group>
     </el-form-item>
 
-
-
-    <el-button type="primary" @click="resetForm">Очистить</el-button>
-    <el-button type="primary" @click="confirm">Добавить</el-button>
+    <el-button icon="el-icon-delete" circle @click="resetForm"></el-button>
+    <!-- <el-button type="primary" @click="confirm">Добавить</el-button> -->
   </el-form>
 <div style="margin-top:2rem;"></div>
   <el-row v-for="(value, key) in users"  :gutter="20" :key="key">
@@ -40,7 +36,7 @@
     </div>
     </el-col>
     <el-col :span="4">
-      <div v-if="value.privs == 1 || me.id === value.id ">
+      <div v-if="me.id === value.id" class="grid-content">
         <i class="el-icon-check"></i>
       </div>
       <div v-else>
@@ -55,6 +51,7 @@
 import { ElForm, ElMessageBox,   } from 'element-plus';
 import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
 import store from "../store";
+import MainTitle from './MainTitle.vue';
 
 export default defineComponent({
   setup() {
@@ -134,41 +131,8 @@ export default defineComponent({
       me: store.state.user,
     };
   },
+  components: {
+    MainTitle,
+  }
 });
 </script>
-<style scoped>
-.text-input{
-  width: 10rem;
-  margin-right:1rem;
-}
-.el-row {
-   margin-bottom: 20px;
-   &:last-child {
-     margin-bottom: 0;
-   }
- }
- .el-col {
-   border-radius: 4px;
- }
- .bg-purple-dark {
-   background: #99a9bf;
- }
- .bg-purple {
-   background: #d3dce6;
- }
- .bg-purple-light {
-   background: #e5e9f2;
- }
- .grid-content {
-   border-radius: 4px;
-   /* min-height: 36px; */
- }
- .row-bg {
-   padding: 10px 0;
-   background-color: #f9fafc;
- }
- .full-width{
-   display: block;
-   width: 100%;
- }
-</style>

@@ -1,8 +1,6 @@
 <template>
-  <div style="margin-bottom: 1rem;">
-    Факты
-    <el-button type="primary" @click="openForm">Добавить</el-button>
-  </div>
+  <MainTitle title="Факты" :callback="confirm"></MainTitle>
+
   <el-row v-for="(value, key) in facts"  :gutter="20" :key="key">
 
     <el-col :span="4"><div class="grid-content bg-purple-light">
@@ -28,10 +26,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
+import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance, h } from 'vue';
 import { ElForm } from 'element-plus';
 import router from "../router";
 import store from "../store";
+import MainTitle from './MainTitle.vue';
 
 export default defineComponent({
   setup() {
@@ -51,15 +50,18 @@ export default defineComponent({
       }
     });
 
-    const openForm = () => {
+    const confirm = () => {
       router.push("/fact")
     };
 
     return {
-      openForm,
+      confirm,
       formRef,
-      facts
+      facts,
     };
   },
+  components: {
+    MainTitle,
+  }
 });
 </script>

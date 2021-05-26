@@ -136,34 +136,67 @@ export default defineComponent({
 </script>
 
 <style>
-  textarea, .el-dropdown-menu__item, .el-select-dropdown__item {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  #app {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    /* color: #2c3e50; */
+ #app, textarea, .el-dropdown-menu__item, .el-select-dropdown__item {
+     font-family: Avenir, Helvetica, Arial, sans-serif;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+     /* text-align: center; */
+    /* color: #2c3e50;     */
     /* margin-top: 60px; */
-  }
-  .el-header {
-    background-color: #b3c0d1;
-    color: #333;
-    line-height: 60px;
-    text-align: right;
-    /* font-size: .75rem; */
-  }
-  .el-aside {
-    text-align:left;
-  }
-  .el-menu-vertical-demo:not(.el-menu--collapse) {
-   width: 200px;
-   min-height: 400px;
- }
+}
+ .el-header {
+     background-color: #b3c0d1;
+     color: #333;
+     line-height: 60px;
+     text-align: right;
+    /* font-size: .75rem;
+     */
+}
+ .el-aside {
+     text-align:left;
+}
+ .el-menu-vertical-demo:not(.el-menu--collapse) {
+     width: 200px;
+     min-height: 400px;
+}
  .username{
-   margin-left:5px;
- }
+     margin-left:5px;
+}
+ .text-input{
+     width: 10rem;
+     margin-right:1rem;
+}
+ .full-width{
+     display: block;
+     width: 100%;
+}
+ .el-row {
+     margin-bottom: 20px;
+     &:last-child {
+         margin-bottom: 0;
+    }
+}
+ .el-col {
+     border-radius: 4px;
+}
+ .bg-purple-dark {
+     background: #99a9bf;
+}
+ .bg-purple {
+     background: #d3dce6;
+}
+ .bg-purple-light {
+     background: #e5e9f2;
+}
+ .grid-content {
+     border-radius: 4px;
+     /* min-height: 36px; */
+     min-height: 2rem;
+     line-height: 2rem;
+     text-align: center;
+}
+ .row-bg {
+     padding: 10px 0;
+     background-color: #f9fafc;
+}
 </style>

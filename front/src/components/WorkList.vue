@@ -1,11 +1,5 @@
 <template>
-  <div>
-    Произведения
-  </div>
-
-  <div style="margin-bottom: 1rem;">
-    <el-button type="primary" @click="openForm">Добавить</el-button>
-  </div>
+  <MainTitle title="Произведения" :callback="confirm"></MainTitle>
 
   <el-row v-for="(value, key) in works"  :gutter="20" :key="key">
     <el-col :span="16"><div class="grid-content bg-purple">
@@ -31,6 +25,7 @@
 import { defineComponent, ref, reactive, onBeforeMount } from 'vue';
 import store from "../store";
 import router from "../router";
+import MainTitle from './MainTitle.vue';
 
 export default defineComponent({
   setup() {
@@ -50,44 +45,18 @@ export default defineComponent({
 
     });
 
-    const openForm = () => {
+    const confirm = () => {
       router.push("/work/")
     };
 
     return {
       works,
       persons,
-      openForm
+      confirm
     };
   },
+  components: {
+    MainTitle,
+  }
 });
 </script>
-
-<style>
-  .el-row {
-    margin-bottom: 20px;
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-  .el-col {
-    border-radius: 4px;
-  }
-  .bg-purple-dark {
-    background: #99a9bf;
-  }
-  .bg-purple {
-    background: #d3dce6;
-  }
-  .bg-purple-light {
-    background: #e5e9f2;
-  }
-  .grid-content {
-    border-radius: 4px;
-    min-height: 36px;
-  }
-  .row-bg {
-    padding: 10px 0;
-    background-color: #f9fafc;
-  }
-</style>

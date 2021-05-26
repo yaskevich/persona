@@ -1,34 +1,42 @@
 <template>
-  <div>Произведение</div>
+  <MainTitle :title="'Произведение ' + $route.params.id " :callback="confirm" :text="work.id? 'Сохранить': 'Добавить'"></MainTitle>
+
   <el-form :model="work" ref="formRef" label-width="100px" :rules="rules">
-    <el-form-item prop="title">
+    <el-form-item prop="title" label="Название">
       <el-input placeholder="Название" v-model="work.title" class="text-input"></el-input>
     </el-form-item>
-    <el-form-item prop="genre">
+    <el-form-item prop="genre" label="Тип">
       <el-input placeholder="Тип" v-model="work.genre" class="text-input"></el-input>
     </el-form-item>
-    <el-form-item>
-      <el-button type="primary" @click="setDefaultAuthor" v-if="persons.length && mainperson">Автор – {{persons.filter(x=>x.id === mainperson)[0].value}}</el-button>
-    <el-select
-        v-model="work.authors"
-        filterable
-        multiple
-        placeholder="Персоны"
-        >
-        <el-option
-          v-for="item in persons"
-          :key="item.id"
-          :label="item.value"
-          :value="item.id">
-        </el-option>
-      </el-select>
+    <el-form-item label="Авторы">
+       <el-space wrap>
+      <el-select
+          v-model="work.authors"
+          filterable
+          multiple
+          placeholder="Персоны"
+          >
+          <el-option
+            v-for="item in persons"
+            :key="item.id"
+            :label="item.value"
+            :value="item.id">
+          </el-option>
+        </el-select>
+
+        <el-button type="primary" @click="setDefaultAuthor" v-if="persons.length && mainperson">Автор – {{persons.filter(x=>x.id === mainperson)[0].value}}</el-button>
+      </el-space>
     </el-form-item>
 
+
     <!-- <el-button type="primary" @click="resetForm">Очистить</el-button> -->
-    <el-space wrap>
-    <el-button type="primary" @click="confirm">Сохранить</el-button>
-    <el-button type="danger" @click="deleteWork" v-if="work.id">Удалить</el-button>
-    </el-space>
+    <el-form-item>
+      <el-button type="primary" @click="confirm">Сохранить</el-button>
+    </el-form-item>
+    <el-form-item>
+      <el-button type="danger" @click="deleteWork" v-if="work.id">Удалить</el-button>
+    </el-form-item>
+    
   </el-form>
 </template>
 
@@ -38,6 +46,7 @@ import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance 
 import store from "../store";
 import { useRoute } from 'vue-router';
 import router from "../router";
+import MainTitle from './MainTitle.vue';
 
 export default defineComponent({
   setup() {
@@ -131,6 +140,9 @@ export default defineComponent({
       deleteWork,
     };
   },
+  components: {
+    MainTitle,
+  }
 });
 
 </script>

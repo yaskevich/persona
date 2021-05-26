@@ -1,14 +1,16 @@
 <template>
+  <MainTitle :title="'Издание ' + $route.params.id " :callback="confirm" :text="form.id? 'Сохранить': 'Добавить'"></MainTitle>
+
 <el-form :model="form" ref="formRef" label-width="100px" :rules="rules">
-  <el-form-item prop="title">
+  <el-form-item prop="title" label="Название">
     <el-input placeholder="Название" v-model="form.title" class="text-input"></el-input>
   </el-form-item>
 
-  <el-form-item prop="published">
+  <el-form-item prop="published" label="Год">
     <el-input placeholder="Год" v-model.number="form.published" class="text-input"></el-input>
   </el-form-item>
 
-<el-form-item>
+<el-form-item label="Произведения">
   <el-select
       v-model="form.works"
       multiple
@@ -27,14 +29,15 @@
       </el-option>
     </el-select>
   </el-form-item>
-  <el-form-item>
+
+  <el-form-item label="Редакторы">
   <el-select
       v-model="form.editors"
       multiple
       filterable
       remote
       reserve-keyword
-      placeholder="Редакторы"
+      placeholder="Персона"
       :remote-method="getEditors"
       :loading="loading">
       <el-option
@@ -45,8 +48,9 @@
       </el-option>
     </el-select>
   </el-form-item>
-  <el-form-item>
-  <!-- <el-select
+
+  <!-- <el-form-item>
+  <el-select
       v-model="form.selectedAuthors"
       multiple
       filterable
@@ -61,11 +65,11 @@
         :label="item.value"
         :value="item.id">
       </el-option>
-    </el-select>  -->
-  </el-form-item>
+    </el-select>
+  </el-form-item> -->
 
-    <el-button type="primary" @click="resetForm">Очистить</el-button>
-    <el-button type="primary" @click="confirm">{{form.id? "Сохранить": "Добавить"}}</el-button>
+    <!-- <el-button type="primary" @click="resetForm">Очистить</el-button>
+    <el-button type="primary" @click="confirm">{{form.id? "Сохранить": "Добавить"}}</el-button> -->
 
 </el-form>
 </template>
@@ -77,6 +81,7 @@ import { ElForm } from 'element-plus';
 import store from "../store";
 import router from "../router";
 import { useRoute } from 'vue-router';
+import MainTitle from './MainTitle.vue';
 
 export default defineComponent({
   setup() {
@@ -184,5 +189,8 @@ export default defineComponent({
       worksAll
     };
   },
+  components: {
+    MainTitle,
+  }
 });
 </script>

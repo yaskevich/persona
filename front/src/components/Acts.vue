@@ -20,7 +20,11 @@
       </span>
     </template>
   </el-dialog>
-  <h3>Типы событий</h3>
+
+  <el-row type="flex" justify="center">
+    <h3>Типы событий</h3>
+  </el-row>
+
   <!--
   @node-drag-start="handleDragStart"
   @node-drag-enter="handleDragEnter"

@@ -1,7 +1,8 @@
 <template>
-  <div style="margin-bottom: 1rem;">
-    Журнал действий пользователей
-  </div>
+  <el-row type="flex" justify="center">
+    <h3>Журнал действий пользователей</h3>
+  </el-row>
+
   <el-row v-for="(value, key) in logs"  :gutter="20" :key="key">
     <el-col :span="6">
       <div class="grid-content bg-purple-light">

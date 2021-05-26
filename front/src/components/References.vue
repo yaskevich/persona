@@ -5,6 +5,7 @@
   @opened="onDialogOpened"
   width="30%">
 
+  <el-row type="flex" justify="center">
     <el-space>
 
       <el-radio-group v-model="bib.reftype">
@@ -14,8 +15,9 @@
       </el-radio-group>
 
     </el-space>
+  </el-row>
 
-    <div class="box">
+    <el-row type="flex" justify="center">
 
       <el-select
         v-model="bib.authors"
@@ -33,12 +35,13 @@
         </el-option>
       </el-select>
 
-    </div>
+    </el-row>
 
     <div v-if="bib.reftype==2">
 
-      <div>Страницы</div>
+      <el-row type="flex" justify="center">Страницы</el-row>
 
+      <el-row type="flex" justify="center">
       <el-tag
         :key="entry"
         v-for="entry in pages"
@@ -60,27 +63,28 @@
 
       <el-button v-else class="button-new-tag" size="small" @click="showPageInput">+ добавить</el-button>
 
+
       <!-- <el-space> -->
         <!-- <el-input v-model="bib.text"><template #prepend>С</template></el-input>
         <el-input v-model="bib.text"><template #prepend>По</template></el-input> -->
         <!-- <el-input v-model="bib.text"></el-input>
         <el-button type="primary" icon="el-icon-plus"></el-button> -->
       <!-- </el-space> -->
-
+    </el-row>
     </div>
 
-    <div class="box">
+    <el-row type="flex" justify="center">
 
       <span v-if="bib.reftype==0">Запись</span>
       <span v-if="bib.reftype==1">Название</span>
       <span v-if="bib.reftype==2">Название-описание</span>
 
-    </div>
+    </el-row>
 
     <el-input v-model="bib.title" ref="titleInputRef"></el-input>
 
-    <div v-if="bib.reftype==2">
-      <div class="box">Цитата</div>
+    <div v-if="bib.reftype==2" style="margin-top:1rem;">
+      <el-row type="flex" justify="center">Цитата</el-row>
       <el-input v-model="bib.content" type="textarea"></el-input>
     </div>
 
@@ -93,9 +97,9 @@
 
   </el-dialog>
 
-  <div v-if="!isEmbedded">
-    Библиографические записи
-  </div>
+  <el-row type="flex" justify="center" v-if="!isEmbedded">
+    <h3>Библиографические записи</h3>
+  </el-row>
 
   <el-tree
     ref="treeRef"
@@ -403,9 +407,6 @@ export default defineComponent({
     justify-content: space-between;
     font-size: 14px;
     padding-right: 8px;
-  }
-  .box{
-    margin-top: 1rem;
   }
   .el-tag + .el-tag {
    margin-left: 10px;

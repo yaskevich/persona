@@ -33,13 +33,19 @@
         </el-container>
       </el-container>
     </div>
-    <div v-else style="margin-top:4rem;">
-      <div>Авторизация пользователя</div>
-      <Login/>
-      <el-divider><i class="el-icon-star-on"></i></el-divider>
-      <div>или</div>
-      <h2>Регистрация новой учетной записи</h2>
-      <Profile/>
+    <div v-else style="margin-top:4rem;text-align:center;">
+      <div style="max-width:600px;display: inline-block;margin: 0 auto;">
+        <el-row type="flex" justify="center">
+          <h3>Авторизация пользователя</h3>
+        </el-row>
+        <Login/>
+
+        <!-- <el-divider><i class="el-icon-star-on"></i></el-divider> -->
+        <el-divider>или</el-divider>
+
+        <h3>Регистрация новой учетной записи</h3>
+        <Profile/>
+      </div>
     </div>
   </div>
   <div v-else>

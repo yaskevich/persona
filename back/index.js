@@ -8,6 +8,8 @@ import passport from 'passport';
 import passportJWT from 'passport-jwt';
 import jwt from 'jsonwebtoken';
 import db from './db.js';
+import history from 'connect-history-api-fallback';
+
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,12 +46,13 @@ if (!process.env.JWT_SECRET){
 
 	passport.use(strategy);
 	const auth = passport.authenticate('jwt', {session: false});
-	// app.use(compression());
-	// app.set('trust proxy', 1);
+	app.use(compression());
+	app.set('trust proxy', 1);
 	app.use(passport.initialize());
 	app.use(passport.session());
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({ extended: true }));
+	app.use(history());
 	app.use(express.static('public'));
 
 	app.post('/api/user/login', async(req, res) => {

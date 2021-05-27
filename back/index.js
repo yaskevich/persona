@@ -76,7 +76,8 @@ if (!process.env.JWT_SECRET){
 	});
 
 	app.get('/api/user/info', auth, async(req,res) => {
-		res.json(req.user);
+		const settings = await db.getData("settings", 1);
+		res.json(Object.assign(req.user, {"settings": settings?.[0]}));
 	 });
 
 	app.post('/api/user/reg', async(req,res) => {

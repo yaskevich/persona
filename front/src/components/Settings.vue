@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, ref, reactive } from 'vue';
 import store from "../store";
 import MainTitle from './MainTitle.vue';
 
@@ -34,28 +34,22 @@ export default {
 
   setup() {
     const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
-    let settings = ref({});
     let persons = ref([]);
+    const settings = reactive({});
 
     onBeforeMount(async() => {
       const personsData = await store.getData("persons");
       persons.value = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
       console.log(persons);
-
-      const result = await store.getData("settings");
-      if("data" in result) {
-        console.log("settings", result.data);
-          settings.value = result.data[0];
-      }
-      console.log("settings", settings.value);
+      Object.assign(settings, store.state.user.settings);
     });
-
 
     const confirm = () => {
       formRef.value?.validate(async(valid) => {
         if(valid) {
           console.log('save:', settings.value);
-          const result = await store.postData("settings", Object.assign({"id": 1}, settings.value));
+          Object.assign(store.state.user.settings, settings);
+          const result = await store.postData("settings", settings);
           console.log(result);
         } else{
           console.log("form not valid");
@@ -63,8 +57,6 @@ export default {
         }
       });
     };
-
-
 
     const  rules = {
       title: [

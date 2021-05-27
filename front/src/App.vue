@@ -1,4 +1,7 @@
 <template>
+  <metainfo>
+    <template v-slot:title="{ content }">{{ content }}</template>
+  </metainfo>
 
   <div id="main" v-if="dataReady">
     <div v-if="loggedIn">
@@ -62,10 +65,28 @@ import router from './router'
 import store from './store'
 import Login from './components/Login.vue'
 import Profile from './components/Profile.vue'
+import { useMeta } from 'vue-meta'
 
 export default defineComponent({
   name: 'App',
   setup() {
+    useMeta(computed(() => ({ title: store.state?.user?.settings?.title || "∙" })));
+    // useMeta({
+    //   title: title.value,
+    //   htmlAttrs: { lang: ['ru'], amp: true },
+      // description: 'The Description',
+      // og: {
+      //   title: 'Og Title',
+      //   description: 'Bla bla',
+      //   image: [
+      //     'https://picsum.photos/600/400/?image=80',
+      //     'https://picsum.photos/600/400/?image=82'
+      //   ]
+      // },
+      // twitter: {
+      //   title: 'Twitter Title'
+      // },
+    // });
     // const windowWidth = ref(window.innerWidth);
     // const onWidthChange = () => windowWidth.value = window.innerWidth;
     // onMounted(() => window.addEventListener('resize', onWidthChange));
@@ -99,7 +120,7 @@ export default defineComponent({
     onBeforeMount(async () => {
       await store.getUser()
       dataReady.value = true;
-      console.log('app → mounted!')
+      console.log('app → mounted!');
     });
 
     console.log('app → setup');
@@ -121,6 +142,8 @@ export default defineComponent({
     // const isCollapsed = computed(() => windowWidth.value < 550 ? true: false);
     // const asidewidth = computed(() => windowWidth.value < 550 ? "50px": "200px");
     const loggedIn = computed(() =>  Object.keys(store?.state?.user).length);
+
+
 
     return {
       // asidewidth,

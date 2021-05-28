@@ -1,31 +1,44 @@
 <template>
-   <el-form label-width="120px" v-model="fact">
-      <el-form-item prop="stamp" label="">
+   <MainTitle :title="'Факт ' + $route.params.id"  :callback="confirm" :text="fact.id? 'Сохранить': 'Добавить'"></MainTitle>
+   <el-form label-width="120px" ref="formRef" :model="fact" :rules="rules">
+
          <el-space  direction="horizontal" style="display:flex;" wrap size="large">
-            <el-date-picker v-model="timestamp" format="YYYY.MM.DD HH:mm" type="datetime" placeholder="Техническое время" :shortcuts="shortcuts"></el-date-picker>
-            <!-- <el-input placeholder="переписка (БП_отправитель)" v-model="fact.firstname"></el-input> -->
-            <el-cascader v-model="fact.acts"  :options="acts" clearable filterable :props="{ emitPath: false, multiple: true, value: 'id', label: 'title' }" placeholder="Вид(ы) деятельности"></el-cascader>
-            <el-select
-                v-model="fact.agent"
-                filterable
-                placeholder="Деятель"
-                >
-                <el-option
-                  v-for="item in persons"
-                  :key="item.id"
-                  :label="item.value"
-                  :value="item.id">
-                </el-option>
-              </el-select>
+           <el-tooltip class="item" placement="top-end">
+           <template #content>
+             Примерные дата и время события,<br/> которые необходимы, чтобы<br/> сортировать факты друг за другом
+           </template>
+            <el-form-item prop="stamp">
+               <el-date-picker v-model="fact.stamp" format="YYYY.MM.DD HH:mm" type="datetime" placeholder="Техническое время" :shortcuts="shortcuts"></el-date-picker>
+            </el-form-item>
+            </el-tooltip>
+
+            <el-form-item prop="acts">
+               <el-cascader v-model="fact.acts"  :options="db.acts" clearable filterable :props="{ emitPath: false, multiple: true, value: 'id', label: 'title' }" placeholder="Вид(ы) деятельности"></el-cascader>
+            </el-form-item>
+
+            <el-form-item label="Деятель">
+               <el-select
+                   v-model="fact.agent"
+                   filterable
+                   placeholder="Деятель"
+                   >
+                   <el-option
+                     v-for="item in db.persons"
+                     :key="item.id"
+                     :label="item.value"
+                     :value="item.id">
+                   </el-option>
+                 </el-select>
+              </el-form-item>
          </el-space>
-      </el-form-item>
-      <el-form-item prop="datedesc" label="Дата">
-         <el-input placeholder="10.05.1928" v-model="fact.datedesc" class="text-input" prop="datedesc"></el-input>
+
+      <el-form-item label="Дата">
+         <el-input placeholder="10.05.1928" v-model="fact.datedesc" class="text-input"></el-input>
       </el-form-item>
       <el-form-item label="Место">
          <el-input placeholder="Пекин" v-model="fact.place"></el-input>
       </el-form-item>
-      <el-form-item label="Описание">
+      <el-form-item prop="title" label="Описание">
          <el-input
             type="textarea"
             autosize
@@ -42,7 +55,7 @@
                placeholder="Участники"
                >
                <el-option
-                  v-for="item in persons"
+                  v-for="item in db.persons"
                   :key="item.id"
                   :label="item.value"
                   :value="item.id">
@@ -50,7 +63,7 @@
             </el-select>
             <el-select v-model="fact.persons2" filterable multiple placeholder="Упомянуты">
                <el-option
-                  v-for="item in persons"
+                  v-for="item in db.persons"
                   :key="item.id"
                   :label="item.value"
                   :value="item.id">
@@ -58,7 +71,7 @@
             </el-select>
             <el-select v-model="fact.works" multiple filterable placeholder="Произведения">
                <el-option
-                  v-for="item in works"
+                  v-for="item in db.works"
                   :key="item.id"
                   :label="item.title"
                   :value="item.id">
@@ -66,7 +79,7 @@
             </el-select>
             <el-select v-model="fact.books" multiple filterable placeholder="Издания">
                <el-option
-                  v-for="item in books"
+                  v-for="item in db.books"
                   :key="item.id"
                   :label="item.title"
                   :value="item.id">
@@ -91,7 +104,7 @@
       <!-- :on-preview="handlePreview"
          :on-remove="handleRemove"
          :file-list="fileList" -->
-      <el-form-item prop="file" label="Медиафайл">
+      <el-form-item label="Медиафайл">
          <!-- <el-upload
             class="upload-demo"
             drag
@@ -117,14 +130,16 @@
            </el-option>
          </el-select>
          </el-form-item> -->
-      <el-button type="primary" @click="onSubmit" v-if="timestamp">Сохранить</el-button>
-      <div v-else>
+      <!-- <el-button type="primary" @click="confirm">Сохранить</el-button> -->
+      <!-- v-if="timestamp" -->
+      <!-- <div v-else>
          <el-alert
            title="Сохранение недоступно, если пункт «Техническое время» не заполнен"
            type="info"
            effect="dark">
          </el-alert>
-      </div>
+      </div> -->
+   <el-button type="danger" v-if="fact?.id" @click="deleteFact">Удалить</el-button>
    </el-form>
    <el-dialog
    title="Источники"
@@ -142,108 +157,60 @@
      </template>
    </el-dialog>
 </template>
-<script>
-import { ref, reactive, toRaw } from 'vue';
-import { onBeforeMount } from 'vue';
+<script lang="ts">
+import { ElForm } from 'element-plus';
+import { defineComponent, onBeforeMount, ref, reactive } from 'vue';
 import store from "../store";
 import References from "./References.vue";
 import { useRoute } from 'vue-router';
 import router from "../router";
+import MainTitle from './MainTitle.vue';
 
-export default {
-  name: "Fact",
-  props: {
-    // datum: Object,
-  },
+export default defineComponent({
   setup() {
+   const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
    const vuerouter = useRoute();
    const id = vuerouter.params.id;
-   const timestamp = ref();
    const fact = reactive({ works: [], persons1: [], persons2: [], books: [], acts: [], datedesc: '', title: '', stamp: null, agent: null, media: null, refs: [] });
-   const persons  = ref([]);
-   const works    = ref([]);
-   const books    = ref([]);
-   const acts     = ref([]);
+   const db = reactive({persons: [], works: [], books: [], acts: []});
    const dialogVisible = ref(false);
    const bibRef = ref(null);
 
    const shortcuts = [{
       text: '1920',
-      value: (() => new Date(1920, 1, 1, 9, 0, 0))(),
+      value: (() => new Date(1920, 1, 1, 12, 0, 0))(),
    }, {
       text: '1940',
-      value: (() => new Date(1940, 1, 1, 9, 0, 0))(),
+      value: (() => new Date(1940, 1, 1, 12, 0, 0))(),
    }, {
       text: '1960',
-      value: (() => new Date(1960, 1, 1, 9, 0, 0))(),
+      value: (() => new Date(1960, 1, 1, 12, 0, 0))(),
    }];
 
     onBeforeMount(async() => {
-
       console.log("router id", id);
       if(id) {
-        const result = await store.getData("facts", id);
-        if("data" in result) {
-           const data = result.data[0];
-          Object.assign(fact, data);
-          timestamp.value = fact.stamp;
-          console.log("fact", fact);
+        const {data} = await store.getData("facts", id);
+        if(data?.length) {
+          Object.assign(fact, data[0]);
+          // const dt  = new Date(fact.stamp);
+          // dt.setMinutes( dt.getMinutes() - dt.getTimezoneOffset() );
+         // fact.stamp = dt.toISOString();
+          console.log("stamp", fact.stamp);
+          // timestamp = fact.stamp;
         }
       }
 
-      const resultSettings = await store.getData("settings");
-      if("data" in resultSettings) {
-          fact.agent = resultSettings.data[0]["persona"];
-      }
+      const names  = Object.keys(db);
+      await Promise
+         .all(names.map(async(x) => store.getData(x)))
+         .then(v => v.forEach((x, i) => db[names[i]] = x.data));
 
-      const result = await store.getData("facts", id);
-      if("data" in result) {
-        console.log("ok");
-      }
-      const personsData = await store.getData("persons");
-      persons.value = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
-      // console.log(persons);
-
-      const resultWorks = await store.getData("works");
-      if("data" in resultWorks) {
-        works.value = resultWorks.data;
-      }
-
-      const resultBooks = await store.getData("books");
-      if("data" in resultBooks) {
-        books.value = resultBooks.data;
-      }
-
-      const resultActs = await store.getData("acts");
-      if("data" in result) {
-        const nested = store.nest(resultActs.data)
-        console.log("nest", nested);
-        acts.value = toRaw(nested);
-      }
-
+      db.persons = db.persons.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
+      db.acts  = store.nest(db.acts);
+      fact.agent = store.state.user.settings.persona;
+      console.log("DATA", db);
     });
-
-    const onSubmit = async() => {
-      // form.validate();
-      // console.log(typeof fact.stamp === "string" ? fact.stamp: fact.stamp.toISOString().replace('T',' ').replace('Z',''));
-      // console.log('val:', typeof timestamp.value);
-
-      if(timestamp.value && typeof timestamp.value === 'object') {
-         console.log("process date");
-         const dt  = timestamp.value;
-         dt.setMinutes( dt.getMinutes() - dt.getTimezoneOffset() );
-         fact.stamp = dt.toISOString();
-      }
-      console.log('save:', toRaw(fact));
-      const result = await store.postData("facts", fact);
-      console.log(result);
-
-      if(!("data" in result && "id" in result.data)) {
-       console.log("error!");
-      } else {
-       router.push("/facts")
-      }
-    };
 
     const handleClose = () => {
       // console.log("close", e);
@@ -253,14 +220,55 @@ export default {
 
     };
 
+    const deleteFact = async(id, key) => {
+      const {data} = await store.deleteById('facts', fact.id);
+      if (data?.id) {
+       router.push('/facts')
+      }
+    };
+
     const dialogOpened = () => {
       bibRef.value.setCheckedItems(fact.refs);
     };
 
-    return { timestamp, bibRef, onSubmit, fact, persons, works, books, acts, shortcuts, dialogVisible, handleClose, dialogOpened, };
+    const  rules = {
+      acts: [{ required: true, message: 'Выберите виды деятельности', trigger: 'change' }],
+      stamp: [ { required: true, message: 'Выставьте примерные дату и время', trigger: 'change' }],
+      title: [ { required: true, message: 'Заполните описание', trigger: 'blur' } ],
+   };
+
+   const confirm = async() => {
+     formRef.value?.validate(async(valid) => {
+        console.log("valid", valid);
+     if (valid) {
+        const datum = {...fact};
+        if(datum.stamp && typeof datum.stamp === 'object') {
+           datum.stamp = store.dateDropTimeZone(fact.stamp);
+           console.log("DROPPED", datum.stamp);
+        }
+         console.log('save:', datum);
+         const {data} = await store.postData("facts", datum);
+         if(fact.id != data?.id) {
+             router.replace("/fact/"+data.id);
+             fact.id = data.id;
+         }
+
+
+     //   if(!("data" in result && "id" in result.data)) {
+     //    console.log("error!");
+     //   } else {
+     //    router.push("/facts");
+     //   }
+        }
+     })
+
+   };
+
+    return { db, bibRef, confirm, fact, shortcuts, dialogVisible, handleClose, dialogOpened, rules, formRef, deleteFact, };
   },
   components: {
-     References
+   MainTitle,
+   References,
   }
-};
+});
 </script>

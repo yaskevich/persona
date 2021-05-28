@@ -58,7 +58,9 @@
                   v-for="item in db.persons"
                   :key="item.id"
                   :label="item.value"
-                  :value="item.id">
+                  :value="item.id"
+                  :disabled="item.disabled"
+                  >
                </el-option>
             </el-select>
             <el-select v-model="fact.persons2" filterable multiple placeholder="Упомянуты">
@@ -66,7 +68,9 @@
                   v-for="item in db.persons"
                   :key="item.id"
                   :label="item.value"
-                  :value="item.id">
+                  :value="item.id"
+                  :disabled="item.disabled"
+                  >
                </el-option>
             </el-select>
             <el-select v-model="fact.works" multiple filterable placeholder="Произведения">
@@ -120,16 +124,7 @@
             </template>
          </el-upload> -->
       </el-form-item>
-      <!-- <el-form-item>
-         <el-select v-model="user.privs" placeholder="Select" value-key>
-           <el-option
-             v-for="item in options"
-             :key="item.value"
-             :label="item.label"
-             :value="item.value">
-           </el-option>
-         </el-select>
-         </el-form-item> -->
+
       <!-- <el-button type="primary" @click="confirm">Сохранить</el-button> -->
       <!-- v-if="timestamp" -->
       <!-- <div v-else>
@@ -206,9 +201,11 @@ export default defineComponent({
          .all(names.map(async(x) => store.getData(x)))
          .then(v => v.forEach((x, i) => db[names[i]] = x.data));
 
-      db.persons = db.persons.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
-      db.acts  = store.nest(db.acts);
       fact.agent = store.state.user.settings.persona;
+      db.persons = db.persons.map (x => ({...x, value: x.firstname + ' ' + x.lastname, disabled: Boolean(x.id == fact.agent)}));
+      console.log(db.persons);
+      db.acts  = store.nest(db.acts);
+
       console.log("DATA", db);
     });
 

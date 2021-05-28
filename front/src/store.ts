@@ -119,9 +119,9 @@ const getData = async(table: string, id?: string): Promise<any> => {
     try {
     const config = { headers: { Authorization: "Bearer " + state.token }, "params": {} };
      if(id) { config["params"] = { id: id }; }
-     console.log(`GET ${table}`);
+     // console.log(`GET ${table}`);
      const response = await axios.get("/api/" + table, config);
-     console.log(response.data);
+     // console.log(response.data);
      return response;
    } catch (error) {
      console.log("Cannot get", error);
@@ -167,10 +167,19 @@ const classify = (x:keyable) => {
 const dateToString = (x:string) => {
   const dt  = new Date(x);
   return dt.toLocaleString('ru-RU');
-}
+};
+
+const dateDropTimeZone = (x:Date) => {
+  const dt  = new Date(x);
+  dt.setMinutes( dt.getMinutes() - dt.getTimezoneOffset() );
+  return dt.toISOString();
+};
 
 export default {
-  // state: readonly(state),
+  dateDropTimeZone,
+  nest,
+  classify,
+  dateToString,
   logout,
   initUser,
   postData,
@@ -178,11 +187,9 @@ export default {
   doLogin,
   getData,
   deleteById,
-  nest,
-  classify,
-  dateToString,
   // doLogout,
   // getData
+  // state: readonly(state),
   state: state,
   version: project.version,
 };

@@ -1,4 +1,5 @@
 <template>
+
   <el-dialog
   :title="dialogData.caption"
   v-model="dialogData.visible"
@@ -25,45 +26,57 @@
     <h3>Типы событий</h3>
   </el-row>
 
-  <!--
-  @node-drag-start="handleDragStart"
-  @node-drag-enter="handleDragEnter"
-  @node-drag-leave="handleDragLeave"
-  @node-drag-over="handleDragOver"
-  @node-drag-end="handleDragEnd"
-  :allow-drop="allowDrop"
-  :allow-drag="allowDrag"
- -->
-  <el-tree
-    :data="acts"
-    node-key="id"
-    :props="{ label: 'title', }"
-    default-expand-all
-    @node-drop="handleDrop"
-    draggable
+  <div style="max-width:350px;">
 
-    :expand-on-click-node="false"
-    style="max-width:350px;"
-    >
-    <template #default="{ node, data }">
-       <span class="custom-tree-node">
-         <span>{{ node.label }}</span>
-         <span>
-           <el-dropdown >
-             <i class="el-icon-s-tools"></i>
-             <template #dropdown>
-               <el-dropdown-menu>
-                 <el-dropdown-item @click="addItem(node, data)">Добавить соседний пункт</el-dropdown-item>
-                 <el-dropdown-item @click="addItem(node, data, true)">Добавить вложенный пункт</el-dropdown-item>
-                 <el-dropdown-item @click="renameItem(node, data)">Переименовать</el-dropdown-item>
-                 <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>Удалить этот пункт</strong></el-dropdown-item>
-               </el-dropdown-menu>
-             </template>
-           </el-dropdown>
+    <!--
+    @node-drag-start="handleDragStart"
+    @node-drag-enter="handleDragEnter"
+    @node-drag-leave="handleDragLeave"
+    @node-drag-over="handleDragOver"
+    @node-drag-end="handleDragEnd"
+    :allow-drag="allowDrag"
+   -->
+    <el-tree
+      :data="acts"
+      node-key="id"
+      :props="{ label: 'title', }"
+      default-expand-all
+      :allow-drop="allowDrop"
+      @node-drop="handleDrop"
+      draggable
+      :expand-on-click-node="false"
+      >
+      <template #default="{ node, data }">
+         <span class="custom-tree-node">
+           <span>{{ node.label }}</span>
+           <span>
+             <el-dropdown >
+               <i class="el-icon-s-tools"></i>
+               <template #dropdown>
+                 <el-dropdown-menu>
+                   <el-dropdown-item @click="addItem(node, data)">Добавить соседний пункт</el-dropdown-item>
+                   <el-dropdown-item @click="addItem(node, data, true)">Добавить вложенный пункт</el-dropdown-item>
+                   <el-dropdown-item @click="renameItem(node, data)">Переименовать</el-dropdown-item>
+                   <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>Удалить этот пункт</strong></el-dropdown-item>
+                 </el-dropdown-menu>
+               </template>
+             </el-dropdown>
+           </span>
          </span>
-       </span>
-     </template>
-  </el-tree>
+       </template>
+    </el-tree>
+
+    <el-row>
+
+      <el-alert v-if="!allowDrop()"
+        title="Перемещение элементов доступно пользователям с правами модератора и выше"
+        type="info">
+      </el-alert>
+      
+    </el-row>
+
+  </div>
+
 </template>
 
 <script lang="ts">
@@ -78,9 +91,6 @@ export default defineComponent({
     const dialogData = reactive({ visible: false, text: "", caption: "", func: null, id: 0 });
     const dialogInputRef = ref(null);
     const acts = reactive([]);
-
-    // const loading = ref(false);
-
 
     onBeforeMount(async() => {
       const result: Object = await store.getData("acts");
@@ -217,6 +227,8 @@ export default defineComponent({
       dialogInputRef.value.focus();
     };
 
+    const allowDrop = () => store.state.user.privs < 5;
+
     return {
       onDialogOpened,
       // handleDragStart,
@@ -225,7 +237,7 @@ export default defineComponent({
       // handleDragOver,
       // handleDragEnd,
       handleDrop,
-      // allowDrop,
+      allowDrop,
       // allowDrag,
       formRef,
       form,

@@ -36,7 +36,7 @@
     <el-form-item>
       <el-button type="danger" @click="deleteWork" v-if="work.id">Удалить</el-button>
     </el-form-item>
-    
+
   </el-form>
 </template>
 
@@ -54,7 +54,6 @@ export default defineComponent({
 
     const work  = ref({});
     const works = reactive([]);
-    const mainperson = ref();
     const persons = ref([]);
     const vuerouter = useRoute();
     const id = vuerouter.params.id;
@@ -78,8 +77,6 @@ export default defineComponent({
       persons.value = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
       console.log(persons);
 
-      const settingsData = await store.getData("settings");
-      mainperson.value = settingsData.data[0].persona;
     });
 
     // const resetForm = () => {
@@ -136,7 +133,7 @@ export default defineComponent({
       work,
       works,
       persons,
-      mainperson,
+      mainperson: store.state.user.settings.persona,
       deleteWork,
     };
   },

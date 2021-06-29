@@ -13,6 +13,7 @@ import Login from './components/Login.vue';
 import Settings from './components/Settings.vue';
 import FactList from './components/FactList.vue';
 import Log from './components/Log.vue';
+import GenreList from './components/GenreList.vue';
 
 const routes = [
 	{
@@ -70,6 +71,11 @@ const routes = [
 		path: '/works',
 		component: WorkList,
 		name: 'WorkList',
+	},
+	{
+		path: '/genres',
+		component: GenreList,
+		name: 'GenreList',
 	},
 	{
 		path: '/logs',

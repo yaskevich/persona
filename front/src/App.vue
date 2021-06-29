@@ -102,6 +102,7 @@ export default defineComponent({
           persons: 'Персоналии',
           works: 'Произведения',
           books: 'Издания',
+          genres: 'Жанры',
           acts: 'Деятельность',
           refs: 'Библиография',
         }

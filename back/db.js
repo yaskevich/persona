@@ -121,6 +121,11 @@ const tablesQueries = [
 		record_id integer not null
 	)`,
 	`ALTER TABLE logs OWNER TO ${process.env.PGUSER}`,
+	`CREATE TABLE IF NOT EXISTS genres (
+		id SERIAL PRIMARY KEY,
+		title text
+	)`,
+	`ALTER TABLE genres OWNER TO ${process.env.PGUSER}`,
 ];
 
 let tablesResult = await pool.query(databaseQuery);

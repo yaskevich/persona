@@ -41,7 +41,8 @@ const tablesQueries = [
 	`CREATE TABLE IF NOT EXISTS works (
 		id SERIAL PRIMARY KEY,
 		title text not null,
-		genre text,
+		genre integer,
+		genrename text,
 		authors integer[] NULL
 	)`,
 	`ALTER TABLE works OWNER TO ${process.env.PGUSER}`,

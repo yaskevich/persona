@@ -10,7 +10,7 @@
       {{value.title}}
     </div></el-col>
     <el-col :span="4"><div class="grid-content bg-purple-light">
-      {{value.genre}}
+      {{genres.filter(x=>x.id === value.genre)?.[0]?.["title"] }}
     </div></el-col>
     <el-col :span="4"><div class="grid-content bg-purple">
       <router-link :to="'/work/' + value.id">
@@ -32,16 +32,22 @@ export default defineComponent({
 
     const works = reactive([]);
     const persons = ref([]);
+    const genres = ref([]);
 
     onBeforeMount(async() => {
       const result = await store.getData("works");
       if("data" in result) {
-        works.push(...result.data);
+        works.push(...result.data.sort((a, b) => b.id - a.id));
       }
 
       const personsData = await store.getData("persons");
       persons.value = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
       console.log(persons);
+
+      const genresData = await store.getData("genres");
+      if("data" in genresData) {
+        genres.value = genresData.data;
+      }
 
     });
 
@@ -52,7 +58,8 @@ export default defineComponent({
     return {
       works,
       persons,
-      confirm
+      genres,
+      confirm,
     };
   },
   components: {

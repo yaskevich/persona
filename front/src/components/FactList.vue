@@ -43,7 +43,7 @@ export default defineComponent({
       console.log(result);
       if("data" in result && !("error" in result.data)) {
         if(Object.keys(result.data).length) {
-          facts.push(...result.data);
+          facts.push(...result.data.sort((a, b) => b.id - a.id));
         } else {
           console.log("table is empty");
         }

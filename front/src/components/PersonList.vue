@@ -67,7 +67,7 @@ export default defineComponent({
     onBeforeMount(async() => {
       const result = await store.getData("persons");
       if("data" in result) {
-        persons.push(...result.data);
+        persons.push(...result.data.sort((a, b) => b.id - a.id));
       }
     });
 

@@ -97,7 +97,7 @@ const tablesQueries = [
 	`CREATE TABLE IF NOT EXISTS facts (
 		id SERIAL PRIMARY KEY,
 		stamp timestamp,
-		agent integer NOT NULL,
+		agent integer,
 		datedesc text,
 		place text,
 		title text,

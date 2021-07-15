@@ -72,7 +72,7 @@
         title="Перемещение элементов доступно пользователям с правами модератора и выше"
         type="info">
       </el-alert>
-      
+
     </el-row>
 
   </div>
@@ -95,7 +95,7 @@ export default defineComponent({
     onBeforeMount(async() => {
       const result: Object = await store.getData("acts");
       if("data" in result) {
-        const nested = store.nest(result.data)
+        const nested = store.nest(result.data.sort((a, b) => b.id - a.id))
         // console.log("nest", nested);
         acts.push(...nested);
       }
@@ -202,7 +202,7 @@ export default defineComponent({
 
     const removeItem = async(node, datum) => {
       // console.log(node, datum);
-      if(datum.children.length) {
+      if(datum?.children?.length) {
         console.log("cannot delete non-empty slot!");
       } else {
         const result = await store.deleteById("acts", datum.id);

@@ -1,5 +1,16 @@
 <template>
   <MainTitle title="Факты" :callback="confirm"></MainTitle>
+  <el-row type="flex" justify="center">
+    <el-switch
+      style="display: block;"
+      v-model="sortMode"
+      active-color="black"
+      inactive-color="gray"
+      active-text="По дате"
+      inactive-text="По созданию"
+    >
+    </el-switch>
+  </el-row>
 
   <el-row v-for="(value, key) in facts"  :gutter="20" :key="key">
 
@@ -35,7 +46,7 @@ import MainTitle from './MainTitle.vue';
 export default defineComponent({
   setup() {
     const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
-
+    const sortMode = ref();
     const facts = reactive([]);
 
     onBeforeMount(async() => {
@@ -58,6 +69,7 @@ export default defineComponent({
       confirm,
       formRef,
       facts,
+      sortMode,
     };
   },
   components: {

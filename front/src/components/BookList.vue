@@ -1,22 +1,34 @@
 <template>
 
-  <MainTitle title="Издания" :callback="confirm"></MainTitle>
+  <MainTitle title="Издания" :callback="() => $router.push('/book/')"></MainTitle>
 
-  <el-row v-for="(value, key) in books" :gutter="20" :key="key">
+  <el-row type="flex" justify="center">
+
+    <el-input placeholder="Фильтр по названиям"
+              v-model="filterString"
+              style="max-width: 280px;"
+              clearable>
+    </el-input>
+
+  </el-row>
+
+  <el-row v-for="(value, key) in filtered()" :gutter="20" :key="key">
+
     <el-col :span="16">
       <div class="grid-content bg-purple">
-        {{value.title}}
         <span v-for="(id, index) in value.editors" :key="index" style="font-style:italic;font-size: .7rem;">
-          <span v-if="index">,</span> {{persons.filter(x=>x.id === id).map(x=>x.value).shift() }}
+              <span v-if="index">,</span> {{persons[id]?.["name"]}}
         </span>
-
+        {{value.title}}
       </div>
     </el-col>
+
     <el-col :span="4">
       <div class="grid-content bg-purple-light">
         {{value.published}}
       </div>
     </el-col>
+    
     <el-col :span="4">
       <div class="grid-content bg-purple">
         <router-link :to="'/book/' + value.id">
@@ -33,7 +45,6 @@
 
   import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
   import { ElForm } from 'element-plus';
-  import router from '../router';
   import store from '../store';
   import MainTitle from './MainTitle.vue';
 
@@ -41,7 +52,8 @@
     setup() {
       const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
       const books = reactive([]);
-      const persons = ref([]);
+      const persons = reactive({});
+      const filterString = ref('');
 
       onBeforeMount(async () => {
         const result = await store.getData('books');
@@ -55,19 +67,23 @@
         }
 
         const personsData = await store.getData('persons');
-        persons.value = personsData.data.map(x => ({ ...x, value: x.firstname + ' ' + x.lastname }));
-        console.log(persons);
+        Object.assign(
+          persons,
+          ...personsData.data.map(x => ({ [x.id]: { ...x, name: x.firstname + ' ' + x.lastname } }))
+        );
       });
 
-      const confirm = () => {
-        router.push('/book/');
+      const filtered = () => {
+        const re = new RegExp(filterString.value, 'i');
+        return filterString.value ? books.filter(x => x.title.search(re) !== -1) : books;
       };
 
       return {
-        confirm,
         formRef,
         books,
         persons,
+        filterString,
+        filtered,
       };
     },
     components: {

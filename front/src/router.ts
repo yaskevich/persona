@@ -17,11 +17,6 @@ import GenreList from './components/GenreList.vue';
 
 const routes = [
 	{
-		path: '/',
-		name: 'Home',
-		component: Home,
-	},
-	{
 		path: '/profile',
 		name: 'Profile',
 		component: () => import('./components/Profile.vue'),
@@ -111,6 +106,12 @@ const routes = [
 		path: '/log/:id?',
 		component: Log,
 		name: 'Log',
+	},
+	{
+		path: '/',
+		alias: ['/home'],
+		name: 'Home',
+		component: Home,
 	},
 ];
 

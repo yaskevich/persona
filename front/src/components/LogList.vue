@@ -48,7 +48,7 @@
       const data = reactive({ users: [], logs: [] });
 
       onBeforeMount(async () => {
-        await store.getDataMulti(data, {"users": "id"});
+        await store.getDataMulti(data, {"users": "id"}, {"logs": "id"});
       });
 
       return { data, store };

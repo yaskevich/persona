@@ -160,19 +160,22 @@ const getData = async(table: string, id?: string): Promise<any> => {
  }
  console.log("No token. Fail.");
 };
-// axios.post('/api/user/login', user, {
-//     "withCredentials": true,
-//     "headers": {
-//         "Accept": 'application/json',
-//         "Content-Type": 'application/json',
-//     }})
-  // .then(function (response) {
-  //   //
-  //   console.log("login result", response);
-  // })
-  // .catch(function (error) {
-  //   console.log(error);
-  // });
+
+const getDataMulti = async (datum: Object, rules: Object) =>{
+  const tables = Object.keys(datum);
+  return (await Promise.all(tables.map(t => getData(t)))).map((x,i) => {
+    if (rules[tables[i]]) {
+      const prop = rules[tables[i]];
+      Object.assign(datum[tables[i]], x?.data.reduce((x, y) => {
+          return { ...x, [y[prop]]: y };
+        }, {})
+      );
+    }else {
+      Object.assign(datum[tables[i]], x?.data);
+    }
+  });
+  // .map((x,i) => ({ [tables[i]] : x?.data}));
+};
 
 const nest = (xx:any, id = null, y = 'parent') =>
     xx.filter((x:any)  => x[y] === id)
@@ -222,4 +225,5 @@ export default {
   state: state,
   version: project.version,
   texts,
+  getDataMulti,
 };

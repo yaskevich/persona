@@ -1,64 +1,58 @@
 <template>
+
   <el-row type="flex" justify="center">
-    <h3>Журнал действий пользователей</h3>
+    <h3>
+      {{store.texts['userlog'][store.state.lang]}}
+    </h3>
   </el-row>
 
-  <el-row v-for="(value, key) in logs"  :gutter="20" :key="key">
+  <el-row v-for="(value, key) in data.logs" :gutter="20" :key="key">
     <el-col :span="6">
       <div class="grid-content bg-purple-light">
-        {{users[value.user_id]["firstname"] + ' ' + users[value.user_id]["lastname"]}}
+        {{data.users[value.user_id]["firstname"] + ' ' + data.users[value.user_id]["lastname"]}}
       </div>
     </el-col>
-    <el-col :span="10">
+    <el-col :span="6">
       <div class="grid-content bg-purple">
         {{store.dateToString(value.created)}}
       </div>
     </el-col>
     <el-col :span="4">
       <div class="grid-content bg-purple">
-        {{value.table_name}}
+        {{store.texts[value.table_name][store.state.lang]}}
+      </div>
+    </el-col>
+    <el-col :span="4">
+      <div class="grid-content bg-purple">
+        {{store.classify(value)}}
       </div>
     </el-col>
     <el-col :span="4">
       <div class="grid-content">
         <router-link :to="'/log/' + value.id">
-        <el-button>{{store.classify(value)}}</el-button>
+          <el-button type="primary" icon="el-icon-search" circle></el-button>
         </router-link>
       </div>
     </el-col>
   </el-row>
+
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
-import store from "../store";
 
-export default defineComponent({
-  setup() {
-    const users = reactive([]);
-    const logs = reactive([]);
+  import { defineComponent, reactive, onBeforeMount } from 'vue';
+  import store from '../store';
 
-    onBeforeMount(async() => {
+  export default defineComponent({
+    setup() {
+      const data = reactive({ users: [], logs: [] });
 
-      const resultUsers = await store.getData("users");
-      if("data" in resultUsers) {
-        Object.assign(users,
-           resultUsers.data
-            .reduce((x, y) => { return { ...x, [y["id"]]: y }}, {}));
-      }
+      onBeforeMount(async () => {
+        await store.getDataMulti(data, {"users": "id"});
+      });
 
-      const resultLogs = await store.getData("logs");
-      if("data" in resultLogs) {
-        logs.push(...resultLogs.data.sort((a, b) => b.id - a.id));
-      }
+      return { data, store };
+    },
+  });
 
-    });
-
-
-
-
-
-    return { users, logs, store, }
-  }
-})
 </script>

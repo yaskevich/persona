@@ -8,7 +8,7 @@
                inactive-color="gray"
                active-text="По дате"
                inactive-text="По созданию"
-               @change="loadFacts">
+               @change="changeSort">
     </el-switch>
   </el-row>
 
@@ -75,7 +75,24 @@
         }
       };
 
+      const changeSort = async () => {
+        if (store.state.user.prefs) {
+          if (store.state.user.prefs.sorts) {
+            store.state.user.prefs.sorts['facts'] = sortMode.value;
+          } else {
+            store.state.user.prefs = { sorts: { facts: sortMode.value } };
+          }
+        } else {
+          store.state.user.prefs = { sorts: { facts: sortMode.value } };
+        }
+        const userData = { id: store.state.user.id, prefs: store.state.user.prefs };
+        const result = await store.postData('users', userData);
+        console.log('save prefs', result);
+        await loadFacts();
+      };
+
       onBeforeMount(async () => {
+        sortMode.value = Boolean(store.state.user?.prefs?.sorts?.['facts']);
         await loadFacts();
       });
 
@@ -89,6 +106,7 @@
         facts,
         sortMode,
         loadFacts,
+        changeSort,
       };
     },
 

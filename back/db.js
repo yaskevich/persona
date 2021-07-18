@@ -110,7 +110,9 @@ const tablesQueries = [
 		books integer[] NULL,
 		refs integer[] NULL,
 		comment text,
-		media integer
+		media integer,
+    relfact integer
+    relfacttype text
 	)`,
 	`ALTER TABLE facts OWNER TO ${process.env.PGUSER}`,
 	`CREATE TABLE IF NOT EXISTS logs (

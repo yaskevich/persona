@@ -1,69 +1,76 @@
 <template>
-  <MainTitle title="Произведения" :callback="confirm"></MainTitle>
 
-  <el-row v-for="(value, key) in works"  :gutter="20" :key="key">
-    <el-col :span="16"><div class="grid-content bg-purple">
-      <span v-for="(id, index) in value.authors" :key="index" style="font-style:italic;font-size: .7rem;">
-        <span v-if="index">,</span>
-        {{persons.filter(x=>x.id === id).map(x=>x.value).shift() }}
-      </span>
-      {{value.title}}
-    </div></el-col>
-    <el-col :span="4"><div class="grid-content bg-purple-light">
-      {{genres.filter(x=>x.id === value.genre)?.[0]?.["title"] }}
-    </div></el-col>
-    <el-col :span="4"><div class="grid-content bg-purple">
-      <router-link :to="'/work/' + value.id">
-      <el-button type="text" size="mini" icon="el-icon-edit" plain class="full-width"></el-button>
-    </router-link>
-    </div></el-col>
+  <MainTitle title="Произведения" :callback="() => $router.push('/work/')"></MainTitle>
+
+  <el-row type="flex" justify="center">
+
+    <el-input placeholder="Фильтр по названиям"
+              v-model="filterString"
+              style="max-width: 280px;"
+              clearable>
+    </el-input>
 
   </el-row>
+
+  <el-row v-for="(value, key) in filtered()" :gutter="20" :key="key">
+
+    <el-col :span="16">
+      <div class="grid-content bg-purple">
+        <span v-for="(id, index) in value.authors" :key="index" style="font-style:italic;font-size: .7rem;">
+              <span v-if="index">,</span> {{data.persons[id]? data.persons[id]["firstname"] + ' '+ data.persons[id]["lastname"]:
+        ''}}
+        </span>
+        {{value.title}}
+      </div>
+    </el-col>
+
+    <el-col :span="4">
+      <div class="grid-content bg-purple-light">
+        {{data.genres[value.genre]?.title}}
+      </div>
+    </el-col>
+
+    <el-col :span="4">
+      <div class="grid-content bg-purple">
+        <router-link :to="'/work/' + value.id">
+          <el-button type="text" size="mini" icon="el-icon-edit" plain class="full-width"></el-button>
+        </router-link>
+      </div>
+    </el-col>
+
+  </el-row>
+
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, reactive, onBeforeMount } from 'vue';
-import store from "../store";
-import router from "../router";
-import MainTitle from './MainTitle.vue';
+<script>
 
-export default defineComponent({
-  setup() {
+  import { defineComponent, reactive, ref, onBeforeMount } from 'vue';
+  import store from '../store';
+  import MainTitle from './MainTitle.vue';
 
-    const works = reactive([]);
-    const persons = ref([]);
-    const genres = ref([]);
+  export default defineComponent({
+    setup() {
+      const data = reactive({ works: [], persons: [], genres: [] });
+      const filterString = ref('');
 
-    onBeforeMount(async() => {
-      const result = await store.getData("works");
-      if("data" in result) {
-        works.push(...result.data.sort((a, b) => b.id - a.id));
-      }
+      onBeforeMount(async () => {
+        await store.getDataMulti(data, { persons: 'id', genres: 'id' }, { works: 'id' });
+      });
 
-      const personsData = await store.getData("persons");
-      persons.value = personsData.data.map (x => ({...x, value: x.firstname + ' ' + x.lastname}) );
-      console.log(persons);
+      const filtered = () => {
+        const re = new RegExp(filterString.value, 'i');
+        return filterString.value ? data.works.filter(x => x.title.search(re) !== -1) : data.works;
+      };
 
-      const genresData = await store.getData("genres");
-      if("data" in genresData) {
-        genres.value = genresData.data;
-      }
+      return {
+        data,
+        filtered,
+        filterString,
+      };
+    },
+    components: {
+      MainTitle,
+    },
+  });
 
-    });
-
-    const confirm = () => {
-      router.push("/work/")
-    };
-
-    return {
-      works,
-      persons,
-      genres,
-      confirm,
-    };
-  },
-  components: {
-    MainTitle,
-  }
-});
 </script>

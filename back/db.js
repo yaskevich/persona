@@ -53,6 +53,7 @@ const tablesQueries = [
 		email text not null,
 		sex integer not null,
 		privs integer not null,
+		prefs json,
 		_passhash text not null,
 		activated BOOLEAN NOT NULL DEFAULT FALSE
 	)`,

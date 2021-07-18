@@ -1,13 +1,13 @@
 <template>
 
-  <MainTitle :title="'Факт ' + $route.params.id" :callback="confirm" :text="fact.id? 'Сохранить': 'Добавить'"></MainTitle>
+  <MainTitle :title="'Событие ' + $route.params.id" :callback="confirm" :text="fact.id? 'Сохранить': 'Добавить'"></MainTitle>
   <el-form label-width="120px" ref="formRef" :model="fact" :rules="rules">
 
     <el-space direction="horizontal" style="display:flex;" wrap size="large">
       <el-tooltip class="item" placement="top-end">
         <template #content>
-               Примерные дата и время события,<br/> которые необходимы, чтобы<br/> сортировать факты друг за другом
-             </template>
+                   Примерные дата и время события,<br/> которые необходимы, чтобы<br/> сортировать факты друг за другом
+                 </template>
         <el-form-item prop="stamp">
           <el-date-picker v-model="fact.stamp" format="YYYY.MM.DD HH:mm" type="datetime" placeholder="Техническое время" :shortcuts="shortcuts"></el-date-picker>
         </el-form-item>
@@ -23,8 +23,7 @@
       </el-form-item>
 
       <el-form-item label="Деятель">
-        <el-select v-model="fact.agent" filterable
-                   placeholder="Деятель">
+        <el-select v-model="fact.agent" filterable placeholder="Деятель">
           <el-option v-for="item in db.persons"
                      :key="item.id"
                      :label="item.value"
@@ -34,7 +33,7 @@
         <el-button type="primary"
                    @click="setDefaultAuthor"
                    v-if="db.persons.length && mainperson">{{db.persons.filter(x=>x.id === mainperson)[0].value}}</el-button>
-        <el-button type="primary" @click="fact.agent = null" >Нет деятеля</el-button>
+        <el-button type="primary" @click="fact.agent = null">Нет деятеля</el-button>
       </el-form-item>
 
     </el-space>
@@ -42,19 +41,21 @@
     <el-form-item label="Дата">
       <el-input placeholder="10.05.1928" v-model="fact.datedesc" class="text-input"></el-input>
     </el-form-item>
+
     <el-form-item label="Место">
       <el-input placeholder="Пекин" v-model="fact.place"></el-input>
     </el-form-item>
+
     <el-form-item prop="title" label="Описание">
       <el-input type="textarea" autosize
                 placeholder="Пастернак пишет письмо Маяковскому"
                 v-model="fact.title">
       </el-input>
     </el-form-item>
+
     <el-form-item label="Связи">
       <el-space direction="horizontal" style="display:flex;" wrap size="large">
-        <el-select v-model="fact.persons1" filterable multiple
-                   placeholder="Участники">
+        <el-select v-model="fact.persons1" filterable multiple placeholder="Участники">
           <el-option v-for="item in db.persons"
                      :key="item.id"
                      :label="item.value"
@@ -85,6 +86,21 @@
         </el-select>
       </el-space>
     </el-form-item>
+
+    <el-form-item label="Событие">
+      <el-space direction="horizontal" style="display:flex;" wrap size="large">
+        <el-select v-model="fact.relfact" clearable filterable placeholder="Событие">
+          <el-option v-for="item in db.facts"
+                     :key="item.id"
+                     :label="item.title"
+                     :value="item.id"
+                     :disabled="item.disabled">
+          </el-option>
+        </el-select>
+        <el-input placeholder="Тип связи" v-model="fact.relfacttype" class="text-input"></el-input>
+      </el-space>
+    </el-form-item>
+
     <el-form-item label="Примечание">
       <el-input type="textarea" autosize
                 placeholder="Был солнечный день"
@@ -98,42 +114,44 @@
       </el-space>
     </el-form-item>
     <!-- :on-preview="handlePreview"
-           :on-remove="handleRemove"
-           :file-list="fileList" -->
-    <el-form-item label="Медиафайл">
-      <!-- <el-upload
-              class="upload-demo"
-              drag
-              action="https://jsonplaceholder.typicode.com/posts/"
-              multiple
-              >
-              <i class="el-icon-upload"></i>
-              <div class="el-upload__text">Перетащите файл сюда или <em>нажмите, чтобы загрузить</em></div>
-              <template #tip>
-                 <div class="el-upload__tip">
-                    Размер файла не больше 500кб
-                 </div>
-              </template>
-           </el-upload> -->
-    </el-form-item>
-
+               :on-remove="handleRemove"
+               :file-list="fileList" -->
+    <!--
+      <el-form-item label="Медиафайл">
+        <el-upload
+                  class="upload-demo"
+                  drag
+                  action="https://jsonplaceholder.typicode.com/posts/"
+                  multiple
+                  >
+                  <i class="el-icon-upload"></i>
+                  <div class="el-upload__text">Перетащите файл сюда или <em>нажмите, чтобы загрузить</em></div>
+                  <template #tip>
+                     <div class="el-upload__tip">
+                        Размер файла не больше 500кб
+                     </div>
+                  </template>
+               </el-upload>
+      </el-form-item>
+       -->
     <!-- <el-button type="primary" @click="confirm">Сохранить</el-button> -->
     <!-- v-if="timestamp" -->
     <!-- <div v-else>
-           <el-alert
-             title="Сохранение недоступно, если пункт «Техническое время» не заполнен"
-             type="info"
-             effect="dark">
-           </el-alert>
-        </div> -->
+               <el-alert
+                 title="Сохранение недоступно, если пункт «Техническое время» не заполнен"
+                 type="info"
+                 effect="dark">
+               </el-alert>
+            </div> -->
+
     <el-popconfirm v-if="fact?.id"
                    title="Точно удалить?"
                    confirmButtonText="Да!"
                    cancelButtonText="Нет"
                    @confirm="deleteFact">
       <template #reference>
-          <el-button type="danger">Удалить</el-button>
-          </template>
+              <el-button type="danger">Удалить</el-button>
+              </template>
     </el-popconfirm>
 
   </el-form>
@@ -144,11 +162,11 @@
              @opened="dialogOpened">
     <References :isEmbedded="true" ref="bibRef"></References>
     <template #footer>
-        <span class="dialog-footer">
-           <el-button @click="handleClose">Отмена</el-button>
-           <el-button type="primary" @click="handleClose(true)">Подтвердить</el-button>
-        </span>
-       </template>
+            <span class="dialog-footer">
+               <el-button @click="handleClose">Отмена</el-button>
+               <el-button type="primary" @click="handleClose(true)">Подтвердить</el-button>
+            </span>
+           </template>
   </el-dialog>
 
 </template>
@@ -179,8 +197,10 @@
         agent: null,
         media: null,
         refs: [],
+        relfact: null,
+        relfacttype: '',
       });
-      const db = reactive({ persons: [], works: [], books: [], acts: [] });
+      const db = reactive({ persons: [], works: [], books: [], acts: [], facts: [] });
       const dialogVisible = ref(false);
       const bibRef = ref(null);
 
@@ -222,7 +242,15 @@
           value: x.firstname + ' ' + x.lastname,
           disabled: Boolean(x.id == store.state.user.settings.persona),
         }));
-        console.log(db.persons);
+        // console.log(db.persons);
+        if (id) {
+          db.facts = db.facts.map(x => ({
+            title: x.title,
+            id: x.id,
+            disabled: Boolean(x.id == id),
+          }));
+          console.log('id', id, db.facts);
+        }
         db.acts = store.nest(db.acts);
 
         console.log('DATA', db);
@@ -259,15 +287,18 @@
             const datum = { ...fact };
             if (datum.stamp && typeof datum.stamp === 'object') {
               datum.stamp = store.dateDropTimeZone(fact.stamp);
-              console.log('DROPPED', datum.stamp);
+              // console.log('DROPPED', datum.stamp);
             }
             // console.log('save:', datum);
             const { data } = await store.postData('facts', datum);
+
             // if(fact.id != data?.id) {
             //    router.replace("/fact/"+data.id);
             //    fact.id = data.id;
             // }
+
             if (data?.id) {
+              // console.log("ajax save ok", data.id);
               router.push('/facts');
             } else {
               console.log('error!');

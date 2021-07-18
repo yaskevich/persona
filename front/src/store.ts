@@ -47,6 +47,13 @@ const texts = {
   "creation": ["Creation", "Создание"],
   "removal": ["Removal", "Удаление"],
   "userlog": ["User Actions Log", "Журнал действий пользователей"],
+  "userauth": ["User Authorization", "Авторизация пользователя"],
+  "or": ["or", "или"],
+  "userreg": ["New Account Registration", "Регистрация новой учетной записи"],
+  "loading": ["loading", "загрузка"],
+  "profile": ["Profile", "Профиль"],
+  "logout": ["Log out", "Выйти"],
+  // "data": ["Data", "Данные"],
 };
 
 const logout = async() => {
@@ -161,7 +168,7 @@ const getData = async(table: string, id?: string): Promise<any> => {
  console.log("No token. Fail.");
 };
 
-const getDataMulti = async (datum: Object, rules: Object) =>{
+const getDataMulti = async (datum: Object, rules: Object, sorts: Object) =>{
   const tables = Object.keys(datum);
   return (await Promise.all(tables.map(t => getData(t)))).map((x,i) => {
     if (rules[tables[i]]) {
@@ -171,7 +178,12 @@ const getDataMulti = async (datum: Object, rules: Object) =>{
         }, {})
       );
     }else {
+      if (sorts[tables[i]]) {
+        const prop = sorts[tables[i]];
+        Object.assign(datum[tables[i]], x?.data.sort((a, b) => b[prop] - a[prop]));
+    } else {
       Object.assign(datum[tables[i]], x?.data);
+    }
     }
   });
   // .map((x,i) => ({ [tables[i]] : x?.data}));

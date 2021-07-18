@@ -5,6 +5,7 @@ import project from '../package.json'
 const state = reactive({
   token: localStorage.getItem('token') || '',
   user: {},
+  lang: 1,
   error: "",
   options: [{
         value: 1,
@@ -18,6 +19,35 @@ const state = reactive({
       }
     ]
 });
+
+const texts = {
+  "home" : ["Home", "Обзор"],
+  "facts": ["Facts", "События"],
+  "persons":["Persons", "Персоналии"],
+  "works": ["Works", "Произведения"],
+  "books": ["Books", "Издания"],
+  "genres": ["Genres", "Жанры"],
+  "acts": ["Activities", "Деятельность"],
+  "refs": ["References", "Библиография"],
+  "users": ["Users", 'Пользователи'],
+  "logs": ["Events", 'Действия'],
+  "settings": ["Project", 'Проект'],
+  "content": ["Content", 'Контент'],
+  "admin": ["Management", 'Настройки'],
+  "dbevent": ["Database Event", 'Запись в базу данных'],
+  "user": ["User", 'Пользователь'],
+  "event": ["Event", 'Событие'],
+  "datatype": ["Data type", 'Тип данных'],
+  "dateandtime": ["Date and Time", 'Дата и время'],
+  "data": ["Data", "Данные"],
+  "field": ["Field", "Поле"],
+  "wasbefore": ["Before", "Было"],
+  "becameafter": ["After", "Стало"],
+  "change": ["Change", "Изменение"],
+  "creation": ["Creation", "Создание"],
+  "removal": ["Removal", "Удаление"],
+  "userlog": ["User Actions Log", "Журнал действий пользователей"],
+};
 
 const logout = async() => {
   localStorage.setItem("token", "");
@@ -157,11 +187,10 @@ interface keyable {
 }
 
 const classify = (x:keyable) => {
-  if (x.data1 && Object.keys(x.data1).length){
-    return x.data0 && Object.keys(x.data0).length ? "Изменение" : "Создание";
-  } else {
-    return "Удаление";
-  }
+  const key = x.data1 && Object.keys(x.data1).length ?
+     x.data0 && Object.keys(x.data0).length ? 'change' : 'removal'
+     : 'removal';
+    return texts[key][state.lang];
 };
 
 const dateToString = (x:string) => {
@@ -192,4 +221,5 @@ export default {
   // state: readonly(state),
   state: state,
   version: project.version,
+  texts,
 };

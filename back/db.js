@@ -239,9 +239,7 @@ export default {
 								record[key] = Boolean(data[key]);
 						}
 						 else { // string
-							// trim
-							if (data[key]) {
-
+							if (data[key] && dbData[key]["data_type"] !== 'json') {
 								data[key] = data[key].trim();
 							}
 							// check for well-formed string && prevent SQLi

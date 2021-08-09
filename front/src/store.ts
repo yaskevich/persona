@@ -2,40 +2,32 @@ import { reactive } from "vue";
 import axios from "axios";
 // import router from "./router";
 import project from '../package.json'
-const state = reactive({
-  token: localStorage.getItem('token') || '',
-  user: {},
-  lang: 1,
-  error: "",
-  options: [{
-        value: 1,
-        label: 'Администратор',
-      }, {
-        value: 3,
-        label: 'Модератор',
-      }, {
-        value: 5,
-        label: 'Редактор',
-      }
-    ]
-});
 
-const texts = {
+
+type objTexts = {
+    [key: string]: [string, string]
+};
+
+const texts:objTexts = {
   "home" : ["Home", "Обзор"],
   "facts": ["Facts", "События"],
+  "fact": ["Fact", "Событие"],
   "persons":["Persons", "Персоналии"],
+  "person":["Person", "Персона"],
   "works": ["Works", "Произведения"],
+  "work": ["Work", "Произведение"],
   "books": ["Books", "Издания"],
+  "book": ["Book", "Издание"],
   "genres": ["Genres", "Жанры"],
   "acts": ["Activities", "Деятельность"],
   "refs": ["References", "Библиография"],
   "users": ["Users", 'Пользователи'],
+  "user": ["User", 'Пользователь'],
   "logs": ["Events", 'Действия'],
   "settings": ["Project", 'Проект'],
   "content": ["Content", 'Контент'],
   "admin": ["Management", 'Настройки'],
   "dbevent": ["Database Event", 'Запись в базу данных'],
-  "user": ["User", 'Пользователь'],
   "event": ["Event", 'Событие'],
   "datatype": ["Data type", 'Тип данных'],
   "dateandtime": ["Date and Time", 'Дата и время'],
@@ -53,9 +45,122 @@ const texts = {
   "loading": ["loading", "загрузка"],
   "profile": ["Profile", "Профиль"],
   "logout": ["Log out", "Выйти"],
-  // "data": ["Data", "Данные"],
+  "filtertitles": ["Filter by titles", "Фильтр по названиям"],
+  "filternames": ["Filter by names", "Фильтр по ФИО"],
+  "save": ["Save", "Сохранить"],
+  "add": ["Add", "Добавить"],
+  "title": ["Title", "Название"],
+  "type": ["Type", "Тип"],
+  "genre": ["Genre", "Жанр"],
+  "authors": ["Authors", "Авторы"],
+  "author": ["Author", "Автор"],
+  "reset": ["Reset", "Очистить"],
+  "remove": ["Delete", "Удалить"],
+  "yes": ["Yes", "Да"],
+  "no": ["No", "Нет"],
+  "confirmdel": ["Do you confirm removal?", "Точно удалить?"],
+  "fieldnonempty": ["The field should not be empty", "Поле должно быть заполнено"],
+  "fieldemail": ["Please input correct email address", "Поле должно содержать корректный адрес e-mail"],
+  "fieldsex": ["Select a sex", "Выберите пол"],
+  "twoandmore": ["Not less than 2 characters", "Не менее 2-х символов"],
+  "pswdmore": ["Not less than 18 characters", "Не менее 18 символов"],
+  "prodata": ["Project data", "Данные в базе"],
+  "webver": ["No", "Версия веб-приложения"],
+  "cancel": ["Cancel", "Отмена"],
+  "facttypes": ["Fact types", "Типы событий"],
+  "addsibling": ["Add sibling item", "Добавить соседний пункт"],
+  "addchild": ["Add child item", "Добавить вложенный пункт"],
+  "rename": ["Rename", "Переименовать"],
+  "delit": ["Delete this item", "Удалить этот пункт"],
+  "warndelleaf": ["Removing item with children items is not allowed", "Нельзя удалить пункт с вложенными элементами"],
+  "warnactsmove": ["Moving itexms requires the rights of a moderator and above", "Перемещение элементов доступно пользователям с правами модератора и выше"],
+  "year": ["Year", "Год"],
+  "editors": ["Editors", "Редакторы"],
+  "techtimetip": ["Approximate date and time,<br/>that are needed to sort<br/>facts sequentially", "Примерные дата и время события,<br/>которые необходимы,<br/>чтобы сортировать события<br/>друг за другом"],
+  "techtime": ["No", "Нет"],
+  "agent": ["Agent", "Деятель"],
+  "noagent": ["No agent", "Нет деятеля"],
+  "date": ["Date", "Дата"],
+  "place": ["Place", "Место"],
+  "desc": ["Description", "Описание"],
+  "desctip": ["Jack London wrote to Joan London", "Борис Пастернак пишет письмо Марине Цветаевой"],
+  "rels": ["Relations", "Связи"],
+  "relfacttype": ["Relation Type", "Тип связи"],
+  "prtcpnts": ["Participants", "Участники"],
+  "ments": ["Mentioned ones", "Упомянуты"],
+  "sources": ["Sources", "Источники"],
+  "note": ["Note", "Примечание"],
+  "bydate": ["By date", "По дате"],
+  "byts": ["By timestamp", "По созданию"],
+  "select": ["Select", "Выбрать"],
+  "seld": ["Selected", "Выбрано"],
+  "medfile": ["Media file", "Медиафайл"],
+  "confirm": ["Comfirm", "Подтвердить"],
+  "uploadtip": ["File size is no more than 500kb", "Размер файла не больше 500кб"],
+  "dragfile": ["Drag a file here", "Перетащите файл сюда"],
+  "clickload": ["click to select", "нажмите, чтобы загрузить"],
+  "selact": ["Select the activities", "Выберите виды деятельности"],
+  "setts": ["Set approximate date and time", "Выставьте примерные дату и время"],
+  "filldesc": ["Fill the description", "Заполните описание"],
+  "pswd": ["Password", "Пароль"],
+  "login": ["Log in", "Войти"],
+  "fname": ["Firstname", "Имя"],
+  "lname": ["Lastname", "Фамилия"],
+  "pname": ["Patronymic", "Отчество"],
+  "sex": ["Gender", "Пол"],
+  "man": ["Male", "Мужчина"],
+  "woman": ["Female", "Женщина"],
+  "disable": ["Disable", "Отключить"],
+  "activate": ["Activate", "Активировать"],
+  "email": ["E-mail", "Эл. почта"],
+  "userpswd": ["Password for user", "Пароль для пользователя"],
+  "mainperson": ["Main person", "Основная персона"],
+  "projtitle": ["Project title", "Название проекта"],
+  "subreq": ["Submit a request", "Отправить заявку"],
+  "subreqd": ["Request is submitted", "Заявка отправлена"],
+  "regmsg": ["After a moderator approves your request, you will get access to the data management interface with this password", "После одобрения заявки модератором Вы получите доступ к интерфейсу редактирования по паролю"],
+  "quotmarks": ["Quotation marks", "Кавычки"],
+  "pages": ["Pages", "Страницы"],
+  "heading": ["Heading", "Заглавие"],
+  "fin": ["End", "Финаль"],
+  "info": ["Information", "Сведения"],
+  "record": ["Record", "Запись"],
+  "cit": ["Citation", "Цитата"],
+  "edit": ["Edit", "Редактировать"],
+  "bib": ["Bibliographical records", "Библиографические записи"],
+  "pdot": ["Pp.", "С."],
+  "ttldsc": ["Descriptive title", "Название-описание"],
+  "administrator": ["Administrator", "Администратор"],
+  "moderator": ["Moderator", "Модератор"],
+  "editor": ["Editor", "Редактор"],
 };
 
+const state = reactive({
+  token: localStorage.getItem('token') || '',
+  user: {},
+  lang: 0,
+  error: "",
+});
+
+const loc = (id:string) => {
+  // if(!texts[id][(<any>state)?.user?.language as any || 0 ]) {
+  //   console.log("issue", id);
+  // }
+  return texts[id][(<any>state)?.user?.language as any || 0 ] || '<...>'
+};
+
+const privs = [
+  {
+    value: 1,
+    label: texts["administrator"][state.lang],
+  }, {
+    value: 3,
+    label: texts["moderator"][state.lang],
+  }, {
+    value: 5,
+    label: texts["editor"][state.lang],
+  }
+];
 const logout = async() => {
   localStorage.setItem("token", "");
   state.user  = {};
@@ -83,7 +188,7 @@ const doLogin = async(payload: Object): Promise<any> => {
        state.token  = response.data.token || '';
        localStorage.setItem('token', state.token);
      } else {
-       console.log(response);
+       // console.log(response);
        return response.data.error;
      }
      return;
@@ -100,7 +205,7 @@ const initUser = async(data: Object): Promise<any> => {
     try {
       const config = { headers: { Authorization: "Bearer " + state.token } };
       const response = await axios.post('/api/user/add', data, config);
-      console.log(response.data);
+      // console.log(response.data);
       return response;
    } catch (error) {
      console.log("Cannot get", error);
@@ -109,7 +214,7 @@ const initUser = async(data: Object): Promise<any> => {
  } else {
    try {
      const response = await axios.post('/api/user/reg', data);
-     console.log(response.data);
+     // console.log(response.data);
      return response;
   } catch (error) {
     console.log("Cannot get", error);
@@ -122,7 +227,7 @@ const postData = async(table: string, data: Object): Promise<any> => {
   if (state.token) {
     try {
       const config = { headers: { Authorization: "Bearer " + state.token } };
-      console.log(`POST ${table}`);
+      // console.log(`POST ${table}`);
       const response = await axios.post('/api/x/'+ table, data, config);
       console.log("store:response", response.data);
       return response;
@@ -240,5 +345,7 @@ export default {
   state: state,
   version: project.version,
   texts,
+  privs,
   getDataMulti,
+  loc,
 };

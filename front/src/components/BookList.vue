@@ -1,10 +1,10 @@
 <template>
 
-  <MainTitle title="Издания" :callback="() => $router.push('/book/')"></MainTitle>
+  <MainTitle :title="loc('books')" :callback="() => $router.push('/book/')"></MainTitle>
 
   <el-row type="flex" justify="center">
 
-    <el-input placeholder="Фильтр по названиям"
+    <el-input :placeholder="loc('filtertitles')"
               v-model="filterString"
               style="max-width: 280px;"
               clearable>
@@ -28,7 +28,7 @@
         {{value.published}}
       </div>
     </el-col>
-    
+
     <el-col :span="4">
       <div class="grid-content bg-purple">
         <router-link :to="'/book/' + value.id">
@@ -57,7 +57,7 @@
 
       onBeforeMount(async () => {
         const result = await store.getData('books');
-        console.log(result);
+        // console.log(result);
         if ('data' in result && !('error' in result.data)) {
           if (Object.keys(result.data).length) {
             books.push(...result.data.sort((a, b) => b.id - a.id));
@@ -84,6 +84,8 @@
         persons,
         filterString,
         filtered,
+
+        loc: store.loc,
       };
     },
     components: {

@@ -1,6 +1,6 @@
 <template>
 
-  <MainTitle title="Жанры" :callback="showDialog"></MainTitle>
+  <MainTitle :title="loc('genres')" :callback="showDialog"></MainTitle>
 
   <el-row v-for="(value, key) in genres" :gutter="20" :key="key">
     <el-col :span="12">
@@ -15,32 +15,32 @@
     </el-col>
     <el-col :span="6">
       <div class="grid-content bg-purple">
-        <el-popconfirm title="Точно удалить?"
-                       confirmButtonText="Да!"
-                       cancelButtonText="Нет"
+        <el-popconfirm :title="loc('confirmdel')"
+                       :confirmButtonText="loc('yes')"
+                       :cancelButtonText="loc('no')"
                        @confirm="deleteGenre(value.id, key)">
           <template #reference>
-          <el-button type="text" size="mini" icon="el-icon-delete" plain class="full-width"></el-button>
-          </template>
+            <el-button type="text" size="mini" icon="el-icon-delete" plain class="full-width"></el-button>
+            </template>
         </el-popconfirm>
       </div>
     </el-col>
   </el-row>
 
-  <el-dialog title="Жанр"
+  <el-dialog :title="loc('genre')"
              v-model="dialogVisible"
              width="30%">
     <el-form :model="form" ref="formRef" label-width="100px" :rules="rules" :inline="true">
       <el-form-item prop="title">
-        <el-input placeholder="Название" v-model="form.title" class="text-input" ref="formInputRef"></el-input>
+        <el-input :placeholder="loc('title')" v-model="form.title" class="text-input" ref="formInputRef"></el-input>
       </el-form-item>
     </el-form>
     <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogVisible = false">Отмена</el-button>
-          <el-button type="primary" @click="confirmDialog">Сохранить</el-button>
-        </span>
-      </template>
+          <span class="dialog-footer">
+            <el-button @click="dialogVisible = false">{{loc('cancel')}}</el-button>
+            <el-button type="primary" @click="confirmDialog">{{loc('save')}}</el-button>
+          </span>
+        </template>
   </el-dialog>
 
 </template>
@@ -75,11 +75,11 @@
         });
       };
 
-      const deleteGenre = async(id, key) => {
-        const result = await store.deleteById("genres", id);
+      const deleteGenre = async (id, key) => {
+        const result = await store.deleteById('genres', id);
         // console.log(result);
-        if("data" in result && "id" in result.data) {
-          console.log("deleted", id);
+        if ('data' in result && 'id' in result.data) {
+          // console.log('deleted', id);
           genres.splice(key, 1);
         }
       };
@@ -87,13 +87,13 @@
       const confirmDialog = () => {
         formRef.value?.validate(async valid => {
           if (valid) {
-            console.log('form', form);
+            // console.log('form', form);
             const result = await store.postData('genres', form);
-            console.log(result);
+            // console.log(result);
             if (!('data' in result && 'id' in result.data)) {
               console.log('error!');
             } else {
-              console.log('ok');
+              // console.log('ok');
               if (form.id) {
                 genres.filter(x => x.id === form.id)[0]['title'] = form.title;
                 delete form.id;
@@ -112,8 +112,8 @@
 
       const rules = {
         title: [
-          { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
-          { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' },
+          { required: true, message: store.loc('fieldnonempty'), trigger: 'blur' },
+          { min: 2, message: store.loc('twoandmore'), trigger: 'blur' },
         ],
       };
 
@@ -128,6 +128,8 @@
         confirmDialog,
         formInputRef,
         deleteGenre,
+
+        loc: store.loc,
       };
     },
     components: {

@@ -1,13 +1,13 @@
 <template>
 
-  <MainTitle title="События" :callback="confirm"></MainTitle>
+  <MainTitle :title="loc('facts')" :callback="confirm"></MainTitle>
   <el-row type="flex" justify="center">
     <el-switch style="display: block;"
                v-model="sortMode"
                active-color="black"
                inactive-color="gray"
-               active-text="По дате"
-               inactive-text="По созданию"
+               :active-text="loc('bydate')"
+               :inactive-text="loc('byts')"
                @change="changeSort">
     </el-switch>
   </el-row>
@@ -87,7 +87,7 @@
         }
         const userData = { id: store.state.user.id, prefs: store.state.user.prefs };
         const result = await store.postData('users', userData);
-        console.log('save prefs', result);
+        // console.log('save prefs', result);
         await loadFacts();
       };
 
@@ -107,6 +107,7 @@
         sortMode,
         loadFacts,
         changeSort,
+        loc: store.loc,
       };
     },
 

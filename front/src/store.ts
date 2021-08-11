@@ -1,14 +1,12 @@
 import { reactive } from "vue";
 import axios from "axios";
-// import router from "./router";
 import project from '../package.json'
-
 
 type objTexts = {
     [key: string]: [string, string]
 };
 
-const texts:objTexts = {
+const localDict:objTexts = {
   "home" : ["Home", "Обзор"],
   "facts": ["Facts", "События"],
   "fact": ["Fact", "Событие"],
@@ -65,7 +63,7 @@ const texts:objTexts = {
   "twoandmore": ["Not less than 2 characters", "Не менее 2-х символов"],
   "pswdmore": ["Not less than 18 characters", "Не менее 18 символов"],
   "prodata": ["Project data", "Данные в базе"],
-  "webver": ["No", "Версия веб-приложения"],
+  "webver": ["Web app version", "Версия веб-приложения"],
   "cancel": ["Cancel", "Отмена"],
   "facttypes": ["Fact types", "Типы событий"],
   "addsibling": ["Add sibling item", "Добавить соседний пункт"],
@@ -104,11 +102,12 @@ const texts:objTexts = {
   "filldesc": ["Fill the description", "Заполните описание"],
   "pswd": ["Password", "Пароль"],
   "login": ["Log in", "Войти"],
-  "fname": ["Firstname", "Имя"],
-  "lname": ["Lastname", "Фамилия"],
-  "pname": ["Patronymic", "Отчество"],
+  "firstname": ["Firstname", "Имя"],
+  "lastname": ["Lastname", "Фамилия"],
+  "patroname": ["Patronymic", "Отчество"],
   "sex": ["Gender", "Пол"],
   "man": ["Male", "Мужчина"],
+  "wikidata": ["Wikidata ID", "Wikidata ID"],
   "woman": ["Female", "Женщина"],
   "disable": ["Disable", "Отключить"],
   "activate": ["Activate", "Активировать"],
@@ -143,22 +142,22 @@ const state = reactive({
 });
 
 const loc = (id:string) => {
-  // if(!texts[id][(<any>state)?.user?.language as any || 0 ]) {
-  //   console.log("issue", id);
-  // }
-  return texts[id][(<any>state)?.user?.language as any || 0 ] || '<...>'
+  return id ?
+      localDict?.[id] ?
+      localDict[id][(<any>state)?.user?.language as any || 0 ] : id
+    : "...";
 };
 
 const privs = [
   {
     value: 1,
-    label: texts["administrator"][state.lang],
+    label: localDict["administrator"][state.lang],
   }, {
     value: 3,
-    label: texts["moderator"][state.lang],
+    label: localDict["moderator"][state.lang],
   }, {
     value: 5,
-    label: texts["editor"][state.lang],
+    label: localDict["editor"][state.lang],
   }
 ];
 const logout = async() => {
@@ -313,7 +312,7 @@ const classify = (x:keyable) => {
   const key = x.data1 && Object.keys(x.data1).length ?
      x.data0 && Object.keys(x.data0).length ? 'change' : 'removal'
      : 'removal';
-    return texts[key][state.lang];
+    return loc(key);
 };
 
 const dateToString = (x:string) => {
@@ -344,7 +343,6 @@ export default {
   // state: readonly(state),
   state: state,
   version: project.version,
-  texts,
   privs,
   getDataMulti,
   loc,

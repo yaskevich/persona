@@ -1,19 +1,19 @@
 <template>
 
-  <MainTitle :title="'Издание ' + $route.params.id " :callback="confirm" :text="form.id? 'Сохранить': 'Добавить'"></MainTitle>
+  <MainTitle :title="loc('book') + ' ' + $route.params.id " :callback="confirm" :text="loc(form.id ? 'save' : 'add')"></MainTitle>
 
   <el-form :model="form" ref="formRef" label-width="100px" :rules="rules">
-    <el-form-item prop="title" label="Название">
-      <el-input placeholder="Название" v-model="form.title" class="text-input"></el-input>
+    <el-form-item prop="title" :label="loc('title')">
+      <el-input :placeholder="loc('title')" v-model="form.title" class="text-input"></el-input>
     </el-form-item>
 
-    <el-form-item prop="published" label="Год">
-      <el-input placeholder="Год" v-model.number="form.published" class="text-input"></el-input>
+    <el-form-item prop="published" :label="loc('year')">
+      <el-input :placeholder="loc('year')" v-model.number="form.published" class="text-input"></el-input>
     </el-form-item>
 
-    <el-form-item label="Произведения">
+    <el-form-item :label="loc('books')">
       <el-select v-model="form.works" multiple filterable remote reserve-keyword
-                 placeholder="Произведение"
+                 :placeholder="loc('book')"
                  :remote-method="getWorks"
                  :loading="loading">
         <el-option v-for="item in worksAll"
@@ -24,9 +24,9 @@
       </el-select>
     </el-form-item>
 
-    <el-form-item label="Редакторы">
+    <el-form-item :label="loc('editors')">
       <el-select v-model="form.editors" multiple filterable remote reserve-keyword
-                 placeholder="Персона"
+                 :placeholder="loc('person')"
                  :remote-method="getEditors"
                  :loading="loading">
         <el-option v-for="item in editorsAll"
@@ -39,18 +39,19 @@
 
     <el-form-item>
       <el-popconfirm v-if="form?.id"
-                     title="Точно удалить?"
-                     confirmButtonText="Да!"
-                     cancelButtonText="Нет"
+                     :title="loc('confirmdel')"
+                     :confirmButtonText="loc('yes')"
+                     :cancelButtonText="loc('no')"
                      @confirm="deleteBook">
         <template #reference>
-          <el-button type="danger">Удалить</el-button>
-          </template>
+              <el-button type="danger">{{loc('remove')}}</el-button>
+              </template>
       </el-popconfirm>
     </el-form-item>
 
-    <!-- <el-button type="primary" @click="resetForm">Очистить</el-button>
-      <el-button type="primary" @click="confirm">{{form.id? "Сохранить": "Добавить"}}</el-button> -->
+    <!-- <el-button type="primary" @click="resetForm">{{loc('reset')}}</el-button>
+          <el-button type="primary" @click="confirm">{{loc(form.id ? 'save': 'add')}}</el-button>
+      -->
 
   </el-form>
 
@@ -80,7 +81,7 @@
       const id = vuerouter.params.id;
 
       onBeforeMount(async () => {
-        console.log('router id', id);
+        // console.log('router id', id);
 
         if (id) {
           const result = await store.getData('books', id);
@@ -100,7 +101,7 @@
       });
 
       const getWorks = async query => {
-        console.log(query);
+        // console.log(query);
         const re = new RegExp(query, 'i');
         loading.value = true;
 
@@ -110,7 +111,7 @@
       };
 
       const getEditors = query => {
-        console.log(query);
+        // console.log(query);
         const re = new RegExp(query, 'i');
         loading.value = true;
         editorsAll.value = persons.filter(x => re.test(x.value));
@@ -139,7 +140,7 @@
       const confirm = () => {
         formRef.value?.validate(async valid => {
           if (valid) {
-            console.log('form', form);
+            // console.log('form', form);
             const result = await store.postData('books', form.value);
             // console.log(result);
             if ('data' in result && 'id' in result.data) {
@@ -155,11 +156,11 @@
 
       const rules = {
         title: [
-          { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
-          { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' },
+          { required: true, message: store.loc('fieldnonempty'), trigger: 'blur' },
+          { min: 2, message: store.loc('twoandmore'), trigger: 'blur' },
         ],
         published: [
-          { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
+          { required: true, message: store.loc('fieldnonempty'), trigger: 'blur' },
           { min: 2, type: 'integer', trigger: 'blur' },
         ],
       };
@@ -178,6 +179,7 @@
         form,
         worksAll,
         deleteBook,
+        loc: store.loc,
       };
     },
     components: {

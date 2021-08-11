@@ -2,7 +2,7 @@
 
   <el-row type="flex" justify="center">
     <h3>
-      {{store.texts['userlog'][store.state.lang]}}
+      {{loc('userlog')}}
     </h3>
   </el-row>
 
@@ -19,7 +19,7 @@
     </el-col>
     <el-col :span="4">
       <div class="grid-content bg-purple">
-        {{store.texts[value.table_name][store.state.lang]}}
+        {{loc(value.table_name)}}
       </div>
     </el-col>
     <el-col :span="4">
@@ -51,7 +51,7 @@
         await store.getDataMulti(data, {"users": "id"}, {"logs": "id"});
       });
 
-      return { data, store };
+      return { data, store, loc: store.loc };
     },
   });
 

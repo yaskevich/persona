@@ -1,9 +1,9 @@
 <template>
-  <el-descriptions class="margin-top" :title="store.texts['dbevent'][store.state.lang]" :column="2" border>
+  <el-descriptions class="margin-top" :title="loc('dbevent')" :column="2" border>
       <el-descriptions-item>
         <template #label>
           <i class="el-icon-user"></i>
-          {{store.texts['user'][store.state.lang]}}
+          {{loc('user')}}
         </template>
         {{user["firstname"] + ' ' + user["lastname"]}}
       </el-descriptions-item>
@@ -11,7 +11,7 @@
       <el-descriptions-item>
         <template #label>
           <i class="el-icon-mobile-phone"></i>
-          {{store.texts['event'][store.state.lang]}}
+          {{loc('event')}}
         </template>
         {{store.classify(record)}}
       </el-descriptions-item>
@@ -27,17 +27,17 @@
       <el-descriptions-item>
         <template #label>
           <i class="el-icon-tickets"></i>
-          {{store.texts['datatype'][store.state.lang]}}
+          {{loc('datatype')}}
         </template>
-        <el-tag>
-          {{store.texts?.[record.table_name]?.[store.state.lang]}}
+        <el-tag v-if="record?.table_name">
+          {{loc(record.table_name)}}
         </el-tag>
       </el-descriptions-item>
 
       <el-descriptions-item>
         <template #label>
           <i class="el-icon-office-building"></i>
-        {{store.texts['dateandtime'][store.state.lang]}}
+        {{loc('dateandtime')}}
         </template>
         {{store.dateToString(record.created)}}
       </el-descriptions-item>
@@ -46,23 +46,23 @@
 
 
 <h3 class="el-descriptions__title" style="margin-top:2rem;">
-  {{store.texts['data'][store.state.lang]}}
+  {{store.loc('data')}}
 </h3>
 <hr/>
 <el-row  :gutter="20">
   <el-col :span="8">
     <div class="grid-content el-descriptions__title bg-purple-light">
-      {{store.texts['field'][store.state.lang]}}
+      {{loc('field')}}
     </div>
   </el-col>
   <el-col :span="8">
     <div class="grid-content el-descriptions__title bg-purple">
-      {{store.texts['wasbefore'][store.state.lang]}}
+      {{loc('wasbefore')}}
     </div>
   </el-col>
   <el-col :span="8">
     <div class="grid-content el-descriptions__title bg-purple-light">
-      {{store.texts['becameafter'][store.state.lang]}}
+      {{loc('becameafter')}}
     </div>
   </el-col>
 </el-row>
@@ -70,7 +70,7 @@
 <el-row v-for="(v, k) in keys"  :gutter="20" :key="k">
   <el-col :span="8">
     <div class="grid-content bg-purple-light">
-      {{v}}
+      <span>{{loc(v)}}</span>
     </div>
   </el-col>
   <el-col :span="8">
@@ -104,7 +104,7 @@ export default {
     onBeforeMount(async() => {
       const resultRecord = await store.getData("logs", id);
       if("data" in resultRecord) {
-        console.log(resultRecord.data);
+        // console.log(resultRecord.data);
         record.value = resultRecord.data.shift();
         const result = await store.getData("users", record.value.user_id);
         if("data" in result) {
@@ -116,7 +116,7 @@ export default {
 
     });
 
-    return { user, record, store, keys };
+    return { user, record, store, keys, loc: store.loc };
   },
 };
 </script>

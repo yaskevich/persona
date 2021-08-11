@@ -1,15 +1,13 @@
 <template>
 
-  <MainTitle :title="'Событие ' + $route.params.id" :callback="confirm" :text="fact.id? 'Сохранить': 'Добавить'"></MainTitle>
+  <MainTitle :title="loc('fact') + ' ' + $route.params.id" :callback="confirm" :text="loc(fact.id ? 'save': 'add')"></MainTitle>
   <el-form label-width="120px" ref="formRef" :model="fact" :rules="rules">
 
     <el-space direction="horizontal" style="display:flex;" wrap size="large">
       <el-tooltip class="item" placement="top-end">
-        <template #content>
-                   Примерные дата и время события,<br/> которые необходимы, чтобы<br/> сортировать факты друг за другом
-                 </template>
+        <template #content><span v-html="loc('techtimetip')"></span></template>
         <el-form-item prop="stamp">
-          <el-date-picker v-model="fact.stamp" format="YYYY.MM.DD HH:mm" type="datetime" placeholder="Техническое время" :shortcuts="shortcuts"></el-date-picker>
+          <el-date-picker v-model="fact.stamp" format="YYYY.MM.DD HH:mm" type="datetime" :placeholder="loc('techtime')" :shortcuts="shortcuts"></el-date-picker>
         </el-form-item>
       </el-tooltip>
 
@@ -19,11 +17,11 @@
                      clearable
                      filterable
                      :props="{ emitPath: false, multiple: true, value: 'id', label: 'title' }"
-                     placeholder="Вид(ы) деятельности"></el-cascader>
+                     :placeholder="loc('acts')"></el-cascader>
       </el-form-item>
 
-      <el-form-item label="Деятель">
-        <el-select v-model="fact.agent" filterable placeholder="Деятель">
+      <el-form-item :label="loc('agent')">
+        <el-select v-model="fact.agent" filterable :placeholder="loc('agent')">
           <el-option v-for="item in db.persons"
                      :key="item.id"
                      :label="item.value"
@@ -33,29 +31,29 @@
         <el-button type="primary"
                    @click="setDefaultAuthor"
                    v-if="db.persons.length && mainperson">{{db.persons.filter(x=>x.id === mainperson)[0].value}}</el-button>
-        <el-button type="primary" @click="fact.agent = null">Нет деятеля</el-button>
+        <el-button type="primary" @click="fact.agent = null">{{loc('noagent')}}</el-button>
       </el-form-item>
 
     </el-space>
 
-    <el-form-item label="Дата">
+    <el-form-item :label="loc('date')">
       <el-input placeholder="10.05.1928" v-model="fact.datedesc" class="text-input"></el-input>
     </el-form-item>
 
-    <el-form-item label="Место">
-      <el-input placeholder="Пекин" v-model="fact.place"></el-input>
+    <el-form-item :label="loc('place')">
+      <el-input placeholder="..." v-model="fact.place"></el-input>
     </el-form-item>
 
-    <el-form-item prop="title" label="Описание">
+    <el-form-item prop="title" :label="loc('desc')">
       <el-input type="textarea" autosize
-                placeholder="Пастернак пишет письмо Маяковскому"
+                :placeholder="loc('desctip')"
                 v-model="fact.title">
       </el-input>
     </el-form-item>
 
-    <el-form-item label="Связи">
+    <el-form-item :label="loc('rels')">
       <el-space direction="horizontal" style="display:flex;" wrap size="large">
-        <el-select v-model="fact.persons1" filterable multiple placeholder="Участники">
+        <el-select v-model="fact.persons1" filterable multiple :placeholder="loc('prtcpnts')">
           <el-option v-for="item in db.persons"
                      :key="item.id"
                      :label="item.value"
@@ -63,21 +61,21 @@
                      :disabled="item.disabled">
           </el-option>
         </el-select>
-        <el-select v-model="fact.persons2" filterable multiple placeholder="Упомянуты">
+        <el-select v-model="fact.persons2" filterable multiple :placeholder="loc('ments')">
           <el-option v-for="item in db.persons"
                      :key="item.id"
                      :label="item.value"
                      :value="item.id">
           </el-option>
         </el-select>
-        <el-select v-model="fact.works" multiple filterable placeholder="Произведения">
+        <el-select v-model="fact.works" multiple filterable :placeholder="loc('works')">
           <el-option v-for="item in db.works"
                      :key="item.id"
                      :label="item.title"
                      :value="item.id">
           </el-option>
         </el-select>
-        <el-select v-model="fact.books" multiple filterable placeholder="Издания">
+        <el-select v-model="fact.books" multiple filterable :placeholder="loc('books')">
           <el-option v-for="item in db.books"
                      :key="item.id"
                      :label="item.title"
@@ -87,9 +85,9 @@
       </el-space>
     </el-form-item>
 
-    <el-form-item label="Событие">
+    <el-form-item :label="loc('fact')">
       <el-space direction="horizontal" style="display:flex;" wrap size="large">
-        <el-select v-model="fact.relfact" clearable filterable placeholder="Событие">
+        <el-select v-model="fact.relfact" clearable filterable :placeholder="loc('fact')">
           <el-option v-for="item in db.facts"
                      :key="item.id"
                      :label="item.title"
@@ -97,76 +95,68 @@
                      :disabled="item.disabled">
           </el-option>
         </el-select>
-        <el-input placeholder="Тип связи" v-model="fact.relfacttype" class="text-input"></el-input>
+        <el-input :placeholder="loc('relfacttype')" v-model="fact.relfacttype" class="text-input"></el-input>
       </el-space>
     </el-form-item>
 
-    <el-form-item label="Примечание">
+    <el-form-item :label="loc('note')">
       <el-input type="textarea" autosize
-                placeholder="Был солнечный день"
+                placeholder="..."
                 v-model="fact.comment">
       </el-input>
     </el-form-item>
-    <el-form-item label="Источники">
+    <el-form-item :label="loc('sources')">
       <el-space direction="horizontal" style="display:flex;" wrap size="large">
-        <el-button type="primary" @click="dialogVisible=true;">Выбрать</el-button>
-        <div v-if="fact.refs?.length">Выбрано: {{fact.refs.length}}</div>
+        <el-button type="primary" @click="dialogVisible=true;">{{loc('select')}}</el-button>
+        <div v-if="fact.refs?.length">{{loc('seld')}}: {{fact.refs.length}}</div>
       </el-space>
     </el-form-item>
     <!-- :on-preview="handlePreview"
-               :on-remove="handleRemove"
-               :file-list="fileList" -->
+                 :on-remove="handleRemove"
+                 :file-list="fileList" -->
     <!--
-      <el-form-item label="Медиафайл">
-        <el-upload
-                  class="upload-demo"
-                  drag
-                  action="https://jsonplaceholder.typicode.com/posts/"
-                  multiple
-                  >
-                  <i class="el-icon-upload"></i>
-                  <div class="el-upload__text">Перетащите файл сюда или <em>нажмите, чтобы загрузить</em></div>
-                  <template #tip>
-                     <div class="el-upload__tip">
-                        Размер файла не больше 500кб
-                     </div>
-                  </template>
-               </el-upload>
-      </el-form-item>
-       -->
-    <!-- <el-button type="primary" @click="confirm">Сохранить</el-button> -->
-    <!-- v-if="timestamp" -->
-    <!-- <div v-else>
-               <el-alert
-                 title="Сохранение недоступно, если пункт «Техническое время» не заполнен"
-                 type="info"
-                 effect="dark">
-               </el-alert>
-            </div> -->
+        <el-form-item :label="loc('medfile')">
+          <el-upload
+                    class="upload-demo"
+                    drag
+                    action="https://jsonplaceholder.typicode.com/posts/"
+                    multiple
+                    >
+                    <i class="el-icon-upload"></i>
+                    <div class="el-upload__text">{{loc('dragfile')}} {{loc('or')}} <em>{{loc('clickload')}}</em></div>
+                    <template #tip>
+                       <div class="el-upload__tip">
+                          {{loc('uploadtip')}}
+                       </div>
+                    </template>
+                 </el-upload>
+        </el-form-item>
+         -->
+    <!-- <el-button type="primary" @click="confirm">{{loc('save')}}</el-button> -->
 
     <el-popconfirm v-if="fact?.id"
-                   title="Точно удалить?"
-                   confirmButtonText="Да!"
-                   cancelButtonText="Нет"
+                   :title="loc('confirmdel')"
+                   :confirmButtonText="loc('yes')"
+                   :cancelButtonText="loc('no')"
                    @confirm="deleteFact">
       <template #reference>
-              <el-button type="danger">Удалить</el-button>
-              </template>
+                <el-button type="danger">{{loc('remove')}}</el-button>
+                </template>
     </el-popconfirm>
 
   </el-form>
-  <el-dialog title="Источники"
+  <el-dialog :title="loc('sources')"
              v-model="dialogVisible"
              width="30%"
              :before-close="handleClose"
              @opened="dialogOpened">
     <References :isEmbedded="true" ref="bibRef"></References>
     <template #footer>
-            <span class="dialog-footer">
-               <el-button @click="handleClose">Отмена</el-button>
-               <el-button type="primary" @click="handleClose(true)">Подтвердить</el-button>
-            </span>
-           </template>
+              <span class="dialog-footer">
+                 <el-button @click="handleClose">{{loc('cancel')}}</el-button>
+                 <el-button type="primary" @click="handleClose(true)">{{loc('confirm')}}</el-button>
+              </span>
+             </template>
   </el-dialog>
 
 </template>
@@ -220,7 +210,7 @@
       ];
 
       onBeforeMount(async () => {
-        console.log('router id', id);
+        // console.log('router id', id);
         if (id) {
           const { data } = await store.getData('facts', id);
           if (data?.length) {
@@ -228,7 +218,7 @@
             // const dt  = new Date(fact.stamp);
             // dt.setMinutes( dt.getMinutes() - dt.getTimezoneOffset() );
             // fact.stamp = dt.toISOString();
-            console.log('stamp', fact.stamp);
+            // console.log('stamp', fact.stamp);
             // timestamp = fact.stamp;
           }
         }
@@ -249,17 +239,17 @@
             id: x.id,
             disabled: Boolean(x.id == id),
           }));
-          console.log('id', id, db.facts);
+          // console.log('id', id, db.facts);
         }
         db.acts = store.nest(db.acts);
 
-        console.log('DATA', db);
+        // console.log('DATA', db);
       });
 
       const handleClose = () => {
         // console.log("close", e);
         fact.refs = bibRef.value.getCheckedItems();
-        console.log('keys', fact.refs);
+        // console.log('keys', fact.refs);
         dialogVisible.value = false;
       };
 
@@ -275,14 +265,14 @@
       };
 
       const rules = {
-        acts: [{ required: true, message: 'Выберите виды деятельности', trigger: 'change' }],
-        stamp: [{ required: true, message: 'Выставьте примерные дату и время', trigger: 'change' }],
-        title: [{ required: true, message: 'Заполните описание', trigger: 'blur' }],
+        acts: [{ required: true, message: store.loc('selact'), trigger: 'change' }],
+        stamp: [{ required: true, message: store.loc('setts'), trigger: 'change' }],
+        title: [{ required: true, message: store.loc('filldesc'), trigger: 'blur' }],
       };
 
       const confirm = async () => {
         formRef.value?.validate(async valid => {
-          console.log('valid', valid);
+          // console.log('valid', valid);
           if (valid) {
             const datum = { ...fact };
             if (datum.stamp && typeof datum.stamp === 'object') {
@@ -325,6 +315,7 @@
         deleteFact,
         mainperson: store.state.user.settings.persona,
         setDefaultAuthor,
+        loc: store.loc,
       };
     },
     components: {

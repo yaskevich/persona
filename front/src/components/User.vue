@@ -1,80 +1,69 @@
 <template>
-  <!-- <div class="user">
-    <h2>№ {{ $route.params.id }}</h2>
-  </div> -->
-    <el-form label-width="120px" v-model="user" :inline="true">
-      <!-- label="Имя" -->
-      <el-form-item prop="firstname">
-      <el-input placeholder="Имя" v-model="user.firstname" class="text-input" prop="firstName"></el-input>
-      </el-form-item>
-    <!-- <el-input placeholder="Отчество" v-model="user.patroname" class="text-input"></el-input> -->
-    <el-form-item prop="lastname">
-      <el-input placeholder="Фамилия" v-model="user.lastname" class="text-input"></el-input>
+
+  <el-form label-width="120px" v-model="user" :inline="true">
+    <el-form-item prop="firstname">
+      <el-input :placeholder="loc('fname')" v-model="user.firstname" class="text-input" prop="firstName"></el-input>
     </el-form-item>
-    <!-- <el-input placeholder="Фамилия при рождении" v-model="form.lastName2" class="text-input"></el-input> -->
-    <!-- <el-input placeholder="Wikidata ID" prop="wikidata" v-model="user.wikidata" class="text-input"></el-input> -->
-    <!-- <el-form-item label="Пол"> -->
-
-
+    <el-form-item prop="lastname">
+      <el-input :placeholder="loc('lname')" v-model="user.lastname" class="text-input"></el-input>
+    </el-form-item>
     <el-form-item>
       <el-select v-model="user.privs" placeholder="Select" value-key>
-        <el-option
-          v-for="item in options"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value">
+        <el-option v-for="item in options"
+                   :key="item.value"
+                   :label="item.label"
+                   :value="item.value">
         </el-option>
       </el-select>
     </el-form-item>
 
-
-
     <el-form-item>
       <el-radio-group v-model="user.sex">
-        <el-radio label="1">Мужчина</el-radio>
-        <el-radio label="2">Женщина</el-radio>
+        <el-radio label="1">{{loc('man')}}</el-radio>
+        <el-radio label="2">{{loc('woman')}}</el-radio>
       </el-radio-group>
     </el-form-item>
-     <el-button type="primary" @click="onSubmit">Сохранить</el-button>
-    </el-form>
+    <el-button type="primary" @click="onSubmit">{{loc('save')}}</el-button>
+  </el-form>
+
 </template>
 <script>
-import { ref } from 'vue';
-import { onBeforeMount } from 'vue';
-import store from "../store";
-import { useRoute } from 'vue-router';
-import router from "../router";
 
-export default {
-  name: "User",
-  props: {
-    // datum: Object,
-  },
-  setup() {
+  import { ref } from 'vue';
+  import { onBeforeMount } from 'vue';
+  import store from '../store';
+  import router from '../router';
+  import { useRoute } from 'vue-router';
 
-    let user = ref({});
-    const vuerouter = useRoute();
-    const id = vuerouter.params.id;
+  export default {
+    name: 'User',
+    setup() {
+      let user = ref({});
+      const vuerouter = useRoute();
+      const id = vuerouter.params.id;
 
-    onBeforeMount(async() => {
-      const result = await store.getData("users", id);
-      if("data" in result) {
-        user.value = result.data[0];
-        user.value.sex = user.value.sex.toString();
-      }
-    });
+      onBeforeMount(async () => {
+        const result = await store.getData('users', id);
+        if ('data' in result) {
+          user.value = result.data[0];
+          user.value.sex = user.value.sex.toString();
+        }
+      });
 
-    const onSubmit = async() => {
-      // form.validate();
-        console.log('save:', user.value);
-        const result = await store.postData("users", user.value);
-        console.log(result);
-    };
+      const onSubmit = async () => {
+        // form.validate();
+        // console.log('save:', user.value);
+        const {data} = await store.postData('users', user.value);
+        if (data?.id) {
+          router.push('/users');
+        } else {
+          console.log('error!');
+        }
 
-    return {onSubmit, user, options: store.state.options};
-  },
-  components: {
+      };
 
-  }
-};
+      return { onSubmit, user, options: store.privs,  loc: store.loc };
+    },
+  };
+
 </script>

@@ -209,7 +209,7 @@ export default {
 				[selectables[table] + "WHERE id = $1", [idInt]]
 				:
 				// [selectables[table] + (["settings", "acts"].includes(table) ? "": "ORDER BY id DESC")];
-				[selectables[table]];
+				[selectables[table] + " ORDER BY id DESC"];
 			const result  = await pool.query(...params);
 			return result.rows;
 		}

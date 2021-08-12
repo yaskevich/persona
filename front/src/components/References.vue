@@ -1,6 +1,6 @@
 <template>
 
-  <el-dialog title="Редактировать"
+  <el-dialog :title="loc('edit')"
              v-model="dialogVisible"
              @opened="onDialogOpened"
              width="30%">
@@ -9,9 +9,9 @@
       <el-space>
 
         <el-radio-group v-model="bib.reftype">
-          <el-radio-button label="0">Сведения</el-radio-button>
-          <el-radio-button label="1">Заглавие</el-radio-button>
-          <el-radio-button label="2">Финаль</el-radio-button>
+          <el-radio-button label="0">{{loc('info')}}</el-radio-button>
+          <el-radio-button label="1">{{loc('heading')}}</el-radio-button>
+          <el-radio-button label="2">{{loc('fin')}}</el-radio-button>
         </el-radio-group>
 
       </el-space>
@@ -24,7 +24,7 @@
                  multiple
                  filterable
                  reserve-keyword
-                 placeholder="Авторы">
+                 :placeholder="loc('authors')">
         <el-option v-for="item in authors"
                    :key="item.id"
                    :label="item.value"
@@ -36,7 +36,7 @@
 
     <div v-if="bib.reftype==2">
 
-      <el-row type="flex" justify="center">Страницы</el-row>
+      <el-row type="flex" justify="center">{{loc('pages')}}</el-row>
 
       <el-row type="flex" justify="center">
         <el-tag :key="entry"
@@ -56,46 +56,46 @@
                   @blur="confirmPageInput">
         </el-input>
 
-        <el-button v-else class="button-new-tag" size="small" @click="showPageInput">+ добавить</el-button>
+        <el-button v-else class="button-new-tag" size="small" @click="showPageInput">+ {{loc('add').toLowerCase()}}</el-button>
 
         <!-- <el-space> -->
-        <!-- <el-input v-model="bib.text"><template #prepend>С</template></el-input>
-          <el-input v-model="bib.text"><template #prepend>По</template></el-input> -->
+        <!-- <el-input v-model="bib.text"><template #prepend>From</template></el-input>
+                <el-input v-model="bib.text"><template #prepend>To</template></el-input> -->
         <!-- <el-input v-model="bib.text"></el-input>
-          <el-button type="primary" icon="el-icon-plus"></el-button> -->
+                <el-button type="primary" icon="el-icon-plus"></el-button> -->
         <!-- </el-space> -->
       </el-row>
     </div>
 
     <el-row type="flex" justify="center">
 
-      <span v-if="bib.reftype==0">Запись</span>
-      <span v-if="bib.reftype==1">Название</span>
-      <span v-if="bib.reftype==2">Название-описание</span>
+      <span v-if="bib.reftype==0">{{loc('record')}}</span>
+      <span v-if="bib.reftype==1">{{loc('title')}}</span>
+      <span v-if="bib.reftype==2">{{loc('ttldsc')}}</span>
 
     </el-row>
 
     <el-input v-model="bib.title" ref="titleInputRef"></el-input>
 
     <div v-if="bib.reftype==2" style="margin-top:1rem;">
-      <el-row type="flex" justify="center">Цитата</el-row>
+      <el-row type="flex" justify="center">{{loc('cit')}}</el-row>
       <el-input v-model="bib.content" type="textarea"></el-input>
       <el-row type="flex" justify="center">
-        <el-button size="mini" @click="curlify" style="margin-top:2px;">Кавычки</el-button>
+        <el-button size="mini" @click="curlify" style="margin-top:2px;">{{loc('quotmarks')}}</el-button>
       </el-row>
     </div>
 
     <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogVisible = false;">Отмена</el-button>
-          <el-button type="primary" v-if="bib.title||pages.length" @click="handleClose(true)">Сохранить</el-button>
-        </span>
-      </template>
+              <span class="dialog-footer">
+                <el-button @click="dialogVisible = false;">{{loc('cancel')}}</el-button>
+                <el-button type="primary" v-if="bib.title||pages.length" @click="handleClose(true)">{{loc('save')}}</el-button>
+              </span>
+            </template>
 
   </el-dialog>
 
   <el-row type="flex" justify="center" v-if="!isEmbedded">
-    <h3>Библиографические записи</h3>
+    <h3>{{loc('bib')}}</h3>
   </el-row>
 
   <el-tree ref="treeRef"
@@ -105,29 +105,29 @@
            default-expand-all
            :expand-on-click-node="false"
            style="max-width:500px;"
-           empty-text="..."
+           :empty-text="loc('loading')"
            :show-checkbox="isEmbedded"
            :check-on-click-node="true"
            :check-strictly="true"
            :render-content="renderNode">
     <!-- <template #default="{ node, data }">
-         <span class="custom-tree-node">
-           <span v-html="( node?.data?.pages?.length ? 'С. ' + node?.data?.pages?.join(', ') + ' • ' : '' ) + node.label + ( node?.data?.content ? '&nbsp;<i class=el-icon-s-comment></i>' : '' )"></span>
-           <span v-if="!isEmbedded">
-             <el-dropdown >
-               <i class="el-icon-s-tools"></i>
-               <template #dropdown>
-                 <el-dropdown-menu>
-                   <el-dropdown-item @click="buildDialog(node, data, 1)">Добавить соседний пункт</el-dropdown-item>
-                   <el-dropdown-item v-if="data.reftype != 2" @click="buildDialog(node, data, 2)">Добавить вложенный пункт</el-dropdown-item>
-                   <el-dropdown-item @click="buildDialog(node, data)">Редактировать</el-dropdown-item>
-                   <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>Удалить этот пункт</strong></el-dropdown-item>
-                 </el-dropdown-menu>
-               </template>
-             </el-dropdown>
-           </span>
-         </span>
-       </template> -->
+               <span class="custom-tree-node">
+                 <span v-html="( node?.data?.pages?.length ? loc('pdot') + ' ' + node?.data?.pages?.join(', ') + ' • ' : '' ) + node.label + ( node?.data?.content ? '&nbsp;<i class=el-icon-s-comment></i>' : '' )"></span>
+                 <span v-if="!isEmbedded">
+                   <el-dropdown >
+                     <i class="el-icon-s-tools"></i>
+                     <template #dropdown>
+                       <el-dropdown-menu>
+                         <el-dropdown-item @click="buildDialog(node, data, 1)">{{loc('addsibling')}}</el-dropdown-item>
+                         <el-dropdown-item v-if="data.reftype != 2" @click="buildDialog(node, data, 2)">{{loc('addchild')}}</el-dropdown-item>
+                         <el-dropdown-item @click="buildDialog(node, data)">{{loc('edit')}}</el-dropdown-item>
+                         <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>{{loc('delit')}}</strong></el-dropdown-item>
+                       </el-dropdown-menu>
+                     </template>
+                   </el-dropdown>
+                 </span>
+               </span>
+             </template> -->
   </el-tree>
 
 </template>
@@ -280,7 +280,7 @@
         if (data?.children?.length) {
           console.log('cannot delete non-empty node!');
           ElMessage({
-            message: 'Нельзя удалить пункт с вложенными элементами',
+            message: store.loc('warndelleaf'),
             type: 'warning',
             showClose: true,
             center: true,
@@ -305,7 +305,7 @@
         const labelStack = [];
 
         if (x.node?.data?.pages?.length) {
-          label = 'С. ' + x.node?.data?.pages?.join(', ');
+          label = store.loc('pdot') + ' ' + x.node?.data?.pages?.join(', ');
         }
 
         if (label && x.data.title) {
@@ -328,13 +328,13 @@
 
         if (!props.isEmbedded) {
           const dropitems = [
-            h(ElDropdownItem, { onClick: () => buildDialog(x.node, x.data) }, () => 'Редактировать'),
-            h(ElDropdownItem, { onClick: () => buildDialog(x.node, x.data, 1) }, () => 'Добавить соседний пункт'),
+            h(ElDropdownItem, { onClick: () => buildDialog(x.node, x.data) }, () => store.loc('edit')),
+            h(ElDropdownItem, { onClick: () => buildDialog(x.node, x.data, 1) }, () => store.loc('addsibling')),
           ];
 
           if (x.data.reftype != 2) {
             dropitems.push(
-              h(ElDropdownItem, { onClick: () => buildDialog(x.node, x.data, 2) }, () => 'Добавить вложенный пункт')
+              h(ElDropdownItem, { onClick: () => buildDialog(x.node, x.data, 2) }, () => store.loc('addchild'))
             );
           }
 
@@ -342,7 +342,7 @@
           // if (!x.data?.children?.length) {
           dropitems.push(
             h(ElDropdownItem, { onClick: () => removeNode(x.node, x.data), divided: true }, () => [
-              h('strong', 'Удалить этот пункт'),
+              h('strong', store.loc('delit')),
             ])
           );
           // }
@@ -379,7 +379,7 @@
           .replace(/(\w)\x22(\w)/g, '$1\x27$2')
           .replace(/(^)\x22(\s)/g, '$1»$2')
           .replace(/(^|\s|\()"/g, '$1«')
-          .replace(/"(\;|\!|\?|\:|\.|\,|$|\)|\s)/g, '»$1');
+          .replace(/"(;|!|\?|:|\.|,|$|\)|\s)/g, '»$1');
       };
 
       return {
@@ -403,6 +403,7 @@
         refs,
         authors,
         curlify,
+        loc: store.loc,
       };
     },
   });

@@ -1,29 +1,29 @@
 <template>
 
-  <MainTitle title="Персоналии" :callback="confirm"></MainTitle>
+  <MainTitle :title="loc('persons')" :callback="confirm"></MainTitle>
 
   <el-form label-width="120px" ref="formRef" :model="form" :inline="true" :rules="rules">
 
     <el-form-item prop="firstname">
-      <el-input placeholder="Имя" v-model="form.firstname" class="text-input"></el-input>
+      <el-input :placeholder="loc('firstname')" v-model="form.firstname" class="text-input"></el-input>
     </el-form-item>
 
     <el-form-item prop="patroname">
-      <el-input placeholder="Отчество" v-model="form.patroname" class="text-input"></el-input>
+      <el-input :placeholder="loc('patroname')" v-model="form.patroname" class="text-input"></el-input>
     </el-form-item>
 
     <el-form-item prop="lastname">
-      <el-input placeholder="Фамилия" v-model="form.lastname"></el-input>
+      <el-input :placeholder="loc('lastname')" v-model="form.lastname"></el-input>
     </el-form-item>
 
     <el-form-item prop="wikidata">
-      <el-input placeholder="Wikidata ID" prop="wikidata" v-model="form.wikidata" class="text-input" style="max-width:110px;"></el-input>
+      <el-input :placeholder="loc('wikidata')" prop="wikidata" v-model="form.wikidata" class="text-input" style="max-width:110px;"></el-input>
     </el-form-item>
 
     <el-form-item>
       <el-radio-group v-model="form.sex">
-        <el-radio label="1">Мужчина</el-radio>
-        <el-radio label="2">Женщина</el-radio>
+        <el-radio label="1">{{loc('man')}}</el-radio>
+        <el-radio label="2">{{loc('woman')}}</el-radio>
       </el-radio-group>
     </el-form-item>
 
@@ -31,7 +31,7 @@
 
   <el-row type="flex" justify="center">
 
-    <el-input placeholder="Фильтр по ФИО"
+    <el-input :placeholder="loc('filternames')"
               v-model="filterString"
               style="max-width: 280px;"
               clearable>
@@ -67,14 +67,14 @@
 
     <el-col :span="4">
       <div class="grid-content bg-purple-light">
-        <!-- <el-button type="primary" @click="confirm">Удалить</el-button> -->
-        <el-popconfirm title="Точно удалить?"
-                       confirmButtonText="Да!"
-                       cancelButtonText="Нет"
+        <!-- <el-button type="primary" @click="confirm">{{loc('remove')}}</el-button> -->
+        <el-popconfirm :title="loc('confirmdel')"
+                       :confirmButtonText="loc('yes')"
+                       :cancelButtonText="loc('no')"
                        @confirm="deletePerson(value.id, key)">
           <template #reference>
-            <el-button>Удалить</el-button>
-            </template>
+                    <el-button>{{loc('remove')}}</el-button>
+                    </template>
         </el-popconfirm>
       </div>
     </el-col>
@@ -135,16 +135,16 @@
 
       const rules = {
         firstname: [
-          { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
-          { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' },
+          { required: true, message: store.loc('fieldnonempty'), trigger: 'blur' },
+          { min: 2, message: store.loc('twoandmore'), trigger: 'blur' },
         ],
         lastname: [
-          { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
-          { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' },
+          { required: true, message: store.loc('fieldnonempty'), trigger: 'blur' },
+          { min: 2, message: store.loc('twoandmore'), trigger: 'blur' },
         ],
         patroname: [
-          { required: false, message: 'Поле должно быть заполнено', trigger: 'blur' },
-          { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' },
+          { required: false, message: store.loc('fieldnonempty'), trigger: 'blur' },
+          { min: 2, message: store.loc('twoandmore'), trigger: 'blur' },
         ],
       };
 
@@ -157,7 +157,18 @@
           : persons;
       };
 
-      return { deletePerson, resetForm, confirm, formRef, form, persons, rules, filterString, filtered };
+      return {
+        deletePerson,
+        resetForm,
+        confirm,
+        formRef,
+        form,
+        persons,
+        rules,
+        filterString,
+        filtered,
+        loc: store.loc,
+      };
     },
     components: {
       MainTitle,

@@ -1,10 +1,10 @@
 <template>
 
-  <MainTitle title="Произведения" :callback="() => $router.push('/work/')"></MainTitle>
+  <MainTitle :title="loc('works')" :callback="() => $router.push('/work/')"></MainTitle>
 
   <el-row type="flex" justify="center">
 
-    <el-input placeholder="Фильтр по названиям"
+    <el-input :placeholder="loc('filtertitles')"
               v-model="filterString"
               style="max-width: 280px;"
               clearable>
@@ -66,6 +66,7 @@
         data,
         filtered,
         filterString,
+        loc: store.loc,
       };
     },
     components: {

@@ -10,8 +10,8 @@
         <el-aside width="210px" style="overflow-y: hidden;">
           <el-menu class="el-menu-vertical-demo" :router="true" :default-openeds="['content']" :default-active="$router.currentRoute.value.path">
             <el-submenu v-for="(v, k) in menuScheme" :index="v.title" :key="k">
-              <template #title><i :class="v.icon"></i><span>{{t[v.title][lang]}}</span></template>
-              <el-menu-item v-for="item in v.data" :index="'/'+item" :key="item">{{t[item][lang]}}</el-menu-item>
+              <template #title><i :class="v.icon"></i><span>{{loc(v.title)}}</span></template>
+              <el-menu-item v-for="item in v.data" :index="'/'+item" :key="item">{{loc(item)}}</el-menu-item>
             </el-submenu>
           </el-menu>
         </el-aside>
@@ -23,10 +23,10 @@
               <template #dropdown>
                      <el-dropdown-menu>
                         <el-dropdown-item @click="goToProfile">
-                          {{t["profile"][lang]}}
+                          {{loc("profile")}}
                         </el-dropdown-item>
                         <el-dropdown-item @click="callLogout">
-                          {{t["logout"][lang]}}
+                          {{loc("logout")}}
                         </el-dropdown-item>
                      </el-dropdown-menu>
                   </template>
@@ -44,14 +44,14 @@
       <div style="max-width:600px;display: inline-block;margin: 0 auto;">
 
         <el-row type="flex" justify="center">
-          <h3>{{t["userauth"][lang]}}</h3>
+          <h3>{{loc('userauth')}}</h3>
         </el-row>
 
         <Login/>
 
         <!-- <el-divider><i class="el-icon-star-on"></i></el-divider> -->
-        <el-divider>{{t["or"][lang]}}</el-divider>
-        <h3>{{t["userreg"][lang]}}</h3>
+        <el-divider>{{loc("or")}}</el-divider>
+        <h3>{{loc("userreg")}}</h3>
 
         <Profile/>
 
@@ -59,7 +59,7 @@
     </div>
   </div>
   <div v-else>
-    {{t["loading"][lang]}}...
+    {{loc("loading")}}
   </div>
 
 </template>
@@ -143,8 +143,7 @@
         callLogout,
         dataReady,
         state: store.state,
-        lang: store.state.lang,
-        t: store.texts,
+        loc: store.loc,
       };
     },
     components: {

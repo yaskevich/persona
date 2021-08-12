@@ -1,15 +1,15 @@
 <template>
 
-  <MainTitle :title="'Произведение ' + $route.params.id " :callback="confirm" :text="work.id? 'Сохранить': 'Добавить'"></MainTitle>
+  <MainTitle :title="loc('work') + ' ' + $route.params.id " :callback="confirm" :text="work.id ? loc('save'): loc('add')"></MainTitle>
 
   <el-form :model="work" ref="formRef" label-width="100px" :rules="rules">
 
-    <el-form-item prop="title" label="Название">
-      <el-input placeholder="Название" v-model="work.title" class="text-input"></el-input>
+    <el-form-item prop="title" :label="loc('title')">
+      <el-input :placeholder="loc('title')" v-model="work.title" class="text-input"></el-input>
     </el-form-item>
 
-    <el-form-item prop="genre" label="Тип">
-      <el-select v-model="work.genre" filterable placeholder="Жанр">
+    <el-form-item prop="genre" :label="loc('genre')">
+      <el-select v-model="work.genre" filterable :placeholder="loc('genre')">
         <el-option v-for="item in genres"
                    :key="item.id"
                    :label="item.title"
@@ -19,9 +19,9 @@
       {{work.genrename}}
     </el-form-item>
 
-    <el-form-item label="Авторы">
+    <el-form-item :label="loc('authors')">
       <el-space wrap>
-        <el-select v-model="work.authors" filterable multiple placeholder="Персоны">
+        <el-select v-model="work.authors" filterable multiple :placeholder="loc('authors')">
           <el-option v-for="item in persons"
                      :key="item.id"
                      :label="item.value"
@@ -31,24 +31,24 @@
 
         <el-button type="primary"
                    @click="setDefaultAuthor"
-                   v-if="persons.length && mainperson">Автор – {{persons.filter(x=>x.id === mainperson)[0].value}}</el-button>
+                   v-if="persons.length && mainperson">{{loc('author')}} – {{persons.filter(x=>x.id === mainperson)[0].value}}</el-button>
       </el-space>
     </el-form-item>
 
-    <!-- <el-button type="primary" @click="resetForm">Очистить</el-button> -->
+    <!-- <el-button type="primary" @click="resetForm">{{loc('reset')}}</el-button> -->
     <el-form-item>
-      <el-button type="primary" @click="confirm">Сохранить</el-button>
+      <el-button type="primary" @click="confirm">{{loc('save')}}</el-button>
     </el-form-item>
 
     <el-form-item>
       <el-popconfirm v-if="work?.id"
-                     title="Точно удалить?"
-                     confirmButtonText="Да!"
-                     cancelButtonText="Нет"
+                     :title="loc('confirmdel')"
+                     :confirmButtonText="loc('yes')"
+                     :cancelButtonText="loc('no')"
                      @confirm="deleteWork">
         <template #reference>
-              <el-button type="danger">Удалить</el-button>
-              </template>
+                  <el-button type="danger">{{loc('remove')}}</el-button>
+                  </template>
       </el-popconfirm>
     </el-form-item>
 
@@ -68,7 +68,6 @@
   export default defineComponent({
     setup() {
       const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
-
       const work = ref({});
       const works = reactive([]);
       const genres = reactive([]);
@@ -77,12 +76,12 @@
       const id = vuerouter.params.id;
 
       onBeforeMount(async () => {
-        console.log('router id', id);
+        // console.log('router id', id);
         if (id) {
           const { data } = await store.getData('works', id);
           if (data) {
             work.value = data[0];
-            console.log('this work', work.value);
+            // console.log('this work', work.value);
           }
         }
 
@@ -93,7 +92,7 @@
 
         const personsData = await store.getData('persons');
         persons.value = personsData.data.map(x => ({ ...x, value: x.firstname + ' ' + x.lastname }));
-        console.log(persons);
+        // console.log(persons);
 
         const genresData = await store.getData('genres');
         if ('data' in genresData) {
@@ -113,7 +112,7 @@
         formRef.value?.validate(async valid => {
           if (valid) {
             const result = await store.postData('works', work.value);
-            console.log(result);
+            /* console.log(result); */
             if ('data' in result && 'id' in result.data) {
               router.push('/works');
             } else {
@@ -135,13 +134,13 @@
 
       const rules = {
         title: [
-          { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
-          { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' },
+          {
+            required: true,
+            message: store.loc('fieldnonempty'),
+            trigger: 'blur',
+          },
+          { min: 2, message: store.loc('fieldnonempty'), trigger: 'blur' },
         ],
-        //  genre: [
-        //    { required: true, message: 'Поле должно быть заполнено', trigger: 'blur' },
-        //    { min: 2, message: 'Не менее 2-х символов', trigger: 'blur' },
-        //  ],
       };
 
       return {
@@ -156,6 +155,8 @@
         mainperson: store.state.user.settings.persona,
         deleteWork,
         genres,
+
+        loc: store.loc,
       };
     },
     components: {

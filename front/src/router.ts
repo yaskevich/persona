@@ -9,7 +9,7 @@ import WorkList from './components/WorkList.vue';
 import BookList from './components/BookList.vue';
 import Book from './components/Book.vue';
 import LogList from './components/LogList.vue';
-import Login from './components/Login.vue';
+// import Login from './components/Login.vue';
 import Settings from './components/Settings.vue';
 import FactList from './components/FactList.vue';
 import Log from './components/Log.vue';
@@ -77,11 +77,11 @@ const routes = [
 		component: LogList,
 		name: 'LogList',
 	},
-	{
-		path: '/login',
-		component: Login,
-		name: 'Login',
-	},
+	// {
+	// 	path: '/login',
+	// 	component: Login,
+	// 	name: 'Login',
+	// },
 	{
 		path: '/books',
 		component: BookList,

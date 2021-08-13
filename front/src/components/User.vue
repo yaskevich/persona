@@ -1,18 +1,21 @@
 <template>
 
   <el-form label-width="120px" v-model="user" :inline="true">
+
     <el-form-item prop="firstname">
       <el-input :placeholder="loc('fname')" v-model="user.firstname" class="text-input" prop="firstName"></el-input>
     </el-form-item>
+
     <el-form-item prop="lastname">
       <el-input :placeholder="loc('lname')" v-model="user.lastname" class="text-input"></el-input>
     </el-form-item>
+
     <el-form-item>
       <el-select v-model="user.privs" placeholder="Select" value-key>
-        <el-option v-for="item in options"
-                   :key="item.value"
-                   :label="item.label"
-                   :value="item.value">
+        <el-option v-for="(code, key) in rights"
+                   :key="key"
+                   :label="loc(code)"
+                   :value="Number(key)">
         </el-option>
       </el-select>
     </el-form-item>
@@ -23,7 +26,9 @@
         <el-radio label="2">{{loc('woman')}}</el-radio>
       </el-radio-group>
     </el-form-item>
+
     <el-button type="primary" @click="onSubmit">{{loc('save')}}</el-button>
+
   </el-form>
 
 </template>
@@ -53,16 +58,15 @@
       const onSubmit = async () => {
         // form.validate();
         // console.log('save:', user.value);
-        const {data} = await store.postData('users', user.value);
+        const { data } = await store.postData('users', user.value);
         if (data?.id) {
           router.push('/users');
         } else {
           console.log('error!');
         }
-
       };
 
-      return { onSubmit, user, options: store.privs,  loc: store.loc };
+      return { onSubmit, user, rights: store.privs, loc: store.loc };
     },
   };
 

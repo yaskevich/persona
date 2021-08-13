@@ -1,10 +1,8 @@
 <template>
 
-  <el-space direction="vertical">
-    <div v-if="rights">
+  <el-row type="flex" justify="center" v-if="rights">
       {{form.firstname}} {{form.lastname}} ● {{rights}}
-    </div>
-  </el-space>
+  </el-row>
   <el-form :model="form" ref="formRef" label-width="100px" :rules="rules">
     <el-form-item prop="firstname" :label="loc('firstname')">
       <el-input :placeholder="loc('firstname')" v-model="form.firstname" class="text-input"></el-input>
@@ -53,7 +51,7 @@
 
       if (isRegistered.value) {
         Object.assign(form, store.state.user);
-        rights = store.privs.filter(x => x.value === form.privs)[0]['label'];
+        rights = store.loc(store.privs[form.privs]);
       }
 
       onBeforeMount(async () => {
@@ -104,18 +102,18 @@
 
       const rules = {
         firstname: [
-          { required: true, message: store.loc('regmsg'), trigger: 'blur' },
-          { min: 2, message: store.loc('regmsg'), trigger: 'blur' },
+          { required: true, message: store.loc('fieldnonempty'), trigger: 'blur' },
+          { min: 2, message: store.loc('twoandmore'), trigger: 'blur' },
         ],
         lastname: [
-          { required: true, message: store.loc('regmsg'), trigger: 'blur' },
-          { min: 2, message: store.loc('regmsg'), trigger: 'blur' },
+          { required: true, message: store.loc('fieldnonempty'), trigger: 'blur' },
+          { min: 2, message: store.loc('twoandmore'), trigger: 'blur' },
         ],
         email: [
-          { required: true, message: store.loc('regmsg'), trigger: 'blur' },
-          { type: 'email', message: store.loc('regmsg'), trigger: ['blur', 'change'] },
+          { required: true, message: store.loc('fieldnonempty'), trigger: 'blur' },
+          { type: 'email', message: store.loc('fieldemail'), trigger: ['blur', 'change'] },
         ],
-        sex: [{ required: true, message: store.loc('regmsg'), trigger: 'change' }],
+        sex: [{ required: true, message: store.loc('fieldsex'), trigger: 'change' }],
       };
 
       return {

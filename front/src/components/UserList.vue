@@ -34,7 +34,7 @@
       <div class="grid-content bg-purple">{{value.lastname}}</div>
     </el-col>
     <el-col :span="4">
-      <div class="grid-content bg-purple-light">{{options.filter(x => x.value === value.privs)[0]["label"].split('(')[0]}}</div>
+      <div class="grid-content bg-purple-light">{{loc(rights[value.privs])}}</div>
     </el-col>
     <el-col :span="4">
       <div class="grid-content bg-purple">
@@ -141,9 +141,8 @@
         rules,
         form,
         users,
-        options: store.privs,
+        rights: store.privs,
         me: store.state.user,
-
         loc: store.loc,
       };
     },

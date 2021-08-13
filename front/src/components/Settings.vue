@@ -17,6 +17,16 @@
       <el-input placeholder="..." v-model="settings.title" class="text-input"></el-input>
     </el-form-item>
 
+    <el-form-item prop="language" :label="loc('language')">
+      <el-select v-model="settings.lang" :placeholder="loc('language')">
+        <el-option v-for="(item, key) in langs"
+                   :key="key"
+                   :label="item"
+                   :value="key">
+        </el-option>
+      </el-select>
+    </el-form-item>
+
   </el-form>
 
 </template>
@@ -49,7 +59,7 @@
             Object.assign(store.state.user.settings, settings);
             const result = await store.postData('settings', settings);
             if (!('data' in result && 'id' in result.data)) {
-              console.log("error", result);
+              console.log('error', result);
             }
           } else {
             console.log('form not valid');
@@ -62,7 +72,7 @@
         title: [{ required: true, message: store.loc('fieldnonempty'), trigger: 'blur' }],
       };
 
-      return { confirm, settings, persons, rules, formRef,  loc: store.loc };
+      return { confirm, settings, persons, rules, formRef, loc: store.loc, langs: store.langs };
     },
     components: {
       MainTitle,

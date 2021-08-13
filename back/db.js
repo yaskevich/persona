@@ -62,7 +62,8 @@ const tablesQueries = [
 	`CREATE TABLE IF NOT EXISTS settings (
 		id SERIAL PRIMARY KEY,
 		title text not null default 'Persona',
-		persona integer not null default 1
+		persona integer not null default 1,
+    lang integer not null default 0
 	)`,
 	`INSERT INTO settings (persona) VALUES(1)`,
 	`ALTER TABLE settings OWNER TO ${process.env.PGUSER}`,

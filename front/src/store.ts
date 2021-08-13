@@ -6,6 +6,22 @@ type objTexts = {
     [key: string]: [string, string]
 };
 
+type objOptions = {
+    [key: string]: string
+};
+
+interface keyable {
+    [key: string]: any
+};
+
+const privs = {
+  1: "administrator",
+  3: "moderator",
+  5: "editor",
+};
+
+const localLanguages:Array<string>  = ["English", "Русский"];
+
 const localDict:objTexts = {
   "home" : ["Home", "Обзор"],
   "facts": ["Facts", "События"],
@@ -40,7 +56,7 @@ const localDict:objTexts = {
   "userauth": ["User Authorization", "Авторизация пользователя"],
   "or": ["or", "или"],
   "userreg": ["New Account Registration", "Регистрация новой учетной записи"],
-  "loading": ["loading", "загрузка"],
+  "loading": ["loading...", "загрузка..."],
   "profile": ["Profile", "Профиль"],
   "logout": ["Log out", "Выйти"],
   "filtertitles": ["Filter by titles", "Фильтр по названиям"],
@@ -132,34 +148,22 @@ const localDict:objTexts = {
   "administrator": ["Administrator", "Администратор"],
   "moderator": ["Moderator", "Модератор"],
   "editor": ["Editor", "Редактор"],
+  "language": ["Language", "Язык"],
 };
 
 const state = reactive({
   token: localStorage.getItem('token') || '',
   user: {},
-  lang: 0,
   error: "",
 });
 
 const loc = (id:string) => {
   return id ?
       localDict?.[id] ?
-      localDict[id][(<any>state)?.user?.language as any || 0 ] : id
+      localDict[id][(<any>state)?.user?.settings?.lang as any || 0 ] : id
     : "...";
 };
 
-const privs = [
-  {
-    value: 1,
-    label: localDict["administrator"][state.lang],
-  }, {
-    value: 3,
-    label: localDict["moderator"][state.lang],
-  }, {
-    value: 5,
-    label: localDict["editor"][state.lang],
-  }
-];
 const logout = async() => {
   localStorage.setItem("token", "");
   state.user  = {};
@@ -272,9 +276,6 @@ const getData = async(table: string, id?: string): Promise<any> => {
  console.log("No token. Fail.");
 };
 
-type objOptions = {
-    [key: string]: string
-}
 const getDataMulti = async (datum: objOptions, rules: objOptions, sorts: objOptions) =>{
   const tables = Object.keys(datum);
   return (await Promise.all(tables.map(t => getData(t)))).map((x,i) => {
@@ -303,10 +304,6 @@ const leaf = (a:any, b:any): Object  =>  {
     const res  = nest(a, b);
     return res.length ? {children: res} : {};
 };
-
-interface keyable {
-    [key: string]: any
-}
 
 const classify = (x:keyable) => {
   const key = x.data1 && Object.keys(x.data1).length ?
@@ -345,5 +342,6 @@ export default {
   version: project.version,
   privs,
   getDataMulti,
+  langs: localLanguages,
   loc,
 };

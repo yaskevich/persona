@@ -20,8 +20,8 @@
                        :cancelButtonText="loc('no')"
                        @confirm="deleteGenre(value.id, key)">
           <template #reference>
-            <el-button type="text" size="mini" icon="el-icon-delete" plain class="full-width"></el-button>
-            </template>
+                <el-button type="text" size="mini" icon="el-icon-delete" plain class="full-width"></el-button>
+                </template>
         </el-popconfirm>
       </div>
     </el-col>
@@ -30,17 +30,17 @@
   <el-dialog :title="loc('genre')"
              v-model="dialogVisible"
              width="30%">
-    <el-form :model="form" ref="formRef" label-width="100px" :rules="rules" :inline="true">
+    <el-form :model="form" ref="formRef" label-width="100px" :rules="rules" :inline="true" @submit.prevent.native>
       <el-form-item prop="title">
-        <el-input :placeholder="loc('title')" v-model="form.title" class="text-input" ref="formInputRef"></el-input>
+        <el-input :placeholder="loc('title')" v-model="form.title" class="text-input" ref="formInputRef" @keyup.enter="confirmDialog"></el-input>
       </el-form-item>
     </el-form>
     <template #footer>
-          <span class="dialog-footer">
-            <el-button @click="dialogVisible = false">{{loc('cancel')}}</el-button>
-            <el-button type="primary" @click="confirmDialog">{{loc('save')}}</el-button>
-          </span>
-        </template>
+              <span class="dialog-footer">
+                <el-button @click="dialogVisible = false">{{loc('cancel')}}</el-button>
+                <el-button type="primary" @click="confirmDialog">{{loc('save')}}</el-button>
+              </span>
+            </template>
   </el-dialog>
 
 </template>
@@ -87,22 +87,28 @@
       const confirmDialog = () => {
         formRef.value?.validate(async valid => {
           if (valid) {
-            // console.log('form', form);
-            const result = await store.postData('genres', form);
-            // console.log(result);
-            if (!('data' in result && 'id' in result.data)) {
-              console.log('error!');
-            } else {
-              // console.log('ok');
-              if (form.id) {
-                genres.filter(x => x.id === form.id)[0]['title'] = form.title;
-                delete form.id;
-              } else {
-                genres.unshift({ ...form });
-              }
+            // console.log('form', form, genres);
+            form.title = form.title.trim();
+            if (genres.filter(x => x.title === form.title).length) {
+              // console.log('avoid duplicates');
               form.title = '';
-
               dialogVisible.value = false;
+            } else {
+              const result = await store.postData('genres', form);
+              // console.log(result);
+              if (!('data' in result && 'id' in result.data)) {
+                console.log('error!');
+              } else {
+                // console.log('ok');
+                if (form.id) {
+                  genres.filter(x => x.id === form.id)[0]['title'] = form.title;
+                  delete form.id;
+                } else {
+                  genres.unshift({ ...form });
+                }
+                form.title = '';
+                dialogVisible.value = false;
+              }
             }
           } else {
             return false;

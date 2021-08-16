@@ -203,14 +203,16 @@ export default {
 		}
 		return {"error": "bad query"};
 	},
-	async getData(table, id){
+	async getData(table, id, offset, limit){
+    const off = offset || 0;
+    const lim = limit || 1000;
 		if (table in dbStructure) {
 			const idInt  = parseInt(id, 10);
 			const params  = idInt ?
 				[selectables[table] + "WHERE id = $1", [idInt]]
 				:
 				// [selectables[table] + (["settings", "acts"].includes(table) ? "": "ORDER BY id DESC")];
-				[selectables[table] + " ORDER BY id DESC"];
+				[selectables[table] + ` ORDER BY id DESC OFFSET ${off} LIMIT ${lim}`];
 			const result  = await pool.query(...params);
 			return result.rows;
 		}

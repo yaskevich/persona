@@ -259,11 +259,17 @@ const deleteById = async(table: string, id: string): Promise<any> => {
  console.log("No token. Fail.");
 };
 
-const getData = async(table: string, id?: string): Promise<any> => {
+const getData = async(table: string, id?: string, pager?: Array<number>): Promise<any> => {
   if (state.token) {
     try {
     const config = { headers: { Authorization: "Bearer " + state.token }, "params": {} };
      if(id) { config["params"] = { id: id }; }
+     if(pager && pager.length) {
+        config["params"] = {
+          off: pager[0] || 0 ,
+          lim: pager[1] || 100 ,
+        };
+      }
      // console.log(`GET ${table}`);
      const response = await axios.get("/api/" + table, config);
      // console.log(response.data);
@@ -276,9 +282,9 @@ const getData = async(table: string, id?: string): Promise<any> => {
  console.log("No token. Fail.");
 };
 
-const getDataMulti = async (datum: objOptions, rules: objOptions, sorts: objOptions) =>{
+const getDataMulti = async (datum: objOptions, rules: objOptions, sorts: objOptions, pager: objOptions) =>{
   const tables = Object.keys(datum);
-  return (await Promise.all(tables.map(t => getData(t)))).map((x,i) => {
+  return (await Promise.all(tables.map(t => getData(t, undefined, pager?.[t] as any)))).map((x,i) => {
     if (rules?.[tables[i]]) {
       const prop = rules[tables[i]];
       Object.assign(datum[tables[i]], x?.data.reduce((x:any, y:any) => {

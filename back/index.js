@@ -77,7 +77,8 @@ if (!process.env.JWT_SECRET){
 
 	app.get('/api/user/info', auth, async(req,res) => {
 		const settings = await db.getData("settings", 1);
-		res.json(Object.assign(req.user, {"settings": settings?.[0]}));
+		const stats = await db.getStats();
+		res.json(Object.assign(req.user, {"settings": settings?.[0]}, {"stats": stats}));
 	 });
 
 	app.post('/api/user/reg', async(req,res) => {
@@ -90,10 +91,10 @@ if (!process.env.JWT_SECRET){
 		res.json(result);
 	});
 
-	app.post('/api/x/:table', auth, async(req,res) => {
+	app.post('/api/:table', auth, async(req,res) => {
 		console.log('POST params', req.params, 'query', req.query);
 		if (req.params['table'] === "users" && (!(req.user.id === req.body.id || req.user.privs == 1))){
-			return res.json({"error": "privs"});
+			return res.json({"error": "access denied"});
 		}
 		res.json(await db.setData(req.body, req.params['table'], req.user));
 	 });
@@ -104,8 +105,8 @@ if (!process.env.JWT_SECRET){
 	});
 
 	app.get('/api/:table', auth, async(req,res) => {
-	 // console.log('GET params', req.params, 'query', req.query);
-	 res.json(await db.getData(req.params['table'], req.query['id']));
+	 console.log('GET params', req.params, 'query', req.query);
+	 res.json(await db.getData(req.params['table'], req.query['id'], req.query['off'], req.query['lim'],));
  });
 
 	app.listen(port);

@@ -171,7 +171,6 @@ for (let table of Object.keys(dbStructure)) {
 		 .join(', '),
 	 "FROM", table, ' '].join(' ');
 } // columns with names starting with _underscore are not exposed for client code!
-
 // console.log(selectables);
 // console.log(dbStructure);
 
@@ -204,8 +203,8 @@ export default {
 		return {"error": "bad query"};
 	},
 	async getData(table, id, offset, limit){
-    const off = offset || 0;
-    const lim = limit || 1000;
+    const off = parseInt(offset, 10) || 0;
+    const lim = parseInt(limit, 10) || 1000;
 		if (table in dbStructure) {
 			const idInt  = parseInt(id, 10);
 			const params  = idInt ?
@@ -355,5 +354,8 @@ export default {
 			return { "message": pwd };
 		}
     return {"error": "user"};
+	},
+	async getStats() {
+		return Object.fromEntries((await Promise.all(Object.keys(dbStructure).map(t => pool.query(`SELECT '${t}' as table, COUNT(*) FROM ${t}`)))).map(x=> x.rows.shift()).map(x=>[x.table, Number(x.count)]));
 	},
 };

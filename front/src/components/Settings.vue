@@ -4,7 +4,7 @@
   <el-form label-width="220px" :model="settings" ref="formRef" :rules="rules">
 
     <el-form-item :label="loc('mainperson')">
-      <el-select v-model="settings.persona" filterable :placeholder="loc('persons')">
+      <el-select v-model="settings.mainperson" filterable :placeholder="loc('persons')">
         <el-option v-for="item in persons"
                    :key="item.id"
                    :label="item.value"
@@ -17,8 +17,8 @@
       <el-input placeholder="..." v-model="settings.title" class="text-input"></el-input>
     </el-form-item>
 
-    <el-form-item prop="language" :label="loc('language')">
-      <el-select v-model="settings.lang" :placeholder="loc('language')">
+    <el-form-item prop="lang" :label="loc('lang')">
+      <el-select v-model="settings.lang" :placeholder="loc('lang')">
         <el-option v-for="(item, key) in langs"
                    :key="key"
                    :label="item"

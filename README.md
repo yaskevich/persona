@@ -1,7 +1,7 @@
 # Persona
 > *a character assumed by an author in a written work* – [Merriam-Webster dictionary](https://www.merriam-webster.com/dictionary/persona)
 
-------
+
 
 ## Web application for gathering and presenting data about life events of creative persons
 
@@ -16,19 +16,25 @@ Both apps are written in modern JavaScript and tested withe the latest LTS versi
 
 ## Deployment
 
-The example script that gets the code from [Github](https://github.com/yaskevich/persona), builds the client app bundle and runs the server is in `deploy-persona.sh` file. **Note**: it uses [PM2](https://pm2.keymetrics.io) as a globally installed package, you should install it manually before running the script. Otherwise, you have to modify the code for using `nodemon` or directly `node`, but it is not recommended for production.
+The example script that gets the code from [Github](https://github.com/yaskevich/persona), builds the client app bundle and runs the server is in [deploy-persona.sh](/deploy-persona.sh) file. **Note**: it uses [PM2](https://pm2.keymetrics.io) as a globally installed package, you should install it manually before running the script. Otherwise, you have to modify the code for using `nodemon` or directly `node`, but it is not recommended for production.
 
 ### Client application
 
-It is a JavaScript UI application written with [Vue 3](https://v3.vuejs.org) framework and [Element Plus](https://element-plus.org/) component library. Build tool is [Vite](https://vitejs.dev). The client application supports localization, currently **English** and **Russian** locales are provided. One can easily add new language, providing dictionary of captions and other text elements as JSON structure.
+It is a JavaScript UI application written with [Vue 3](https://v3.vuejs.org) framework and [Element Plus](https://element-plus.org/) component library. Build tool is [Vite](https://vitejs.dev).
 
-At first, install all necessary NodeJS modules: `npm install `
+#### Internationalization
+
+The client application supports localization, currently **English** and **Russian** locales are provided. The list of supported languages and corresponding translations of UI texts are stored in [i18n.json](/front/src/i18n.json) file. One can easily add a new language, putting new language name to *languages* array and extending an array of every UI element translation with new item in *dictionary* object.
+
+#### Serving client code
+
+At first, install all necessary NodeJS modules: `npm install`
 
 To build the static bundle run:
 
 `npm run build`
 
-To start development and start the app in hot-reload mode run:
+To start development and run the app in hot-reload mode:
 
 `npm run dev`
 
@@ -38,7 +44,7 @@ To serve client code locally:
 
 ### Server application
 
-This is an [ExpressJS](https://expressjs.com/) application that stores data in a database and controls access to the data with JSON Web Token. User passwords are not stored in the database, just hashes.
+This is an [ExpressJS](https://expressjs.com/) application that stores data in a database and controls an access to the data with JSON Web Token. User passwords are not stored in the database, just hashes.
 
 The only external dependency of the app is [PostgreSQL](https://www.postgresql.org) server v9.6+. Once it is installed and the database is created, you have to provide environmental variables either via `.env` file, or by putting it in `ecosystem.config.cjs`, or providing them in other way – it depends on how you are going to run the application.
 
@@ -60,9 +66,7 @@ PORT=8080
 JWT_SECRET=test
 ```
 
-Keep in mind: before running the app one should install all necessary NodeJS modules:
-
-`npm install`
+Keep in mind, before running the app one should install all necessary NodeJS modules with `npm install`
 
 ### Web-proxy
 

@@ -133,7 +133,7 @@
 </template>
 
 
-<script lang="ts">
+<script>
 
   import { defineComponent, ref, reactive, onBeforeMount, toRaw, nextTick } from 'vue';
   import store from '../store';
@@ -174,7 +174,7 @@
         authors.value = personsData.data.map(x => ({ ...x, value: x.firstname + ' ' + x.lastname }));
       });
 
-      const buildDialog = (node, data, actionType) => {
+      const buildDialog = (node, data, actionType = 0) => {
         console.log('node', node);
         nodeRef = node;
         dataRef = data;
@@ -311,10 +311,12 @@
         if (label && x.data.title) {
           label += ' • ';
         }
+        // console.log("len", x.data.title, x.data.title.length);
 
-        label += x.data.title;
+        const maxLabelLength = 50;
+        const labelArray = x.data.title.length > maxLabelLength ? [label + x.data.title.slice(0, maxLabelLength), h('i', { class: 'el-icon-more indent', style: "color:#F56C6C" })] : [label + x.data.title]
 
-        labelStack.push(label);
+        labelStack.push(...labelArray);
 
         if (x.node?.data?.content) {
           labelStack.push(h('i', { class: 'el-icon-s-comment indent' }));

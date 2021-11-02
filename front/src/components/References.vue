@@ -175,7 +175,7 @@
       });
 
       const buildDialog = (node, data, actionType = 0) => {
-        console.log('node', node);
+        // console.log('node', node);
         nodeRef = node;
         dataRef = data;
         Object.assign(bib, actionType ? scheme : toRaw(data));
@@ -188,17 +188,17 @@
       };
 
       const handleClose = async e => {
-        console.log('close', e);
+        // console.log('close', e);
         dialogVisible.value = false;
 
-        console.log('bib', bib);
+        // console.log('bib', bib);
         if (bib.reftype == 0) {
-          console.log('check 0');
+          // console.log('check 0');
           bib.authors = null;
           bib.content = null;
           bib.pages = [];
         } else if (bib.reftype == 1) {
-          console.log('check 1');
+          // console.log('check 1');
           bib.content = null;
           bib.pages = [];
         } else {
@@ -311,8 +311,11 @@
         if (label && x.data.title) {
           label += ' • ';
         }
-        
-        const maxLabelLength = 50;
+
+        const prefixLength = (x.node?.data?.authors?.length||0) + x.node.level + label.length;
+
+        let maxLabelLength = 50-prefixLength;
+
         const labelArray = x.data.title.length > maxLabelLength ? [label + x.data.title.slice(0, maxLabelLength), h(ElTooltip, { content: x.data.title }, () => [h('i', { class: 'el-icon-more indent', style: "color:#F56C6C" })] )] : [label + x.data.title];
 
         labelStack.push(...labelArray);

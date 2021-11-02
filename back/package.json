@@ -1,6 +1,6 @@
 {
   "name": "persona-backend",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Server application for Persona project",
   "main": "index.js",
   "type": "module",
@@ -18,7 +18,7 @@
     "express": "^4.17.1",
     "generate-password": "^1.6.1",
     "jsonwebtoken": "^8.5.1",
-    "passport": "^0.4.1",
+    "passport": "^0.5.0",
     "passport-jwt": "^4.0.0",
     "pg": "^8.7.1",
     "pg-format": "^1.0.4"

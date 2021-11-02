@@ -137,7 +137,7 @@
 
   import { defineComponent, ref, reactive, onBeforeMount, toRaw, nextTick } from 'vue';
   import store from '../store';
-  import { ElDropdown, ElDropdownMenu, ElDropdownItem, ElMessage } from 'element-plus';
+  import { ElDropdown, ElDropdownMenu, ElDropdownItem, ElMessage, ElTooltip } from 'element-plus';
 
   export default defineComponent({
     name: 'References',
@@ -311,10 +311,9 @@
         if (label && x.data.title) {
           label += ' • ';
         }
-        // console.log("len", x.data.title, x.data.title.length);
-
+        
         const maxLabelLength = 50;
-        const labelArray = x.data.title.length > maxLabelLength ? [label + x.data.title.slice(0, maxLabelLength), h('i', { class: 'el-icon-more indent', style: "color:#F56C6C" })] : [label + x.data.title]
+        const labelArray = x.data.title.length > maxLabelLength ? [label + x.data.title.slice(0, maxLabelLength), h(ElTooltip, { content: x.data.title }, () => [h('i', { class: 'el-icon-more indent', style: "color:#F56C6C" })] )] : [label + x.data.title];
 
         labelStack.push(...labelArray);
 

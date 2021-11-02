@@ -49,7 +49,7 @@ if (!process.env.JWT_SECRET){
 	app.use(compression());
 	app.set('trust proxy', 1);
 	app.use(passport.initialize());
-	app.use(passport.session());
+	// app.use(passport.session());
 	app.use(bodyParser.json());
 	app.use(bodyParser.urlencoded({ extended: true }));
 	app.use(history());

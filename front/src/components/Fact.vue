@@ -147,7 +147,7 @@
   </el-form>
   <el-dialog :title="loc('sources')"
              v-model="dialogVisible"
-             width="30%"
+             width="500px"
              :before-close="handleClose"
              @opened="dialogOpened">
     <References :isEmbedded="true" ref="bibRef"></References>

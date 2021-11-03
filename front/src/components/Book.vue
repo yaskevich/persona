@@ -11,9 +11,9 @@
       <el-input :placeholder="loc('year')" v-model.number="form.published" class="text-input"></el-input>
     </el-form-item>
 
-    <el-form-item :label="loc('books')">
+    <el-form-item :label="loc('works')">
       <el-select v-model="form.works" multiple filterable remote reserve-keyword
-                 :placeholder="loc('book')"
+                 :placeholder="loc('work')"
                  :remote-method="getWorks"
                  :loading="loading">
         <el-option v-for="item in worksAll"

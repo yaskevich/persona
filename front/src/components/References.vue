@@ -321,7 +321,9 @@
         labelStack.push(...labelArray);
 
         if (x.node?.data?.content) {
-          labelStack.push(h('i', { class: 'el-icon-s-comment indent' }));
+          labelStack.push(
+            h(ElTooltip, { content: x.node.data.content }, () => [h('i', { class: 'el-icon-s-comment indent', style: "color:#409EFF" })] )
+          );
         }
 
         if (x.node?.data?.authors?.length) {

@@ -1,6 +1,7 @@
 'use strict';
 
 import path from 'path';
+import fs from 'fs';
 import express from 'express';
 import compression from 'compression';
 import bodyParser from 'body-parser';
@@ -17,6 +18,7 @@ if (!process.env.JWT_SECRET){
 	console.error('Error: secret key should be provided as an environment variable!');
 	process.exit(1);
 }
+const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 
 (async () => {
 	const app = express();
@@ -78,7 +80,7 @@ if (!process.env.JWT_SECRET){
 	app.get('/api/user/info', auth, async(req,res) => {
 		const settings = await db.getData("settings", 1);
 		const stats = await db.getStats();
-		res.json(Object.assign(req.user, {"settings": settings?.[0]}, {"stats": stats}));
+		res.json(Object.assign(req.user, {"settings": settings?.[0], "stats": stats, "commit": process.env.COMMIT, "server": __package.version, }));
 	 });
 
 	app.post('/api/user/reg', async(req,res) => {

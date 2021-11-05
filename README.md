@@ -5,6 +5,8 @@
 
 ## Web application for gathering and presenting data about life events of creative persons
 
+Briefly, it is a **CMS for biographies** (lists of *events* classified by *activity*) of people that are related to other people (*persons*) and to objects (*works*) of different types (*genres*), grouped into collections (*books*).
+
 ## Project structure
 
 - Client application (frontend / UI) code is in [front](/front).
@@ -12,7 +14,7 @@
 - Server application (backend / API) code is in [back](/back).
 
 
-Both apps are written in modern JavaScript and tested withe the latest LTS versions of [NodeJS](https://nodejs.org/) (v14 and v16). The client needs NodeJS to be built into static bundle, the server runs on NodeJS.
+Both apps are written in modern JavaScript and tested with the latest LTS versions of [NodeJS](https://nodejs.org/) (v14 and v16). The client needs NodeJS to be built into static bundle, the server runs on NodeJS.
 
 ## Deployment
 
@@ -46,7 +48,7 @@ To serve client code locally:
 
 This is an [ExpressJS](https://expressjs.com/) application that stores data in a database and controls an access to the data with JSON Web Token. User passwords are not stored in the database, just hashes.
 
-The only external dependency of the app is [PostgreSQL](https://www.postgresql.org) server v9.6+. Once it is installed and the database is created, you have to provide environmental variables either via `.env` file, or by putting it in `ecosystem.config.cjs`, or providing them in other way – it depends on how you are going to run the application.
+The only external dependency of the app is [PostgreSQL](https://www.postgresql.org) server v9.6+. Once it is installed and the database is created, you have to provide environmental variables either via `.env` file, or by putting them in `ecosystem.config.cjs`, or providing them in other way – it depends on how you are going to deploy the application.
 
 Thus, running with [nodemon](https://www.npmjs.com/package/nodemon):
 

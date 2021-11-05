@@ -58,6 +58,8 @@
       "pswdmore": ["Not less than 18 characters", "Не менее 18 символов"],
       "prodata": ["Project data", "Данные в базе"],
       "webver": ["Web app version", "Версия веб-приложения"],
+      "apiver": ["API version", "Версия API"],
+      "commithash": ["Commit", "Коммит"],
       "cancel": ["Cancel", "Отмена"],
       "facttypes": ["Fact types", "Типы событий"],
       "addsibling": ["Add sibling item", "Добавить соседний пункт"],

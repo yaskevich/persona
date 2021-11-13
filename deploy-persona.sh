@@ -1,20 +1,23 @@
 pm2 delete persona
 rm -rf persona
-mkdir -p persona-build
-cd persona-build
-degit https://github.com/yaskevich/persona#main
+git clone https://github.com/yaskevich/persona  --depth 1
+cd persona
+hash=`git rev-parse --short HEAD`
+# echo $hash
+rm -rf .git
 cd front
 npm install
 npm run build
+mv dist ../public
 cd ../back
 npm install
-cd ../../
-mv persona-build/back persona
-mv persona-build/front/dist persona/public
-rm -rf persona-build
-cp persona.env persona/.env
-cd persona
-# # pm2-runtime ecosystem.config.js
+rm ../* 2>/dev/null
+rm ../.* 2>/dev/null
+cd ../
+mv back/* .
+rm -rf front back
+cp ../persona.env .env
+printf "\nCOMMIT=%s" $hash >> .env
 pm2 start ecosystem.config.cjs
 pm2 save
 

@@ -4,23 +4,11 @@ import project from '../package.json';
 import i18n from './i18n.json';
 import router from './router';
 
-type objTexts = {
-  [key: string]: Array<string>;
-};
-
-type objOptions = {
-  [key: string]: string;
-};
-
-interface keyable {
-  [key: string]: any;
-}
-
 const privs = {
   1: 'administrator',
   3: 'moderator',
   5: 'editor',
-};
+} as keyable;
 // const privs = [
 //   { id: 1, name: 'administrator' },
 //   { id: 3, name: 'moderator' },
@@ -32,13 +20,19 @@ const localDict: objTexts = i18n.dictionary;
 
 const state = reactive({
   token: localStorage.getItem('token') || '',
-  user: { server: 0, commit: 0 },
+  user: {}, // { server: 0, commit: 0 }
   error: '',
 } as IState);
 
 const loc = (id: string) => {
   return id ? (localDict?.[id] ? localDict[id][((<any>state)?.user?.settings?.lang as any) || 0] : id) : '...';
 };
+
+const getHumanReadablePrivs = (id:number) => {
+  const name = privs?.[String(id)];
+  return loc(name || 'unknown');
+};
+
 
 const logoutUser = () => {
   delete state.token;
@@ -130,7 +124,7 @@ const postData = async (table: string, data: Object): Promise<any> => {
   console.log('No token. Fail.');
 };
 
-const deleteById = async (table: string, id: string): Promise<any> => {
+const deleteById = async (table: string, id: string | number): Promise<any> => {
   if (state.token) {
     try {
       const config = { headers: { Authorization: 'Bearer ' + state.token }, params: {} };
@@ -172,7 +166,7 @@ const getData = async (table: string, id?: string, pager?: Array<number>): Promi
   console.log('No token. Fail.');
 };
 
-const getDataMulti = async (datum: objOptions, rules: objOptions, sorts: objOptions, pager: objOptions) => {
+const getDataMulti = async (datum: any, rules: objOptions, sorts: objOptions, pager?: objOptions) => {
   const tables = Object.keys(datum);
   return (await Promise.all(tables.map(t => getData(t, undefined, pager?.[t] as any)))).map((x, i) => {
     if (rules?.[tables[i]]) {
@@ -244,4 +238,5 @@ export default {
   getDataMulti,
   langs: localLanguages,
   loc,
+  getHumanReadablePrivs,
 };

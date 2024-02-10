@@ -17,11 +17,11 @@
     <el-form-item :label="store.loc('authors')">
       <el-space wrap>
         <el-select v-model="work.authors" filterable multiple :placeholder="store.loc('authors')"><el-option
-            v-for="item in persons" :key="item.id" :label="getLabel(item)" :value="item.id" />
+            v-for="item in persons" :key="item.id" :label="store.getLabel(item)" :value="item.id" />
         </el-select>
 
         <el-button type="primary" @click="setDefaultAuthor" v-if="persons.length && mainperson">{{ store.loc('author') }}
-          &ndash; {{ getLabel(persons.filter(x => x.id === mainperson)[0]) }}</el-button>
+          &ndash; {{ store.getLabel(persons.filter(x => x.id === mainperson)[0]) }}</el-button>
       </el-space>
     </el-form-item>
 
@@ -60,9 +60,6 @@ const vuerouter = useRoute();
 const id = String(vuerouter.params.id);
 
 const isLoaded = ref(false);
-
-const getLabel = (x: IPerson) => x.firstname + ' ' + x.lastname;
-
 
 onBeforeMount(async () => {
   // console.log('router id', id);

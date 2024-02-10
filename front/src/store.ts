@@ -217,6 +217,8 @@ const dateDropTimeZone = (x: Date) => {
   return dt.toISOString();
 };
 
+const getLabel = (x: IPerson) => x.firstname + ' ' + x.lastname;
+
 export default {
   dateDropTimeZone,
   nest,
@@ -239,4 +241,5 @@ export default {
   langs: localLanguages,
   loc,
   getHumanReadablePrivs,
+  getLabel
 };

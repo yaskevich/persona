@@ -1,77 +1,41 @@
 <template>
-
-  <MainTitle :title="loc('works')" :callback="() => $router.push('/work/')"></MainTitle>
+  <MainTitle :title="store.loc('works')" :callback="() => $router.push('/work/')"></MainTitle>
 
   <el-row type="flex" justify="center">
 
-    <el-input :placeholder="loc('filtertitles')"
-              v-model="filterString"
-              style="max-width: 280px;"
-              clearable>
+    <el-input :placeholder="store.loc('filtertitles')" v-model="filterString" style="max-width: 280px;" clearable>
     </el-input>
 
   </el-row>
 
-  <el-row v-for="(value, key) in filtered()" :gutter="20" :key="key">
-
-    <el-col :span="16">
-      <div class="grid-content bg-purple">
-        <span v-for="(id, index) in value.authors" :key="index" style="font-style:italic;font-size: .7rem;">
-              <span v-if="index">,</span> {{data.persons[id]? data.persons[id]["firstname"] + ' '+ data.persons[id]["lastname"]:
-        ''}}
-        </span>
-        {{value.title}}
-      </div>
-    </el-col>
-
-    <el-col :span="4">
-      <div class="grid-content bg-purple-light">
-        {{data.genres[value.genre]?.title}}
-      </div>
-    </el-col>
-
-    <el-col :span="4">
-      <div class="grid-content bg-purple">
-        <router-link :to="'/work/' + value.id">
-          <el-button type="text" size="mini" icon="el-icon-edit" plain class="full-width"></el-button>
-        </router-link>
-      </div>
-    </el-col>
-
+  <el-row v-for="(value, key) in filtered()" :key="key">
+    <router-link :to="'/work/' + value.id" style="text-decoration: none;">
+      <span v-for="(id, index) in value.authors" :key="index" style="color: black">
+        <span v-if="index">,</span> {{ data.persons[id] ? data.persons[id]["firstname"] + ' ' +
+          data.persons[id]["lastname"] : '' }}
+      </span>.
+      <span style="font-weight: bold;">{{ value.title }}</span>
+      <span style="color:gray;padding-left: 5px;">{{ data.genres[String(value.genre)]?.title }}</span>
+    </router-link>
   </el-row>
-
 </template>
 
-<script>
+<script setup lang="ts">
 
-  import { defineComponent, reactive, ref, onBeforeMount } from 'vue';
-  import store from '../store';
-  import MainTitle from './MainTitle.vue';
+import { reactive, ref, onBeforeMount } from 'vue';
+import store from '../store';
+import MainTitle from './MainTitle.vue';
 
-  export default defineComponent({
-    setup() {
-      const data = reactive({ works: [], persons: [], genres: [] });
-      const filterString = ref('');
+const data = reactive({ works: [] as Array<IWork>, persons: [] as Array<IPerson>, genres: [] as keyable });
+const filterString = ref('');
 
-      onBeforeMount(async () => {
-        await store.getDataMulti(data, { persons: 'id', genres: 'id' }, { works: 'id' });
-      });
+onBeforeMount(async () => {
+  await store.getDataMulti(data, { persons: 'id', genres: 'id' }, { works: 'id' });
+});
 
-      const filtered = () => {
-        const re = new RegExp(filterString.value, 'i');
-        return filterString.value ? data.works.filter(x => x.title.search(re) !== -1) : data.works;
-      };
-
-      return {
-        data,
-        filtered,
-        filterString,
-        loc: store.loc,
-      };
-    },
-    components: {
-      MainTitle,
-    },
-  });
+const filtered = () => {
+  const re = new RegExp(filterString.value, 'i');
+  return filterString.value ? data.works.filter((x: IWork) => x.title.search(re) !== -1) : data.works;
+};
 
 </script>

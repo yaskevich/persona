@@ -1,6 +1,6 @@
 <template>
-
-  <MainTitle :title="loc('book') + ' ' + $route.params.id " :callback="confirm" :text="loc(form.id ? 'save' : 'add')"></MainTitle>
+  <MainTitle :title="loc('book') + ' ' + $route.params.id" :callback="confirm" :text="loc(form.id ? 'save' : 'add')">
+  </MainTitle>
 
   <el-form :model="form" ref="formRef" label-width="100px" :rules="rules">
     <el-form-item prop="title" :label="loc('title')">
@@ -12,179 +12,139 @@
     </el-form-item>
 
     <el-form-item :label="loc('works')">
-      <el-select v-model="form.works" multiple filterable remote reserve-keyword
-                 :placeholder="loc('work')"
-                 :remote-method="getWorks"
-                 :loading="loading">
-        <el-option v-for="item in worksAll"
-                   :key="item.id"
-                   :label="item.title"
-                   :value="item.id">
+      <el-select v-model="form.works" multiple filterable remote reserve-keyword :placeholder="loc('work')"
+        :remote-method="getWorks" :loading="loading">
+        <el-option v-for="item in worksAll" :key="item.id" :label="item.title" :value="item.id">
         </el-option>
       </el-select>
     </el-form-item>
 
     <el-form-item :label="loc('editors')">
-      <el-select v-model="form.editors" multiple filterable remote reserve-keyword
-                 :placeholder="loc('person')"
-                 :remote-method="getEditors"
-                 :loading="loading">
-        <el-option v-for="item in editorsAll"
-                   :key="item.id"
-                   :label="item.value"
-                   :value="item.id">
+      <el-select v-model="form.editors" multiple filterable remote reserve-keyword :placeholder="loc('person')"
+        :remote-method="getEditors" :loading="loading">
+        <el-option v-for="person in editorsAll" :key="person.id" :label="store.getLabel(person)" :value="person.id">
         </el-option>
       </el-select>
     </el-form-item>
 
     <el-form-item>
-      <el-popconfirm v-if="form?.id"
-                     :title="loc('confirmdel')"
-                     :confirmButtonText="loc('yes')"
-                     :cancelButtonText="loc('no')"
-                     @confirm="deleteBook">
+      <el-popconfirm v-if="form?.id" :title="loc('confirmdel')" :confirmButtonText="loc('yes')"
+        :cancelButtonText="loc('no')" @confirm="deleteBook">
         <template #reference>
-              <el-button type="danger">{{loc('remove')}}</el-button>
-              </template>
+          <el-button type="danger">{{ loc('remove') }}</el-button>
+        </template>
       </el-popconfirm>
     </el-form-item>
-
-    <!-- <el-button type="primary" @click="resetForm">{{loc('reset')}}</el-button>
+    <!--
+       <el-button type="primary" @click="resetForm">{{loc('reset')}}</el-button>
           <el-button type="primary" @click="confirm">{{loc(form.id ? 'save': 'add')}}</el-button>
       -->
-
   </el-form>
-
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 
-  // import { ElForm } from 'element-plus';
-  import { defineComponent, ref, onBeforeMount, ComponentPublicInstance } from 'vue';
-  import { ElForm } from 'element-plus';
-  import store from '../store';
-  import router from '../router';
-  import { useRoute } from 'vue-router';
-  import MainTitle from './MainTitle.vue';
+import { ref, onBeforeMount } from 'vue';
+import type { FormInstance, FormRules } from 'element-plus';
+import { ElForm } from 'element-plus';
+import store from '../store';
+import router from '../router';
+import { useRoute } from 'vue-router';
+import MainTitle from './MainTitle.vue';
 
-  export default defineComponent({
-    setup() {
-      const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
-      // const form  = reactive({ title: '', published: '', works: [], editors: [], selectedAuthors: []});
-      const form = ref({ title: '', published: '', editors: [], works: [] });
-      const worksAll = ref([]);
-      let persons = [];
-      const loading = ref(false);
-      const editorsAll = ref([]);
-      // const authors = ref([]);
-      const vuerouter = useRoute();
-      const id = vuerouter.params.id;
+const formRef = ref<FormInstance>();
+const form = ref({ title: '', published: '', editors: [], works: [], id: null });
+const worksAll = ref([] as Array<IWork>);
+let persons = [] as Array<IPerson>;
+const loading = ref(false);
+const editorsAll = ref([] as Array<IPerson>);
+const vuerouter = useRoute();
+const id = String(vuerouter.params.id);
 
-      onBeforeMount(async () => {
-        // console.log('router id', id);
+onBeforeMount(async () => {
 
-        if (id) {
-          const result = await store.getData('books', id);
-          if ('data' in result) {
-            form.value = result.data[0];
-            // console.log("this book", form);
-          }
-        }
+  if (id) {
+    const result = await store.getData('books', id);
+    if ('data' in result) {
+      form.value = result.data[0];
+      // console.log("this book", form);
+    }
+  }
 
-        const personsData = await store.getData('persons');
-        persons = personsData.data.map(x => ({ ...x, value: x.firstname + ' ' + x.lastname }));
-        editorsAll.value = persons;
-        // authors.value  = persons;
+  const personsData = await store.getData('persons');
+  persons = personsData.data;
+  editorsAll.value = persons;
 
-        const worksData = await store.getData('works');
-        worksAll.value = worksData.data;
-      });
+  const worksData = await store.getData('works');
+  worksAll.value = worksData.data;
+});
 
-      const getWorks = async query => {
-        // console.log(query);
-        const re = new RegExp(query, 'i');
-        loading.value = true;
+const getWorks = async (query: string) => {
+  // console.log(query);
+  const re = new RegExp(query, 'i');
+  loading.value = true;
 
-        const worksData = await store.getData('works');
-        worksAll.value = worksData.data.filter(x => re.test(x.title));
-        loading.value = false;
-      };
+  const worksData = await store.getData('works');
+  worksAll.value = worksData.data.filter((x: IWork) => re.test(x.title));
+  loading.value = false;
+};
 
-      const getEditors = query => {
-        // console.log(query);
-        const re = new RegExp(query, 'i');
-        loading.value = true;
-        editorsAll.value = persons.filter(x => re.test(x.value));
-        loading.value = false;
-      };
+const getEditors = (query: string) => {
+  // console.log(query);
+  const re = new RegExp(query, 'i');
+  loading.value = true;
+  editorsAll.value = persons.filter(x => re.test(x.firstname) || re.test(x.lastname));
+  loading.value = false;
+};
 
-      // const getAuthors = (query) => {
-      //   console.log(query);
-      //   const re  = new RegExp(query, "i");
-      //   loading.value = true;
-      //   authors.value = persons.filter(x => re.test(x.value));
-      //   loading.value = false;
-      // };
+// const getAuthors = (query) => {
+//   console.log(query);
+//   const re  = new RegExp(query, "i");
+//   loading.value = true;
+//   authors.value = persons.filter(x => re.test(x.value));
+//   loading.value = false;
+// };
 
-      const resetForm = () => {
-        formRef.value?.resetFields();
-      };
+const resetForm = () => {
+  formRef.value?.resetFields();
+};
 
-      const deleteBook = async () => {
-        const result = await store.deleteById('books', form.value.id);
-        if ('data' in result && 'id' in result.data) {
-          router.push('/books');
-        }
-      };
+const deleteBook = async () => {
+  if (form?.value?.id) {
+    const result = await store.deleteById('books', form.value.id);
+    if ('data' in result && 'id' in result.data) {
+      router.push('/books');
+    }
+  }
+};
 
-      const confirm = () => {
-        formRef.value?.validate(async valid => {
-          if (valid) {
-            // console.log('form', form);
-            const result = await store.postData('books', form.value);
-            // console.log(result);
-            if ('data' in result && 'id' in result.data) {
-              router.push('/books');
-            } else {
-              console.log('error!');
-            }
-          } else {
-            return false;
-          }
-        });
-      };
-
-      const rules = {
-        title: [
-          { required: true, message: store.loc('fieldnonempty'), trigger: 'blur' },
-          { min: 2, message: store.loc('twoandmore'), trigger: 'blur' },
-        ],
-        published: [
-          { required: true, message: store.loc('fieldnonempty'), trigger: 'blur' },
-          { min: 2, type: 'integer', trigger: 'blur' },
-        ],
-      };
-
-      return {
-        // getAuthors,
-        // authors,
-        editorsAll,
-        getEditors,
-        getWorks,
-        loading,
-        resetForm,
-        confirm,
-        formRef,
-        rules,
-        form,
-        worksAll,
-        deleteBook,
-        loc: store.loc,
-      };
-    },
-    components: {
-      MainTitle,
-    },
+const confirm = () => {
+  formRef.value?.validate(async (valid: boolean) => {
+    if (valid) {
+      // console.log('form', form);
+      const result = await store.postData('books', form.value);
+      // console.log(result);
+      if ('data' in result && 'id' in result.data) {
+        router.push('/books');
+      } else {
+        console.log('error!');
+      }
+    } else {
+      return false;
+    }
   });
+};
 
+const rules = <FormRules<IRuleFormBook>>{
+  title: [
+    { required: true, message: store.loc('fieldnonempty'), trigger: 'blur' },
+    { min: 2, message: store.loc('twoandmore'), trigger: 'blur' },
+  ],
+  published: [
+    { required: true, message: store.loc('fieldnonempty'), trigger: 'blur' },
+    { min: 2, type: 'integer', trigger: 'blur' },
+  ],
+};
+
+const loc = store.loc;
 </script>

@@ -28,11 +28,10 @@ const loc = (id: string) => {
   return id ? (localDict?.[id] ? localDict[id][((<any>state)?.user?.settings?.lang as any) || 0] : id) : '...';
 };
 
-const getHumanReadablePrivs = (id:number) => {
+const getHumanReadablePrivs = (id: number) => {
   const name = privs?.[String(id)];
   return loc(name || 'unknown');
 };
-
 
 const logoutUser = () => {
   delete state.token;
@@ -166,7 +165,7 @@ const getData = async (table: string, id?: string, pager?: Array<number>): Promi
   console.log('No token. Fail.');
 };
 
-const getDataMulti = async (datum: any, rules: objOptions, sorts: objOptions, pager?: objOptions) => {
+const getDataMulti = async (datum: any, rules: objOptions, sorts: objOptions, pager?: objPager) => {
   const tables = Object.keys(datum);
   return (await Promise.all(tables.map(t => getData(t, undefined, pager?.[t] as any)))).map((x, i) => {
     if (rules?.[tables[i]]) {
@@ -217,7 +216,7 @@ const dateDropTimeZone = (x: Date) => {
   return dt.toISOString();
 };
 
-const getLabel = (x: IPerson) => x.firstname + ' ' + x.lastname;
+const getLabel = (x: IPerson | IUser) => x.firstname + ' ' + x.lastname;
 
 export default {
   dateDropTimeZone,
@@ -241,5 +240,5 @@ export default {
   langs: localLanguages,
   loc,
   getHumanReadablePrivs,
-  getLabel
+  getLabel,
 };

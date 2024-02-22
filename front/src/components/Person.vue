@@ -20,8 +20,8 @@
     <!-- <el-form-item :label="loc('sex')"> -->
     <el-form-item>
       <el-radio-group v-model="person.sex">
-        <el-radio label="1">{{ store.loc('man') }}</el-radio>
-        <el-radio label="2">{{ store.loc('woman') }}</el-radio>
+        <el-radio :label="1">{{ store.loc('man') }}</el-radio>
+        <el-radio :label="2">{{ store.loc('woman') }}</el-radio>
       </el-radio-group>
     </el-form-item>
 
@@ -45,7 +45,6 @@ onBeforeMount(async () => {
     const result = await store.getData('persons', id);
     if ('data' in result) {
       person.value = result.data[0];
-      person.value.sex = person.value.sex.toString();
     }
   }
 });

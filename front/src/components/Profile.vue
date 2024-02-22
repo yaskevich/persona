@@ -38,7 +38,7 @@ import store from '../store';
 const formRef = ref<FormInstance>();
 const users = ref([]);
 const form = reactive({} as IUser);
-const isRegistered = ref(Boolean(Object.keys(store?.state?.user as any)?.length));
+const isRegistered = ref(store?.state?.user && Object.keys(store?.state?.user)?.length);
 let rights: string;
 const infoAlert = ref('');
 

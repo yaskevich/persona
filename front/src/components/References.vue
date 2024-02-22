@@ -62,7 +62,8 @@
       <el-row type="flex" justify="center">{{ loc('cit') }}</el-row>
       <el-input v-model="bib.content" type="textarea"></el-input>
       <el-row type="flex" justify="center">
-        <el-button size="small" @click="curlify" style="margin-top:2px;">{{ loc('quotmarks') }}</el-button>
+        <el-button size="small" @click="fixQuotes" style="margin-top:2px;">{{
+          loc('quotmarks') }}</el-button>
       </el-row>
     </div>
 
@@ -165,6 +166,8 @@ const buildDialog = (node: Node, data: ITree, actionType = 0) => {
     // console.log("bib on show", bib);
   });
 };
+
+const fixQuotes = () => bib.content = store.curlify(bib.content);
 
 const handleClose = async () => {
   dialogVisible.value = false;
@@ -357,14 +360,8 @@ const setCheckedItems = (keys: Array<number>) => {
   return treeRef.value!.setCheckedKeys(keys);
 };
 
-const curlify = () => {
-  bib.content = bib.content
-    .replace(/\x27/g, '\x22')
-    .replace(/(\w)\x22(\w)/g, '$1\x27$2')
-    .replace(/(^)\x22(\s)/g, '$1»$2')
-    .replace(/(^|\s|\()"/g, '$1«')
-    .replace(/"(;|!|\?|:|\.|,|$|\)|\s)/g, '»$1');
-};
+defineExpose({ getCheckedItems, setCheckedItems });
+
 
 
 </script>

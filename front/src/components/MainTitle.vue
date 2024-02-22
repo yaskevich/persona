@@ -2,7 +2,7 @@
   <el-row type="flex" justify="center">
     <el-space size="default" :spacer="spacer">
       <h3>{{ title }}</h3>
-      <el-button v-if="callback" size="default" type="info" plain @click="() => callback">{{ text || store.loc('add') }}</el-button>
+      <el-button v-if="callback" size="default" type="info" plain @click="callback()">{{ text || store.loc('add') }}</el-button>
     </el-space>
   </el-row>
 </template>

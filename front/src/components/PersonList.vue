@@ -23,8 +23,8 @@
 
       <el-form-item>
         <el-radio-group v-model="form.sex">
-          <el-radio label="1">{{ loc('man') }}</el-radio>
-          <el-radio label="2">{{ loc('woman') }}</el-radio>
+          <el-radio :label="1">{{ loc('man') }}</el-radio>
+          <el-radio :label="2">{{ loc('woman') }}</el-radio>
         </el-radio-group>
       </el-form-item>
 

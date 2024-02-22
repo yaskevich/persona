@@ -205,6 +205,14 @@ const classify = (x: keyable) => {
   return loc(key);
 };
 
+const curlify = (str: string) =>
+  str
+    .replace(/\x27/g, '\x22')
+    .replace(/(\w)\x22(\w)/g, '$1\x27$2')
+    .replace(/(^)\x22(\s)/g, '$1»$2')
+    .replace(/(^|\s|\()"/g, '$1«')
+    .replace(/"(;|!|\?|:|\.|,|$|\)|\s)/g, '»$1');
+
 const dateToString = (x: string) => {
   const dt = new Date(x);
   return dt.toLocaleString('ru-RU');
@@ -222,6 +230,7 @@ export default {
   dateDropTimeZone,
   nest,
   classify,
+  curlify,
   dateToString,
   logoutUser,
   initUser,

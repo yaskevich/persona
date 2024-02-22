@@ -22,8 +22,8 @@
 
       <el-form-item>
         <el-radio-group v-model="user.sex">
-          <el-radio label="1">{{ store.loc('man') }}</el-radio>
-          <el-radio label="2">{{ store.loc('woman') }}</el-radio>
+          <el-radio :label="1">{{ store.loc('man') }}</el-radio>
+          <el-radio :label="2">{{ store.loc('woman') }}</el-radio>
         </el-radio-group>
       </el-form-item>
 
@@ -55,16 +55,13 @@ onBeforeMount(async () => {
   const result = await store.getData('users', String(id));
   if ('data' in result) {
     user.value = result.data[0] as IUser;
-    user.value.sex = user.value.sex.toString();
-    user.value.privs = user.value.privs.toString();
-    console.log(user.value);
     isLoaded.value = true;
   }
 });
 
 const resetPassword = async () => {
   const { data } = await store.postData('user/reset/', { id: user.value.id });
-  console.log(data);
+  // console.log(data);
   newPassword.value = data?.message;
 };
 

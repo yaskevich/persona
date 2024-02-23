@@ -6,7 +6,7 @@
   <div id="main" v-if="dataReady">
     <div v-if="loggedIn">
       <el-container>
-        <el-aside width="210px" style="overflow-y: hidden;">
+        <el-aside width="210px" style="overflow-y: hidden;" class="hidden-sm-and-down">
           <el-menu class="el-menu-vertical-demo" :router="true" :default-openeds="['content']"
             :default-active="$router.currentRoute.value.path">
             <el-sub-menu v-for="(v, k) in menuScheme" :index="v.title" :key="k">
@@ -17,24 +17,29 @@
         </el-aside>
         <el-container>
           <el-header style="text-align: right;" class="el-header">
-            <el-space>
-              <el-dropdown>
-                <el-text text style="padding-top: 20px">
-                  <el-icon><el-icon-avatar /></el-icon>
-                  {{ state.user.firstname }}
-                </el-text>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item @click="goToProfile">
-                      {{ loc("profile") }}
-                    </el-dropdown-item>
-                    <el-dropdown-item @click="callLogout">
-                      {{ loc("logout") }}
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
+            <el-menu :default-active="$router.currentRoute.value.path" class="el-menu-demo" mode="horizontal"
+              :ellipsis="false" @select="handleSelect">
+              <el-menu-item index="index">
+                <img style="height: 50%" src="/android-chrome-192x192.png" alt="Project logo" />
+              </el-menu-item>
+              <div class="flex-grow" />
+              <el-sub-menu index="workspace" class="hidden-md-and-up">
+                <template #title>{{ loc('workspace') }}</template>
+                <el-menu-item-group v-for="(v, k) in menuScheme" :index="v.title" :key="k">
+                  <template #title><i :class="v.icon"></i><span>{{ loc(v.title) }}</span></template>
+                  <el-menu-item v-for="item in v.data" :index="'/' + item" :key="item">{{ loc(item) }}</el-menu-item>
+                </el-menu-item-group>
+              </el-sub-menu>
+              <el-sub-menu index="userspace">
+                <template #title> <el-icon><el-icon-avatar /></el-icon>
+                  {{ state?.user?.firstname }}
                 </template>
-              </el-dropdown>
-            </el-space>
+                <el-menu-item index="/profile"> {{ loc("profile") }}
+                </el-menu-item>
+                <el-menu-item index="logout"> {{ loc("logout") }}
+                </el-menu-item>
+              </el-sub-menu>
+            </el-menu>
           </el-header>
           <el-main>
             <router-view />
@@ -68,35 +73,22 @@
 
 <script setup lang="ts">
 // import { defineComponent, onBeforeMount, ref, onMounted, onUnmounted, computed, } from 'vue'
-import { defineComponent, onBeforeMount, ref, computed } from 'vue';
+import { onBeforeMount, ref, computed } from 'vue';
 import router from './router';
 import store from './store';
 import Login from './components/Login.vue';
 import Profile from './components/Profile.vue';
 import { useMeta } from 'vue-meta';
+import 'element-plus/theme-chalk/display.css';
+
+const dataReady = ref(false);
 
 useMeta(computed(() => ({ title: store.state?.user?.settings?.title || '∙' })));
-// useMeta({
-//   title: title.value,
-//   htmlAttrs: { lang: ['ru'], amp: true },
-// description: 'The Description',
-// og: {
-//   title: 'Og Title',
-//   description: 'Bla bla',
-//   image: [
-//     'https://picsum.photos/600/400/?image=80',
-//     'https://picsum.photos/600/400/?image=82'
-//   ]
-// },
-// twitter: {
-//   title: 'Twitter Title'
-// },
-// });
 // const windowWidth = ref(window.innerWidth);
 // const onWidthChange = () => windowWidth.value = window.innerWidth;
 // onMounted(() => window.addEventListener('resize', onWidthChange));
 // onUnmounted(() => window.removeEventListener('resize', onWidthChange));
-const dataReady = ref(false);
+
 
 const menuScheme = [
   {
@@ -124,18 +116,33 @@ const callLogout = async () => {
   await store.logoutUser();
 };
 
-const goToProfile = () => {
-  router.push('/profile');
-};
+// const goToProfile = () => {
+//   router.push('/profile');
+// };
+
+const handleSelect = (key: string, keyPath: string[]) => {
+  console.log(key, keyPath)
+  if (key === "index") {
+    return;
+  } else if (key === "logout") {
+    callLogout();
+  } else {
+    router.push(key);
+  }
+}
 
 // const isCollapsed = computed(() => windowWidth.value < 550 ? true: false);
 // const asidewidth = computed(() => windowWidth.value < 550 ? "50px": "200px");
-const loggedIn = computed(() => Object.keys(store?.state?.user).length);
+const loggedIn = computed(() => store?.state?.user && Object.keys(store.state.user).length);
 const state = store.state;
 const loc = store.loc;
 </script>
 
 <style>
+.flex-grow {
+  flex-grow: 1;
+}
+
 #app,
 textarea,
 .el-dropdown-menu__item,
@@ -149,12 +156,10 @@ textarea,
   /* margin-top: 60px; */
 }
 
-.el-header {
+/* .el-header {
   background-color: #b3c0d1;
-  color: #333;
-  /* line-height: 60px; */
-  /* text-align: right; */
-}
+  color: #333; 
+} */
 
 .el-aside {
   text-align: left;

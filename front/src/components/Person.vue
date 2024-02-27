@@ -17,6 +17,10 @@
     <el-form-item prop="wikidata" :label="store.loc('wikidata')">
       <el-input :placeholder="store.loc('wikidata')" v-model="person.wikidata" class="text-input"></el-input>
     </el-form-item>
+
+    <el-form-item prop="note" :label="store.loc('note')">
+      <el-input :placeholder="store.loc('note')" v-model="person.note" class="text-input"></el-input>
+    </el-form-item>
     <!-- <el-form-item :label="loc('sex')"> -->
     <el-form-item>
       <el-radio-group v-model="person.sex">
@@ -24,7 +28,15 @@
         <el-radio :label="2">{{ store.loc('woman') }}</el-radio>
       </el-radio-group>
     </el-form-item>
-
+    <el-form-item>
+      <el-popconfirm :title="store.loc('confirmdel')" :confirmButtonText="store.loc('yes')"
+        :cancelButtonText="store.loc('no')" @confirm="deletePerson(person.id)">
+        <template #reference>
+          <el-button type="danger">{{ store.loc('remove') }}</el-button>
+        </template>
+      </el-popconfirm>
+      <el-button type="primary" @click="confirm">{{ store.loc('save') }}</el-button>
+    </el-form-item>
   </el-form>
 </template>
 
@@ -58,5 +70,15 @@ const confirm = async () => {
   }
   router.push('/persons');
 };
+
+const deletePerson = async (id: number) => {
+  const { data } = await store.deleteById('persons', id);
+  if (data && 'id' in data) {
+    console.log('deleted', id);
+    router.push('/persons');
+    // persons.splice(key, 1);
+  }
+};
+
 
 </script>

@@ -2,7 +2,9 @@
   <el-descriptions class="margin-top" :title="loc('dbevent')" :column="2" border>
     <el-descriptions-item>
       <template #label>
-        <i class="el-icon-user"></i>
+        <el-icon>
+          <el-icon-user />
+        </el-icon>
         {{ loc('user') }}
       </template>
       {{ store.getLabel(user) }}
@@ -10,23 +12,19 @@
 
     <el-descriptions-item>
       <template #label>
-        <i class="el-icon-mobile-phone"></i>
+        <el-icon>
+          <el-icon-circle-check />
+        </el-icon>
         {{ loc('event') }}
       </template>
-      {{ store.classify(record) }}
+      {{ loc(store.classify(record)) }}
     </el-descriptions-item>
-
-    <!-- <el-descriptions-item>
-        <template #label>
-          <i class="el-icon-location-outline"></i>
-          Place
-        </template>
-        Suzhou
-      </el-descriptions-item> -->
 
     <el-descriptions-item>
       <template #label>
-        <i class="el-icon-tickets"></i>
+        <el-icon>
+          <el-icon-tickets />
+        </el-icon>
         {{ loc('datatype') }}
       </template>
       <el-tag v-if="record?.table_name">
@@ -36,7 +34,9 @@
 
     <el-descriptions-item>
       <template #label>
-        <i class="el-icon-office-building"></i>
+        <el-icon>
+          <el-icon-clock />
+        </el-icon>
         {{ loc('dateandtime') }}
       </template>
       {{ store.dateToString(record.created) }}
@@ -117,9 +117,3 @@ onBeforeMount(async () => {
 });
 
 </script>
-
-<style scoped>
-.title {
-  font-weight: bold;
-}
-</style>

@@ -140,7 +140,7 @@ const deleteById = async (table: string, id: string | number): Promise<any> => {
   console.log('No token. Fail.');
 };
 
-const getData = async (table: string, id?: string, pager?: Array<number>): Promise<any> => {
+const getData = async (table: string, id?: string | number, pager?: Array<number>): Promise<any> => {
   if (state.token) {
     try {
       const config = { headers: { Authorization: 'Bearer ' + state.token }, params: {} };
@@ -201,8 +201,7 @@ const leaf = (a: any, b: any): Object => {
 const classify = (x: keyable) => {
   const x0 = Boolean(x.data0 && Object.keys(x.data0).length);
   const x1 = Boolean(x.data1 && Object.keys(x.data1).length);
-  const key = x0 && x1 ? 'change' : x1 ? 'creation' : 'removal';
-  return loc(key);
+  return x0 && x1 ? 'change' : x1 ? 'creation' : 'removal';
 };
 
 const curlify = (str: string) =>
@@ -224,7 +223,8 @@ const dateDropTimeZone = (x: Date) => {
   return dt.toISOString();
 };
 
-const getLabel = (x: IPerson | IUser) => x.firstname + ' ' + x.lastname;
+const getLabel = (x: IPerson | IUser, isNoted = false) =>
+  x?.firstname + ' ' + x?.lastname + (isNoted && x?.note ? ' ⸱ ' + x.note : '');
 
 export default {
   dateDropTimeZone,

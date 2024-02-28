@@ -27,7 +27,9 @@
           <span>{{ node.label }}</span>
           <span>
             <el-dropdown>
-              <i class="el-icon-s-tools"></i>
+              <el-icon>
+                <el-icon-tools />
+              </el-icon>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="addItem(node, data)">{{ loc('addsibling') }}</el-dropdown-item>
@@ -74,7 +76,7 @@ onBeforeMount(async () => {
   if ('data' in result) {
     const actsData = result.data as Array<IAct>;
     const nested = store.nest(actsData.sort((a, b) => b.id - a.id));
-    console.log("nest", nested);
+    // console.log("nest", nested);
     acts.push(...nested);
   }
 });

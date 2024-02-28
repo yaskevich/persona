@@ -15,7 +15,6 @@
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label>
-          <!-- <i class="el-icon-notebook-2"></i> -->
           <el-icon><el-icon-notebook /></el-icon>
           {{ loc('books') }}
         </template> {{ data.books }}

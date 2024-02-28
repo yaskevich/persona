@@ -16,54 +16,37 @@
 
     <el-form-item>
       <el-radio-group v-model="form.sex">
-        <el-radio label="1">{{ store.loc('man') }}</el-radio>
-        <el-radio label="2">{{ store.loc('woman') }}</el-radio>
+        <el-radio :label="1">{{ store.loc('man') }}</el-radio>
+        <el-radio :label="2">{{ store.loc('woman') }}</el-radio>
       </el-radio-group>
     </el-form-item>
 
-    <el-button icon="el-icon-delete" circle @click="resetForm"></el-button>
-    <!-- <el-button type="primary" @click="confirm">{{store.loc('users')}}</el-button> -->
+    <el-form-item>
+      <el-button icon="el-icon-delete" circle @click="resetForm"></el-button>
+      <!-- <el-button type="primary" @click="confirm">{{store.loc('users')}}</el-button> -->
+    </el-form-item>
   </el-form>
 
 
   <div style="margin-top:2rem;"></div>
   <el-row v-for="(value, key) in users" :gutter="20" :key="key">
-    <el-col :span="8">
-      <div class="grid-content">
-        <!-- <el-icon v-if="value.sex === 1"><el-icon-male /></el-icon>
+    <el-col :span="12">
+      <!-- <div class="grid-content"> -->
+      <!-- <el-icon v-if="value.sex === 1"><el-icon-male /></el-icon>
         <el-icon v-else><el-icon-female /></el-icon> -->
-        <el-tooltip class="box-item" effect="dark" :content="store.getHumanReadablePrivs(value.privs)" placement="right">
-          <router-link :to="'/user/' + value.id" style="text-decoration: none; color: inherit;">
-            <el-button type="primary" v-if="value.privs === 1">
-              {{ value.firstname }}
-              {{ value.lastname }}
-            </el-button>
-            <el-button type="info" v-if="value.privs === 3">
-              {{ value.firstname }}
-              {{ value.lastname }}
-            </el-button>
-            <el-button v-if="value.privs === 5">
-              {{ value.firstname }}
-              {{ value.lastname }}
-            </el-button>
-          </router-link>
-        </el-tooltip>
-
-      </div>
+      <el-tooltip class="box-item" effect="dark" :content="store.getHumanReadablePrivs(value.privs)" placement="right">
+        <el-button :disabled="store!.state!.user!.privs > 1 && value.id !== store!.state!.user!.id"
+          :plain="store.state.user?.id !== value.id" @click="$router.push('/user/' + value.id)"
+          :type="getUserType(value)">{{ store.getLabel(value) }}</el-button>
+      </el-tooltip>
+      <!-- </div> -->
     </el-col>
 
-    <!-- <el-col :span="4">
-      <div class="grid-content bg-purple">
-        <router-link :to="'/user/' + value.id">
-          <el-button type="" link size="small" icon="el-icon-edit" plain class="full-width"></el-button>
-        </router-link>
-      </div>
-    </el-col> -->
-    <el-col :span="4">
-      <div v-if="store.state.user?.id === value.id" class="grid-content">
-        <i class="el-icon-check"></i>
-      </div>
-      <div v-else>
+    <el-col :span="12">
+      <!-- <div v-if="store.state.user?.id === value.id" class="grid-content">
+        <el-icon><el-icon-check /></el-icon>
+      </div> -->
+      <div v-if="store!.state!.user!.privs === 1 && store.state.user?.id !== value.id">
         <div v-if="value.activated" class="grid-content">
           <el-button type="danger" @click="switchUserStatus(value)">{{ store.loc('disable') }}</el-button>
         </div>
@@ -101,6 +84,21 @@ const rules = <FormRules<IRuleFormProfile>>{
   ],
 };
 
+
+const getUserType = (user: IUser) => {
+  if (!user.activated) {
+    return 'info';
+  }
+  if (user.privs === 1) {
+    return 'primary';
+  }
+  if (user.privs === 3) {
+    return 'default';
+  }
+  if (user.privs === 5) {
+    return 'success';
+  }
+}
 onBeforeMount(async () => {
   const result = await store.getData('users');
   // if (response.data && Object.keys(response.data).length) {

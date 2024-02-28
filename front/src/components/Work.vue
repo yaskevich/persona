@@ -1,5 +1,6 @@
 <template>
-  <MainTitle :title="store.loc('work') + ' ' + $route.params.id" :callback="confirm" :text="work.id ? store.loc('save') : store.loc('add')">
+  <MainTitle :title="store.loc('work') + ' ' + $route.params.id" :callback="confirm"
+    :text="work.id ? store.loc('save') : store.loc('add')">
   </MainTitle>
 
   <el-form :model="work" ref="formRef" label-width="4rem" :rules="rules" v-if="isLoaded">
@@ -16,8 +17,9 @@
 
     <el-form-item :label="store.loc('authors')">
       <el-space wrap>
-        <el-select v-model="work.authors" filterable multiple :placeholder="store.loc('authors')"><el-option
-            v-for="item in persons" :key="item.id" :label="store.getLabel(item)" :value="item.id" />
+        <el-select v-model="work.authors" filterable multiple :placeholder="store.loc('authors')"
+          class="wide-select"><el-option v-for="item in persons" :key="item.id" :label="store.getLabel(item)"
+            :value="item.id" />
         </el-select>
 
         <el-button type="primary" @click="setDefaultAuthor" v-if="persons.length && mainperson">{{ store.loc('author') }}
@@ -131,10 +133,3 @@ const rules = {
 };
 
 </script>
-
-
-<style>
-.el-select__selection {
-  min-width: 5rem !important;
-}
-</style>

@@ -8,8 +8,8 @@
       <el-tooltip class="item" placement="top-end">
         <template #content><span v-html="loc('techtimetip')"></span></template>
         <el-form-item prop="stamp">
-          <el-date-picker v-model="(fact.stamp as any)" format="YYYY.MM.DD HH:mm" type="datetime" :placeholder="loc('techtime')"
-            :shortcuts="shortcuts"></el-date-picker>
+          <el-date-picker v-model="(fact.stamp as any)" format="YYYY.MM.DD HH:mm" type="datetime"
+            :placeholder="loc('techtime')" :shortcuts="shortcuts"></el-date-picker>
         </el-form-item>
       </el-tooltip>
 
@@ -20,13 +20,15 @@
       </el-form-item>
 
       <el-form-item :label="loc('agent')">
-        <el-select v-model="(fact.agent as any)" filterable :placeholder="loc('agent')">
-          <el-option v-for="item in db.persons" :key="item.id" :label="store.getLabel(item)" :value="item.id">
-          </el-option>
-        </el-select>
-        <el-button type="primary" @click="setDefaultAuthor" v-if="db.persons.length && mainperson">{{
-          store.getLabel(db.persons.filter((x: IPerson) => x.id === mainperson)[0]) }}</el-button>
-        <el-button type="primary" @click="fact.agent = null">{{ loc('noagent') }}</el-button>
+        <el-space :wrap="true">
+          <el-select class="wide-select" v-model="(fact.agent as any)" filterable :placeholder="loc('agent')">
+            <el-option v-for="item in db.persons" :key="item.id" :label="store.getLabel(item, true)" :value="item.id">
+            </el-option>
+          </el-select>
+          <el-button type="primary" @click="setDefaultAuthor" v-if="db.persons.length && mainperson">{{
+            store.getLabel(db.persons.filter((x: IPerson) => x.id === mainperson)[0], true) }}</el-button>
+          <el-button type="info" @click="fact.agent = null">{{ loc('noagent') }}</el-button>
+        </el-space>
       </el-form-item>
 
     </el-space>
@@ -46,20 +48,20 @@
 
     <el-form-item :label="loc('rels')">
       <el-space direction="horizontal" style="display:flex;" wrap size="large">
-        <el-select v-model="fact.persons1" filterable multiple :placeholder="loc('prtcpnts')">
-          <el-option v-for="item in db.persons" :key="item.id" :label="store.getLabel(item)" :value="item.id"
+        <el-select v-model="fact.persons1" filterable multiple :placeholder="loc('prtcpnts')" class="wide-select">
+          <el-option v-for="item in db.persons" :key="item.id" :label="store.getLabel(item, true)" :value="item.id"
             :disabled="item.disabled">
           </el-option>
         </el-select>
-        <el-select v-model="fact.persons2" filterable multiple :placeholder="loc('ments')">
-          <el-option v-for="item in db.persons" :key="item.id" :label="store.getLabel(item)" :value="item.id">
+        <el-select v-model="fact.persons2" filterable multiple :placeholder="loc('ments')" class="wide-select">
+          <el-option v-for="item in db.persons" :key="item.id" :label="store.getLabel(item, true)" :value="item.id">
           </el-option>
         </el-select>
-        <el-select v-model="fact.works" multiple filterable :placeholder="loc('works')">
+        <el-select v-model="fact.works" multiple filterable :placeholder="loc('works')" class="wide-select">
           <el-option v-for="item in db.works" :key="item.id" :label="item.title" :value="item.id">
           </el-option>
         </el-select>
-        <el-select v-model="fact.books" multiple filterable :placeholder="loc('books')">
+        <el-select v-model="fact.books" multiple filterable :placeholder="loc('books')" class="wide-select">
           <el-option v-for="item in db.books" :key="item.id" :label="item.title" :value="item.id">
           </el-option>
         </el-select>
@@ -68,9 +70,9 @@
 
     <el-form-item :label="loc('fact')">
       <el-space direction="horizontal" style="display:flex;" wrap size="large">
-        <el-select v-model="(fact.relfact as any)" clearable filterable :placeholder="loc('fact')">
-          <el-option v-for="item in db.facts" :key="item.id" :label="item.title" :value="String(item!.id)"
-            :disabled="item.disabled">
+        <el-select v-model="(fact.relfact as any)" clearable filterable :placeholder="loc('fact')" class="wide-select">
+          <el-option v-for="item in db.facts" :key="item.id" :label="item.id + ': ' + item.title.slice(0, 48)"
+            :value="String(item!.id)" :disabled="item.disabled">
           </el-option>
         </el-select>
         <el-input :placeholder="loc('relfacttype')" v-model="fact.relfacttype" class="text-input"></el-input>
@@ -178,12 +180,12 @@ onBeforeMount(async () => {
   await Promise.all(names.map(async x => store.getData(x))).then(v => v.forEach((x, i) => (db[names[i]] = x.data)));
 
   // fact.agent = fact.agent || store.state.user.settings.persona;
-  db.persons = db.persons.map((x:IPerson) => ({
+  db.persons = db.persons.map((x: IPerson) => ({
     ...x, disabled: Boolean(x.id == store?.state?.user?.settings.mainperson),
   }));
 
   if (id) {
-    db.facts = db.facts.map((x:IFact) => ({ ...x, disabled: x.id == id, }));
+    db.facts = db.facts.map((x: IFact) => ({ ...x, disabled: x.id == id, }));
   }
   db.acts = store.nest(db.acts);
 
@@ -209,9 +211,7 @@ const deleteFact = async () => {
   }
 };
 
-const dialogOpened = () => {
-  bibRef.value?.setCheckedItems(fact.refs);
-};
+const dialogOpened = () => bibRef.value?.setCheckedItems(fact.refs || []);
 
 const rules = {
   acts: [{ required: true, message: store.loc('selact'), trigger: 'change' }],

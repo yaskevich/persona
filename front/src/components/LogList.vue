@@ -5,40 +5,36 @@
     </h3>
   </el-row>
 
-  <el-row v-for="(value, key) in datum.logs" :gutter="20" :key="key">
-    <el-col :span="6">
-      <div class="grid-content bg-purple-light">
+  <el-row v-for="(value, key) in datum.logs" :gutter="70" :key="key">
+
+    <el-col :span="8">
+      <el-space>
+        <el-icon>
+          <component :is="icons[store.classify(value)]" />
+        </el-icon>
+
+        <el-tag disable-transitions size="large" type="info">
+          {{ loc(value.table_name) }}
+        </el-tag>
+      </el-space>
+    </el-col>
+
+    <el-col :span="8">
+      <el-tag disable-transitions type="warning" size="large">
         {{ store.getLabel(datum.users[value.user_id]) }}
-      </div>
+      </el-tag>
     </el-col>
-    <el-col :span="6">
-      <div class="grid-content bg-purple">
-        {{ store.dateToString(value.created) }}
-      </div>
+
+    <el-col :span="8">
+      <el-button type="primary" plain @click="$router.push('/log/' + value.id)">{{ store.dateToString(value.created)
+      }}</el-button>
     </el-col>
-    <el-col :span="4">
-      <div class="grid-content bg-purple">
-        {{ loc(value.table_name) }}
-      </div>
-    </el-col>
-    <el-col :span="4">
-      <div class="grid-content bg-purple">
-        {{ store.classify(value) }}
-      </div>
-    </el-col>
-    <el-col :span="4">
-      <div class="grid-content">
-        <router-link :to="'/log/' + value.id">
-          <el-button type="primary" icon="el-icon-search" circle></el-button>
-        </router-link>
-      </div>
-    </el-col>
+
   </el-row>
 
   <el-row type="flex" justify="center">
     <el-pagination layout="prev, pager, next" :total="total" :page-size="size" :default-page-size="size"
-      :default-current-page="1" @update:current-page="updatePagination">
-    </el-pagination>
+      :default-current-page="1" @update:current-page="updatePagination" />
   </el-row>
 </template>
 
@@ -51,7 +47,11 @@ const datum = reactive({ users: [], logs: [] as Array<ILog> });
 const total = store.state?.user?.stats?.logs;
 const size = 30;
 const loc = store.loc;
-
+const icons = {
+  'change': 'el-icon-editpen',
+  'creation': 'el-icon-circleplus',
+  'removal': 'el-icon-remove'
+};
 onBeforeMount(async () => {
   await store.getUser(); // update stats
   await store.getDataMulti(datum, { users: 'id' }, {}, { logs: [0, size] });

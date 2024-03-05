@@ -22,7 +22,8 @@
             :value="item.id" />
         </el-select>
 
-        <el-button type="primary" @click="setDefaultAuthor" v-if="persons.length && mainperson">{{ store.loc('author') }}
+        <el-button type="primary" @click="setDefaultAuthor" v-if="persons.length && mainperson">{{ store.loc('author')
+          }}
           &ndash; {{ store.getLabel(persons.filter(x => x.id === mainperson)[0]) }}</el-button>
       </el-space>
     </el-form-item>
@@ -32,9 +33,25 @@
       <el-button type="primary" @click="confirm">{{ store.loc('save') }}</el-button>
     </el-form-item> -->
 
-    <el-form-item>
+    <template v-if="relBooks?.length || relFacts?.length">
+      <el-form-item :label="store.loc('books')" v-if="relBooks?.length">
+        <el-space wrap>
+          <el-button size="small" type="warning" v-for="(value, key) in relBooks" :key="key"
+            @click="$router.push('/book/' + value.id)">{{ value.title }}</el-button>
+        </el-space>
+      </el-form-item>
+      <el-form-item :label="store.loc('facts')" v-if="relFacts?.length">
+        <el-space wrap>
+          <el-button size="small" type="warning" v-for="(value, key) in relFacts" :key="key"
+            @click="$router.push('/fact/' + value.id)">{{ value.datedesc }}</el-button>
+        </el-space>
+      </el-form-item>
+    </template>
+
+    <el-form-item v-else>
       <el-popconfirm v-if="work?.id" :title="store.loc('confirmdel')" :confirmButtonText="store.loc('yes')"
         :cancelButtonText="store.loc('no')" @confirm="deleteWork">
+
         <template #reference>
           <el-button type="danger">{{ store.loc('remove') }}</el-button>
         </template>
@@ -42,6 +59,7 @@
     </el-form-item>
 
   </el-form>
+
 </template>
 
 <script setup lang="ts">
@@ -61,6 +79,9 @@ const persons = ref([] as Array<IPerson>);
 const vuerouter = useRoute();
 const id = String(vuerouter.params.id);
 
+const relBooks = ref([] as Array<IBook>);
+const relFacts = ref([] as Array<IFact>);
+
 const isLoaded = ref(false);
 
 onBeforeMount(async () => {
@@ -71,6 +92,12 @@ onBeforeMount(async () => {
       work.value = data[0];
       // console.log('this work', work.value);
     }
+    const booksData = await store.getData('books', { 'works': id });
+    relBooks.value = booksData.data;
+
+    const factsData = await store.getData('facts', { 'works': id });
+    relFacts.value = factsData.data;
+
   }
 
   const resultWorks = await store.getData('works');

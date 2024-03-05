@@ -12,11 +12,10 @@
     </el-form-item>
 
     <el-form-item :label="loc('works')">
-      <el-select v-model="form.works" multiple filterable remote reserve-keyword :placeholder="loc('work')"
-        :remote-method="getWorks" :loading="loading">
-        <el-option v-for="item in worksAll" :key="item.id" :label="item.title" :value="item.id">
-        </el-option>
-      </el-select>
+      <el-select-v2 v-model="form.works" multiple filterable remote reserve-keyword :placeholder="loc('work')" :options="worksAll" :props="{label:'title', value: 'id'}">
+        <!-- <el-option v-for="item in worksAll" :key="item.id" :label="item.title" :value="item.id"> -->
+        <!-- </el-option> -->
+      </el-select-v2>
     </el-form-item>
 
     <el-form-item :label="loc('editors')">
@@ -27,7 +26,14 @@
       </el-select>
     </el-form-item>
 
-    <el-form-item>
+    <el-form-item :label="store.loc('facts')" v-if="relFacts?.length">
+      <el-space wrap>
+        <el-button size="small" type="warning" v-for="(value, key) in relFacts" :key="key"
+          @click="$router.push('/fact/' + value.id)">{{ value.datedesc }}</el-button>
+      </el-space>
+    </el-form-item>
+
+    <el-form-item v-else>
       <el-popconfirm v-if="form?.id" :title="loc('confirmdel')" :confirmButtonText="loc('yes')"
         :cancelButtonText="loc('no')" @confirm="deleteBook">
         <template #reference>
@@ -40,6 +46,7 @@
           <el-button type="primary" @click="confirm">{{loc(form.id ? 'save': 'add')}}</el-button>
       -->
   </el-form>
+
 </template>
 
 <script setup lang="ts">
@@ -60,6 +67,8 @@ const loading = ref(false);
 const editorsAll = ref([] as Array<IPerson>);
 const vuerouter = useRoute();
 const id = String(vuerouter.params.id);
+const relFacts = ref([] as Array<IFact>);
+
 
 onBeforeMount(async () => {
 
@@ -69,6 +78,9 @@ onBeforeMount(async () => {
       form.value = result.data[0];
       // console.log("this book", form);
     }
+
+    const factsData = await store.getData('facts', { 'books': id });
+    relFacts.value = factsData.data;
   }
 
   const personsData = await store.getData('persons');

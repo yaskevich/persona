@@ -16,8 +16,8 @@
 
     <el-form-item>
       <el-radio-group v-model="form.sex">
-        <el-radio :label="1">{{ store.loc('man') }}</el-radio>
-        <el-radio :label="2">{{ store.loc('woman') }}</el-radio>
+        <el-radio :value="1">{{ store.loc('man') }}</el-radio>
+        <el-radio :value="2">{{ store.loc('woman') }}</el-radio>
       </el-radio-group>
     </el-form-item>
 
@@ -93,10 +93,13 @@ const getUserType = (user: IUser) => {
     return 'primary';
   }
   if (user.privs === 3) {
-    return 'default';
+    return 'success';
   }
   if (user.privs === 5) {
-    return 'success';
+    return 'default';
+  }
+  if (user.privs === 7) {
+    return 'warning';
   }
 }
 onBeforeMount(async () => {

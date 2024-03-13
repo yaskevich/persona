@@ -6,8 +6,9 @@ import router from './router';
 
 const privs = {
   1: 'administrator',
-  3: 'moderator',
-  5: 'editor',
+  3: 'editor',
+  5: 'contributor',
+  7: 'viewer',
 } as keyable;
 // const privs = [
 //   { id: 1, name: 'administrator' },
@@ -140,12 +141,16 @@ const deleteById = async (table: string, id: string | number): Promise<any> => {
   console.log('No token. Fail.');
 };
 
-const getData = async (table: string, id?: string | number, pager?: Array<number>): Promise<any> => {
+const getData = async (table: string, prop?: string | number | Object, pager?: Array<number>): Promise<any> => {
   if (state.token) {
     try {
       const config = { headers: { Authorization: 'Bearer ' + state.token }, params: {} };
-      if (id) {
-        config['params'] = { id: id };
+      if (prop) {
+        if (typeof prop === 'number' || typeof prop === 'string') {
+          config['params'] = { id: prop };
+        } else if (typeof prop === 'object') {
+          config['params'] = prop;
+        }
       }
       if (pager && pager.length) {
         config['params'] = {

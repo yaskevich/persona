@@ -17,8 +17,8 @@
 
     <el-form-item prop="sex">
       <el-radio-group v-model="form.sex">
-        <el-radio :label="1">{{ store.loc('man') }}</el-radio>
-        <el-radio :label="2">{{ store.loc('woman') }}</el-radio>
+        <el-radio :value="1">{{ store.loc('man') }}</el-radio>
+        <el-radio :value="2">{{ store.loc('woman') }}</el-radio>
       </el-radio-group>
     </el-form-item>
     <el-alert v-if="infoAlert" :title="infoAlert" :center="true" type="error" effect="dark">
@@ -45,7 +45,7 @@ const infoAlert = ref('');
 if (isRegistered.value) {
   Object.assign(form, store.state.user);
   const level = String(form.privs);
-  if (['1', '3', '5'].includes(level) && store.privs?.[level as keyof typeof store.privs]) {
+  if (['1', '3', '5', '7'].includes(level) && store.privs?.[level as keyof typeof store.privs]) {
     rights = store.loc(store.privs[level as keyof typeof store.privs]);
   }
 }

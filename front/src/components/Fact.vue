@@ -1,7 +1,7 @@
 <template>
   <MainTitle :title="loc('fact') + ' ' + $route.params.id" :callback="confirm" :text="loc(fact.id ? 'save' : 'add')">
   </MainTitle>
-  <el-form label-width="120px" ref="formRef" :model="fact" :rules="rules">
+  <el-form v-show="isLoaded" label-width="120px" ref="formRef" :model="fact" :rules="rules">
 
     <el-space direction="horizontal" style="display:flex;" wrap size="large">
 
@@ -21,12 +21,13 @@
 
       <el-form-item :label="loc('agent')">
         <el-space :wrap="true">
-          <el-select class="wide-select" v-model="(fact.agent as any)" filterable :placeholder="loc('agent')">
-            <el-option v-for="item in db.persons" :key="item.id" :label="store.getLabel(item, true)" :value="item.id">
-            </el-option>
-          </el-select>
+          <el-select-v2 class="wide-select" v-model="(fact.agent as any)" filterable :placeholder="loc('agent')"
+            :options="db.persons">
+            <!-- <el-option v-for="item in db.persons" :key="item.id" :label="store.getLabel(item, true)" :value="item.id">
+            </el-option> -->
+          </el-select-v2>
           <el-button type="primary" @click="setDefaultAuthor" v-if="db.persons.length && mainperson">{{
-            store.getLabel(db.persons.filter((x: IPerson) => x.id === mainperson)[0], true) }}</el-button>
+    db.persons.find((x: any) => x.value === mainperson)?.label }}</el-button>
           <el-button type="info" @click="fact.agent = null">{{ loc('noagent') }}</el-button>
         </el-space>
       </el-form-item>
@@ -48,19 +49,22 @@
 
     <el-form-item :label="loc('rels')">
       <el-space direction="horizontal" style="display:flex;" wrap size="large">
-        <el-select v-model="fact.persons1" filterable multiple :placeholder="loc('prtcpnts')" class="wide-select">
-          <el-option v-for="item in db.persons" :key="item.id" :label="store.getLabel(item, true)" :value="item.id"
-            :disabled="item.disabled">
-          </el-option>
-        </el-select>
-        <el-select v-model="fact.persons2" filterable multiple :placeholder="loc('ments')" class="wide-select">
-          <el-option v-for="item in db.persons" :key="item.id" :label="store.getLabel(item, true)" :value="item.id">
-          </el-option>
-        </el-select>
-        <el-select v-model="fact.works" multiple filterable :placeholder="loc('works')" class="wide-select">
-          <el-option v-for="item in db.works" :key="item.id" :label="item.title" :value="item.id">
-          </el-option>
-        </el-select>
+        <el-select-v2 v-model="fact.persons1" filterable multiple :placeholder="loc('prtcpnts')" class="wide-select"
+          :options="db.persons">
+          <!-- <el-option v-for="item in db.persons" :key="item.id" :label="store.getLabel(item, true)" :value="item.id"
+            :disabled="item.disabled"> -->
+          <!-- </el-option> -->
+        </el-select-v2>
+        <el-select-v2 v-model="fact.persons2" filterable multiple :placeholder="loc('ments')" class="wide-select"
+          :options="db.persons">
+          <!-- <el-option v-for="item in db.persons" :key="item.id" :label="store.getLabel(item, true)" :value="item.id"> -->
+          <!-- </el-option> -->
+        </el-select-v2>
+        <el-select-v2 v-model="fact.works" multiple filterable :placeholder="loc('works')" class="wide-select"
+          :props="{ 'value': 'id', 'label': 'title' }" :options="db.works">
+          <!-- <el-option v-for="item in db.works" :key="item.id" :label="item.title" :value="item.id">
+          </el-option> -->
+        </el-select-v2>
         <el-select v-model="fact.books" multiple filterable :placeholder="loc('books')" class="wide-select">
           <el-option v-for="item in db.books" :key="item.id" :label="item.title" :value="item.id">
           </el-option>
@@ -68,7 +72,7 @@
       </el-space>
     </el-form-item>
 
-    <el-form-item :label="loc('fact')">
+    <!-- <el-form-item :label="loc('fact')">
       <el-space direction="horizontal" style="display:flex;" wrap size="large">
         <el-select v-model="(fact.relfact as any)" clearable filterable :placeholder="loc('fact')" class="wide-select">
           <el-option v-for="item in db.facts" :key="item.id" :label="item.id + ': ' + item.title.slice(0, 48)"
@@ -77,7 +81,7 @@
         </el-select>
         <el-input :placeholder="loc('relfacttype')" v-model="fact.relfacttype" class="text-input"></el-input>
       </el-space>
-    </el-form-item>
+    </el-form-item> -->
 
     <el-form-item :label="loc('note')">
       <el-input type="textarea" autosize placeholder="..." v-model="fact.comment">
@@ -94,6 +98,7 @@
 
     <el-popconfirm v-if="fact?.id" :title="loc('confirmdel')" :confirmButtonText="loc('yes')"
       :cancelButtonText="loc('no')" @confirm="deleteFact">
+
       <template #reference>
         <el-button type="danger">{{ loc('remove') }}</el-button>
       </template>
@@ -103,6 +108,7 @@
   <el-dialog :title="loc('sources')" v-model="dialogVisible" width="500px" :before-close="handleClose"
     @opened="dialogOpened">
     <References :isEmbedded="true" ref="bibRef"></References>
+
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="handleClose">{{ loc('cancel') }}</el-button>
@@ -111,6 +117,7 @@
     </template>
   </el-dialog>
 </template>
+
 <script setup lang="ts">
 
 import { ElForm, ElTooltip, FormInstance, FormRules } from 'element-plus';
@@ -141,11 +148,12 @@ const fact = reactive({
   place: '',
   comment: ''
 } as IFact);
-const db = reactive({ persons: [] as Array<IPerson>, works: [] as Array<IWork>, books: [] as Array<IBook>, acts: [] as Array<IAct>, facts: [] as Array<IFact> }) as keyable;
+const db = reactive({ persons: [] as Array<IPerson>, works: [] as Array<IWork>, books: [] as Array<IBook>, acts: [] as Array<IAct>, }) as keyable; // facts: [] as Array<IFact>
 const dialogVisible = ref(false);
 const bibRef = ref<InstanceType<typeof References>>();
 const mainperson = store?.state?.user?.settings?.mainperson;
 const loc = store.loc;
+const isLoaded = ref(false);
 
 const shortcuts = [
   {
@@ -181,14 +189,16 @@ onBeforeMount(async () => {
 
   // fact.agent = fact.agent || store.state.user.settings.persona;
   db.persons = db.persons.map((x: IPerson) => ({
-    ...x, disabled: Boolean(x.id == store?.state?.user?.settings.mainperson),
+    label: store.getLabel(x, true),
+    value: x.id,
+    disabled: Boolean(x.id == store?.state?.user?.settings.mainperson),
   }));
 
-  if (id) {
-    db.facts = db.facts.map((x: IFact) => ({ ...x, disabled: x.id == id, }));
-  }
+  // if (id) {
+  //   db.facts = db.facts.map((x: IFact) => ({ ...x, disabled: x.id == id, }));
+  // }
   db.acts = store.nest(db.acts);
-
+  isLoaded.value = true;
 });
 
 const handleClose = () => {

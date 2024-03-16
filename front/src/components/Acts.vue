@@ -17,41 +17,36 @@
     <h3>{{ loc('facttypes') }}</h3>
   </el-row>
 
-  <div style="max-width:350px;">
-
-    <el-tree :data="acts" node-key="id" :empty-text="loc('loading')" :props="{ label: 'title', }" default-expand-all
-      :allow-drop="allowDrop" @node-drop="handleDrop" draggable :expand-on-click-node="false">
-      <template #default="{ node, data }">
-
-        <span class="custom-tree-node">
-          <span>{{ node.label }}</span>
+  <el-tree :data="acts" node-key="id" :empty-text="loc('loading')" :props="{ label: 'title', }" default-expand-all
+    :highlight-current="true" :allow-drop="allowDrop" @node-drop="handleDrop" draggable :expand-on-click-node="false">
+    <template #default="{ node, data }">
+      <span class="custom-tree-node">
+        <el-dropdown>
           <span>
-            <el-dropdown>
-              <el-icon>
-                <el-icon-tools />
-              </el-icon>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item @click="addItem(node, data)">{{ loc('addsibling') }}</el-dropdown-item>
-                  <el-dropdown-item @click="addItem(node, data, true)">{{ loc('addchild') }}</el-dropdown-item>
-                  <el-dropdown-item @click="renameItem(node, data)">{{ loc('rename') }}</el-dropdown-item>
-                  <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>{{ loc('delit')
-                  }}</strong></el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+            {{ node.label }}
           </span>
-        </span>
+          <!-- <el-icon>
+                <el-icon-tools />
+              </el-icon> -->
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="addItem(node, data)">{{ loc('addsibling') }}</el-dropdown-item>
+              <el-dropdown-item @click="addItem(node, data, true)">{{ loc('addchild') }}</el-dropdown-item>
+              <el-dropdown-item @click="renameItem(node, data)">{{ loc('rename') }}</el-dropdown-item>
+              <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>{{ loc('delit')
+              }}</strong></el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </span>
 
-      </template>
-    </el-tree>
+    </template>
+  </el-tree>
 
-    <el-row>
-      <el-alert v-if="!allowDrop()" :title="loc('warnactsmove')" type="info">
-      </el-alert>
-    </el-row>
-
-  </div>
+  <el-row>
+    <el-alert v-if="!allowDrop()" :title="loc('warnactsmove')" type="info">
+    </el-alert>
+  </el-row>
 </template>
 
 <script setup lang="ts">

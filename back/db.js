@@ -1,9 +1,6 @@
 import dotenv from 'dotenv';
-
 import bcrypt from 'bcrypt';
-
 import passGen from 'generate-password';
-
 import pg from 'pg';
 import pgFormat from 'pg-format';
 
@@ -16,7 +13,12 @@ if (!process.env.NODE_ENV && configLoaded.error) {
 }
 const saltRounds = 8;
 const passOptions = {
-  length: 18, numbers: true, uppercase: false, excludeSimilarCharacters: true, strict: true, symbols: false
+  length: 18,
+  numbers: true,
+  uppercase: false,
+  excludeSimilarCharacters: true,
+  strict: true,
+  symbols: false,
 };
 
 const { Pool } = pg;
@@ -24,132 +26,174 @@ const pool = new Pool();
 // prevent formatting as a timestamp with zone
 pg.types.setTypeParser(1114, (x) => x);
 
+// const databaseQuery = `SELECT table_name FROM information_schema.columns
+//  WHERE table_schema = 'public' group by table_name`;
+
 const databaseQuery = `SELECT table_name, column_name, ordinal_position,
 column_default, is_nullable, data_type
 FROM information_schema.columns
 WHERE table_schema = 'public'
 ORDER BY table_name, ordinal_position`;
 
-const tablesQueries = [
-  `CREATE TABLE IF NOT EXISTS persons (
-id SERIAL PRIMARY KEY,
-firstName text not null,
-lastName varchar,
-patroName text,
-sex integer,
-wikidata integer
-)`,
-  `ALTER TABLE persons OWNER TO ${process.env.PGUSER}`,
-  `CREATE TABLE IF NOT EXISTS works (
-id SERIAL PRIMARY KEY,
-title text not null,
-genre integer,
-genrename text,
-authors integer[] NULL
-)`,
-  `ALTER TABLE works OWNER TO ${process.env.PGUSER}`,
-  `CREATE TABLE IF NOT EXISTS users (
-id SERIAL PRIMARY KEY,
-firstname text not null,
-lastname text not null,
-email text not null,
-sex integer not null,
-privs integer not null,
-prefs json,
-_passhash text not null,
-activated BOOLEAN NOT NULL DEFAULT FALSE
-)`,
-  // `ALTER TABLE users RENAME COLUMN passdata TO _passhash`;
-  `ALTER TABLE users OWNER TO ${process.env.PGUSER}`,
-  `CREATE TABLE IF NOT EXISTS settings (
-id SERIAL PRIMARY KEY,
-title text not null default 'Persona',
-mainperson integer not null default 1,
-lang integer not null default 0
-)`,
-  'INSERT INTO settings (mainperson) VALUES(1)',
-  `ALTER TABLE settings OWNER TO ${process.env.PGUSER}`,
-  `CREATE TABLE books (
-id SERIAL PRIMARY KEY,
-title text not null,
-published integer not null,
-editors integer[] NULL,
-works integer[] NULL
-)`,
-  `ALTER TABLE books OWNER TO ${process.env.PGUSER}`,
-  `CREATE TABLE IF NOT EXISTS acts (
-id SERIAL PRIMARY KEY,
-title text not null,
-parent integer
-)`,
-  `ALTER TABLE acts OWNER TO ${process.env.PGUSER}`,
-  // the table should have at least 1 item to enable UI
-  'INSERT INTO acts (title) VALUES(\'test\')',
+const databaseScheme = {
 
-  `CREATE TABLE IF NOT EXISTS refs (
-id SERIAL PRIMARY KEY,
-parent integer,
-title text,
-content text,
-reftype integer NOT NULL DEFAULT 0,
-pages text[],
-authors integer[] NULL
-)`,
+  persons: `
+    id SERIAL PRIMARY KEY,
+    firstname TEXT NOT NULL,
+    lastname TEXT,
+    patroname TEXT,
+    sex INTEGER,
+    wikidata INTEGER,
+    note TEXT`,
 
-  `ALTER TABLE refs OWNER TO ${process.env.PGUSER}`,
-  // the table should have at least 1 item to enable UI
-  'INSERT INTO refs (title) VALUES(\'test\')',
-  `CREATE TABLE IF NOT EXISTS facts (
-id SERIAL PRIMARY KEY,
-stamp timestamp,
-agent integer,
-datedesc text,
-place text,
-title text,
-acts integer[] NULL,
-persons1 integer[] NULL,
-persons2 integer[] NULL,
-works integer[] NULL,
-books integer[] NULL,
-refs integer[] NULL,
-comment text,
-media integer,
-relfact integer
-relfacttype text
-)`,
-  `ALTER TABLE facts OWNER TO ${process.env.PGUSER}`,
-  `CREATE TABLE IF NOT EXISTS logs (
-id SERIAL PRIMARY KEY,
-created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-user_id integer not null,
-data0 json,
-data1 json,
-table_name text not null,
-record_id integer not null
-)`,
-  `ALTER TABLE logs OWNER TO ${process.env.PGUSER}`,
-  `CREATE TABLE IF NOT EXISTS genres (
-id SERIAL PRIMARY KEY,
-title text
-)`,
-  `ALTER TABLE genres OWNER TO ${process.env.PGUSER}`,
-];
+  works: `
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    genre INTEGER,
+    genrename TEXT,
+    authors INTEGER[] NULL`,
 
-let tablesResult = await pool.query(databaseQuery);
+  users: `
+    id SERIAL PRIMARY KEY,
+    firstname TEXT NOT NULL,
+    lastname TEXT NOT NULL,
+    email TEXT NOT NULL,
+    sex INTEGER NOT NULL,
+    privs INTEGER NOT NULL,
+    prefs JSON,
+    _passhash TEXT NOT NULL,
+    activated BOOLEAN NOT NULL DEFAULT FALSE`,
 
-if (!tablesResult.rows.length) {
+  settings: `
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL DEFAULT 'Persona',
+    mainperson INTEGER NOT NULL DEFAULT 1,
+    lang INTEGER NOT NULL DEFAULT 0`,
+
+  books: `
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    published INTEGER NOT NULL,
+    editors INTEGER[] NULL,
+    works INTEGER[] NULL`,
+
+  acts: `
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    parent INTEGER`,
+
+  refs: `
+    id SERIAL PRIMARY KEY,
+    parent INTEGER,
+    title TEXT,
+    content TEXT,
+    reftype INTEGER NOT NULL DEFAULT 0,
+    pages TEXT[],
+    authors INTEGER[] NULL`,
+
+  facts: `
+    id SERIAL PRIMARY KEY,
+    stamp TIMESTAMP,
+    agent INTEGER,
+    datedesc TEXT,
+    place TEXT,
+    title TEXT,
+    acts INTEGER[] NULL,
+    persons1 INTEGER[] NULL,
+    persons2 INTEGER[] NULL,
+    works INTEGER[] NULL,
+    books INTEGER[] NULL,
+    refs INTEGER[] NULL,
+    comment TEXT,
+    media INTEGER,
+    relfact INTEGER
+    relfacttype TEXT`,
+
+  logs: `
+    id SERIAL PRIMARY KEY,
+    created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    user_id INTEGER NOT NULL,
+    data0 JSON,
+    data1 JSON,
+    table_name TEXT NOT NULL,
+    record_id INTEGER NOT NULL`,
+
+  genres: `
+    id SERIAL PRIMARY KEY,
+    title TEXT`,
+
+  reltypes: `
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    name1 TEXT NOT NULL,
+    name2 TEXT NOT NULL,
+    bilateral BOOLEAN NOT NULL DEFAULT FALSE`,
+
+  relships: `
+    persons INTEGER[] NOT NULL,
+    main INTEGER,
+    rel_id INTEGER NOT NULL`,
+
+};
+
+let tablesResult;
+try {
+  tablesResult = await pool.query(databaseQuery);
+} catch (error) {
+  console.error(error);
+  pool.end();
+  process.exit(1);
+}
+
+const tables = [...new Set(tablesResult.rows.map((x) => x.table_name))];
+
+const prepareTable = async (args) => {
+  const tableName = args[0];
+  if (!tables.includes(tableName)) {
+    console.log(`init table '${tableName}'`);
+    try {
+      await pool.query(`CREATE TABLE IF NOT EXISTS ${tableName} (${args[1]})`);
+      await pool.query(`ALTER TABLE ${tableName} OWNER TO ${process.env.PGUSER}`);
+    } catch (createError) {
+      console.error(createError);
+      console.error(`Issue with table '${tableName}'!`);
+      throw createError;
+    }
+  }
+};
+
+const initDatabase = async () => {
+  /* eslint-disable-next-line no-restricted-syntax */
+  for (const table of Object.entries(databaseScheme)) {
+    /* eslint-disable-next-line no-await-in-loop */
+    await prepareTable(table);
+    if (table[0] === 'settings') {
+      // eslint-disable-next-line no-await-in-loop
+      await pool.query('INSERT INTO settings (mainperson) VALUES(1)');
+    } else if (table[0] === 'acts') {
+      // the table should have at least 1 item to enable UI
+      // eslint-disable-next-line no-await-in-loop
+      await pool.query('INSERT INTO acts (title) VALUES(\'test\')');
+    } else if (table[0] === 'refs') {
+      // the table should have at least 1 item to enable UI
+      // eslint-disable-next-line no-await-in-loop
+      await pool.query('INSERT INTO refs (title) VALUES(\'test\')');
+    }
+  }
+};
+
+if (tables.length !== Object.keys(databaseScheme).length) {
+  console.log(tables.length, Object.keys(databaseScheme).length);
   console.log('initializing database: started');
   try {
     await pool.query('BEGIN');
     try {
-      for (let i = 0; i < tablesQueries.length; i++) {
-        // eslint-disable-next-line no-await-in-loop
-        await pool.query(tablesQueries[i]);
-      }
+      await initDatabase();
       await pool.query('COMMIT');
       tablesResult = await pool.query(databaseQuery);
       console.log('initializing database: done');
     } catch (error) {
+      console.log('Rolling back...');
       await pool.query('ROLLBACK');
     }
   } catch (error) {
@@ -163,18 +207,23 @@ const dbStructure = {};
 for (const row of tablesResult.rows) {
   // eslint-disable-next-line no-unused-expressions
   dbStructure[row.table_name]
-    ? dbStructure[row.table_name][row.column_name] = row
-    : dbStructure[row.table_name] = { [row.column_name]: row };
+    ? (dbStructure[row.table_name][row.column_name] = row)
+    : (dbStructure[row.table_name] = { [row.column_name]: row });
 }
+
 const selectables = {};
 // eslint-disable-next-line no-restricted-syntax
 for (const table of Object.keys(dbStructure)) {
-  selectables[table] = ['SELECT',
+  selectables[table] = [
+    'SELECT',
     Object.values(dbStructure[table])
       .filter((x) => x.column_name.charAt(0) !== '_')
       .map((x) => x.column_name)
       .join(', '),
-    'FROM', table, ' '].join(' ');
+    'FROM',
+    table,
+    ' ',
+  ].join(' ');
 } // columns with names starting with _underscore are not exposed for client code!
 // console.log(selectables);
 // console.log(dbStructure);
@@ -207,14 +256,29 @@ export default {
     }
     return { error: 'bad query' };
   },
-  async getData(table, id, offset, limit) {
-    const off = parseInt(offset, 10) || 0;
-    const lim = parseInt(limit, 10) || 5000;
+  async getData(table, query) {
+    const props = query;
+    let off = 0;
+    let lim = 5000;
+
+    if (props?.off) {
+      off = Number(props.off);
+      delete props.off;
+    }
+    if (props?.lim) {
+      lim = Number(props.lim);
+      delete props.lim;
+    }
+
     if (table in dbStructure) {
-      const idInt = parseInt(id, 10);
-      const params = idInt
-        ? [`${selectables[table]} WHERE id = $1`, [idInt]]
-      // [selectables[table] + (["settings", "acts"].includes(table) ? "": "ORDER BY id DESC")];
+      const addon = Object.entries(props)
+        .map((x) => (dbStructure[table][x[0]].data_type === 'ARRAY'
+          ? `${Number(x[1])} = ANY(${String(x[0])})`
+          : `${String(x[0])} = ${Number(x[1])}`))
+        .join(' AND ');
+      // console.log(dbStructure[table]);
+      const params = addon
+        ? [`${selectables[table]} WHERE ${addon}`] // [selectables[table] + (["settings", "acts"].includes(table) ? "": "ORDER BY id DESC")];
         : [`${selectables[table]} ORDER BY id DESC OFFSET ${off} LIMIT ${lim}`];
       const result = await pool.query(...params);
       return result.rows;
@@ -234,10 +298,9 @@ export default {
         if (key in dbData) {
           if (dbData[key].column_default && dbData[key].column_default.includes('nextval')) {
             meta[key] = data[key];
-          } else if (dbData[key].data_type === 'integer') {
+          } else if (dbData[key].data_type === 'INTEGER') {
             // console.log(`${key}${data[key]}`, typeof data[key]);
-            record[key] = data[key] === null || (typeof data[key] === 'string' && !data[key])
-              ? 'null' : parseInt(data[key], 10);
+            record[key] = data[key] === null || (typeof data[key] === 'string' && !data[key]) ? 'null' : parseInt(data[key], 10);
           } else if (dbData[key].data_type === 'ARRAY') {
             if (data[key] && data[key].length) {
               record[key] = `'{${data[key].join(',')}}'`;
@@ -246,7 +309,8 @@ export default {
             }
           } else if (dbData[key].data_type === 'boolean') {
             record[key] = Boolean(data[key]);
-          } else { // string
+          } else {
+            // string
             if (data[key] && dbData[key].data_type !== 'json') {
               data[key] = data[key].trim();
             }
@@ -261,7 +325,9 @@ export default {
       delete data.id;
 
       if ('id' in meta && meta.id) {
-        const pairs = Object.keys(record).map((key) => `${key} = ${record[key]}`).join(', ');
+        const pairs = Object.keys(record)
+          .map((key) => `${key} = ${record[key]}`)
+          .join(', ');
         const sel = `SELECT ${Object.keys(record).join(', ')} FROM ${table} WHERE id = ${meta.id}`;
         try {
           stored = (await pool.query(sel))?.rows?.shift();
@@ -273,7 +339,9 @@ export default {
           return { error };
         }
       } else {
-        query = `INSERT INTO ${table} (${Object.keys(record).join(', ')}) VALUES(${Object.values(record).join(', ')}) RETURNING id`;
+        query = `INSERT INTO ${table} (${Object.keys(record).join(', ')}) VALUES(${Object.values(record).join(
+          ', '
+        )}) RETURNING id`;
       }
 
       if (query) {
@@ -311,8 +379,12 @@ export default {
     return res.rows[0];
   },
   async getUserData(email, pwd) {
-    if (!email) { return { error: 'email' }; }
-    if (!pwd) { return { error: 'password' }; }
+    if (!email) {
+      return { error: 'email' };
+    }
+    if (!pwd) {
+      return { error: 'password' };
+    }
 
     // console.log("email/pwd", email, pwd);
     const res = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
@@ -351,7 +423,10 @@ export default {
     const hash = await bcrypt.hash(pwd, saltRounds);
     console.log('ready');
     // console.log(pwd, hash);
-    const result = await pool.query('INSERT INTO users (firstname, lastname, email, sex, privs, _passhash, activated) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id', [data.firstname, data.lastname, data.email, data.sex, privs, hash, active]);
+    const result = await pool.query(
+      'INSERT INTO users (firstname, lastname, email, sex, privs, _passhash, activated) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+      [data.firstname, data.lastname, data.email, data.sex, privs, hash, active]
+    );
     if (result.rows.length === 1) {
       return { message: pwd };
     }
@@ -372,6 +447,10 @@ export default {
     return { error: 'Operation is allowed only for administrators' };
   },
   async getStats() {
-    return Object.fromEntries((await Promise.all(Object.keys(dbStructure).map((t) => pool.query(`SELECT '${t}' as table, COUNT(*) FROM ${t}`)))).map((x) => x.rows.shift()).map((x) => [x.table, Number(x.count)]));
+    return Object.fromEntries(
+      (await Promise.all(Object.keys(dbStructure).map((t) => pool.query(`SELECT '${t}' as table, COUNT(*) FROM ${t}`))))
+        .map((x) => x.rows.shift())
+        .map((x) => [x.table, Number(x.count)])
+    );
   },
 };

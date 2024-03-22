@@ -25,34 +25,42 @@
             {{ store.loc('add') }}<el-icon class="el-icon--right"><el-icon-arrow-down /></el-icon>
           </el-button>
           <template #dropdown>
-            <el-dropdown-menu v-for="(rel, index) in rels.reltypes">
+            <el-dropdown-menu v-for="rel in data.reltypes">
               <el-dropdown-item :command="rel.id">{{ rel?.name1 }}</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+        <el-tooltip placement="top-end" v-for="(item) in relships">
+          <template #content>
+            {{ getRelation(data.reltypes[item.rel_id], data.persons?.[item.member1],
+    data.persons?.[item.member2]) }}</template>
+          <el-button icon="el-icon-share" link type="primary" style="margin-left: 5px;"></el-button>
+        </el-tooltip>
       </el-col>
       <el-col>
         <el-tooltip placement="top-end" v-if="newRel?.rel_id">
           <template #content>{{ store.loc('flip') }}</template>
-          <el-button icon="el-icon-switchfilled" style="margin-top: 1rem;margin-bottom: 1rem;" type="success"
-            @click="addRelation"> {{
-    store.renderRelations(rels.reltypes[newRel.rel_id]) }}
+          <el-button :plain="isFlipped" icon="el-icon-switchfilled" style="margin-top: 1rem;margin-bottom: 1rem;"
+            type="success" @click="swapMembers"> {{
+    store.renderRelations(data.reltypes[newRel.rel_id], isFlipped) }}
           </el-button>
         </el-tooltip>
 
         <template v-if="newRel?.rel_id">
-          <el-select-v2 v-model="relatedPerson" filterable :placeholder="store.loc('person')" :options="persons" />
+          <el-select-v2 v-model="relatedPerson" filterable :placeholder="store.loc('person')" :options="persons"
+            @change="selectPerson" />
           <el-tag effect="plain" type="info" v-if="relatedPerson">
-            {{ rels.persons[relatedPerson].firstname }} {{ rels.persons[relatedPerson].lastname }} &ndash; {{
-    rels.reltypes[newRel?.rel_id]?.name2 }}</el-tag> <el-tag effect="plain" type="info"> {{ person.firstname }}
+            {{ data.persons[relatedPerson].firstname }} {{ data.persons[relatedPerson].lastname }} &ndash; {{
+    data.reltypes[newRel?.rel_id]?.[isFlipped ? 'name1' : 'name2'] }}</el-tag> <el-tag effect="plain"
+            type="info"> {{ person.firstname }}
             {{ person.lastname }} &ndash; {{
-    rels.reltypes[newRel?.rel_id]?.name1 }}
+    data.reltypes[newRel?.rel_id]?.[isFlipped ? 'name2' : 'name1'] }}
           </el-tag>
         </template>
       </el-col>
       <el-col>
         <el-button size="small" type="warning" plain v-if="relatedPerson" @click="addRelation">Confirm</el-button>
-        <el-button size="small" type="primary" plain v-if="relatedPerson" @click="addRelation">Cancel</el-button>
+        <el-button size="small" type="primary" plain v-if="relatedPerson" @click="clearRelation">Cancel</el-button>
       </el-col>
     </el-form-item>
 
@@ -90,33 +98,66 @@ import router from '../router';
 let person = ref({} as IPerson);
 const vuerouter = useRoute();
 const id = String(vuerouter.params.id);
-const rels = reactive({ 'reltypes': {} as keyable, persons: {} as keyable });
+const idNum = Number(id);
+
+const data = reactive({ 'reltypes': {} as keyable, persons: {} as keyable });
 const relatedPerson = ref<number>();
 const persons = ref<Array<IPerson>>([]);
+const relships = ref<Array<IRelship>>([]);
 const newRel = ref<IRelship>();
 const isLoaded = ref(false);
+const isFlipped = ref(false);
+
+const getRelation = (rel: IRelation, person1: IPerson, person2: IPerson) => `${store.getLabel(person1)} (${rel.name1}) ${rel.bilateral ? '⟺' : '⟹'} ${store.getLabel(person2)} (${rel.name2})`;
+
+const selectPerson = () => {
+  // console.log('select!', relatedPerson.value);
+  if (relatedPerson.value) {
+    const member = isFlipped.value ? 'member1' : 'member2';
+    if (newRel?.value) {
+      newRel.value[member] = relatedPerson.value;
+    }
+  }
+};
+
+const swapMembers = () => {
+  isFlipped.value = !isFlipped.value;
+  if (newRel?.value) {
+    newRel.value.member2 = [newRel.value.member1, newRel.value.member1 = newRel.value.member2][0];
+  }
+  // console.log('flip', newRel.value);
+};
 
 const handleCommand = (command: string | number | object) => {
-  console.log(`click on item ${command}`)
-  newRel.value = { rel_id: Number(command), persons: [Number(id)], main: Number(id) };
+  newRel.value = {
+    rel_id: Number(command),
+    member1: isFlipped.value ? relatedPerson.value : idNum,
+    member2: isFlipped.value ? idNum : relatedPerson.value,
+  } as any;
+  // console.log(`relation type ${command}`, newRel.value, isFlipped.value, relatedPerson.value);
+};
+
+const clearRelation = () => {
+  (relatedPerson.value as any) = null;
+  (newRel.value as any) = {} as IRelship;
 };
 
 const addRelation = () => {
-  if (relatedPerson.value) {
-    newRel.value?.persons.push(relatedPerson.value);
+  // console.log(newRel.value);
+  if (newRel?.value) {
+    relships.value.push(newRel.value);
+    clearRelation();
   }
-  console.log(newRel.value);
 };
 
 onBeforeMount(async () => {
-  await store.getDataMulti(rels, { 'reltypes': 'id', persons: 'id' }, {}, {});
+  await store.getDataMulti(data, { 'reltypes': 'id', persons: 'id' }, {}, {});
 
   if (id) {
-    person.value = rels.persons[id];
+    person.value = data.persons[id];
   }
 
-  const idNum = Number(id);
-  persons.value = Object.values(rels.persons).map((x: IPerson) => ({
+  persons.value = Object.values(data.persons).map((x: IPerson) => ({
     label: store.getLabel(x, true),
     value: x.id,
     disabled: x.id == idNum,
@@ -133,7 +174,7 @@ const confirm = async () => {
   if (!('data' in result && 'id' in result.data)) {
     console.log("error", result);
   }
-  router.push('/persons');
+  // router.push('/persons');
 };
 
 const deletePerson = async (id: number) => {
@@ -144,6 +185,5 @@ const deletePerson = async (id: number) => {
     // persons.splice(key, 1);
   }
 };
-
 
 </script>

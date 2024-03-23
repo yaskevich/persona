@@ -1,14 +1,14 @@
 <template>
     <MainTitle :title="store.loc('relations')" :callback="confirm"></MainTitle>
     <el-space direction="vertical" alignment="flex-start">
-        <el-button style="margin: 5px" :type="value.bilateral ? 'primary': 'info'" v-for="(value, key) in rels"
-            @click="$router.push('/relation/' + value.id)"> {{ value.name1 }}
-            {{ value.bilateral ? '⟺':  '⟹'  }}
+        <el-button style="margin: 5px" :type="value.bilateral ? 'primary' : 'info'" v-for="(value, key) in rels"
+            @click="$router.push('/relation/' + value.id)">
             <!-- <el-icon style="margin-left: 3px; margin-right: 3px;">
                 <el-icon-switch v-if="value.bilateral" />
                 <el-icon-right v-else />
             </el-icon> -->
-            {{ value.name2 }}</el-button>
+            {{ store.renderRelations(value) }}
+        </el-button>
     </el-space>
 </template>
 

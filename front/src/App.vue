@@ -10,6 +10,7 @@
           <el-menu class="el-menu-vertical-demo" :router="true" :default-openeds="['content']"
             :default-active="$router.currentRoute.value.path">
             <el-sub-menu v-for="(v, k) in menuScheme" :index="v.title" :key="k">
+
               <template #title><i :class="v.icon"></i><span>{{ loc(v.title) }}</span></template>
               <el-menu-item v-for="item in v.data" :index="'/' + item" :key="item">{{ loc(item) }}</el-menu-item>
             </el-sub-menu>
@@ -24,13 +25,16 @@
               </el-menu-item>
               <div class="flex-grow" />
               <el-sub-menu index="workspace" class="hidden-md-and-up">
+
                 <template #title>{{ loc('workspace') }}</template>
                 <el-menu-item-group v-for="(v, k) in menuScheme" :index="v.title" :key="k">
+
                   <template #title><i :class="v.icon"></i><span>{{ loc(v.title) }}</span></template>
                   <el-menu-item v-for="item in v.data" :index="'/' + item" :key="item">{{ loc(item) }}</el-menu-item>
                 </el-menu-item-group>
               </el-sub-menu>
               <el-sub-menu index="userspace">
+
                 <template #title> <el-icon><el-icon-avatar /></el-icon>
                   {{ state?.user?.firstname }}
                 </template>
@@ -57,7 +61,6 @@
 
         <Login />
 
-        <!-- <el-divider><i class="el-icon-star-on"></i></el-divider> -->
         <el-divider>{{ loc("or") }}</el-divider>
         <h3>{{ loc("userreg") }}</h3>
 
@@ -94,7 +97,7 @@ const menuScheme = [
   {
     title: 'content',
     icon: 'el-icon-message',
-    data: ['home', 'facts', 'persons', 'works', 'books', 'genres', 'acts', 'refs'],
+    data: ['home', 'facts', 'persons', 'works', 'books', 'genres', 'acts', 'refs', 'relations'],
   },
   {
     title: 'admin',
@@ -141,6 +144,11 @@ const loc = store.loc;
 <style>
 .flex-grow {
   flex-grow: 1;
+}
+
+#app {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 #app,
@@ -196,7 +204,7 @@ textarea,
   border-radius: 4px;
 }
 
-.bg-purple-dark {
+/* .bg-purple-dark {
   background: #99a9bf;
 }
 
@@ -206,24 +214,37 @@ textarea,
 
 .bg-purple-light {
   background: #e5e9f2;
-}
+} */
 
+/* 
 .grid-content {
   border-radius: 4px;
-  /* min-height: 36px; */
+  min-height: 36px;
   min-height: 2rem;
   line-height: 2rem;
-  /* text-align: center; */
+  text-align: center;
   padding-left: 10px
 }
 
 .row-bg {
   padding: 10px 0;
   background-color: #f9fafc;
-}
+} */
 
 .el-icon {
   vertical-align: middle;
   margin-bottom: 3px;
+}
+
+/* .el-select__selection {
+  min-width: 5rem !important;
+} */
+
+.wide-select {
+  min-width: 12.5rem;
+}
+
+.tools {
+  margin-top: -10px !important;
 }
 </style>

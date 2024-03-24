@@ -124,15 +124,14 @@ const databaseScheme = {
 
   reltypes: `
     id SERIAL PRIMARY KEY,
-    title TEXT NOT NULL,
     name1 TEXT NOT NULL,
     name2 TEXT NOT NULL,
     bilateral BOOLEAN NOT NULL DEFAULT FALSE`,
 
   relships: `
-    persons INTEGER[] NOT NULL,
-    main INTEGER,
-    rel_id INTEGER NOT NULL`,
+    rel_id INTEGER NOT NULL,
+    member1 INTEGER NOT NULL,
+    member2 INTEGER NOT NULL`,
 
 };
 
@@ -295,23 +294,24 @@ export default {
       const meta = {};
       // eslint-disable-next-line no-restricted-syntax
       for (const key of Object.keys(data)) {
+        const dataType = dbData[key].data_type.toLowerCase();
         if (key in dbData) {
           if (dbData[key].column_default && dbData[key].column_default.includes('nextval')) {
             meta[key] = data[key];
-          } else if (dbData[key].data_type === 'INTEGER') {
+          } else if (dataType === 'integer') {
             // console.log(`${key}${data[key]}`, typeof data[key]);
-            record[key] = data[key] === null || (typeof data[key] === 'string' && !data[key]) ? 'null' : parseInt(data[key], 10);
-          } else if (dbData[key].data_type === 'ARRAY') {
+            record[key] = data[key] === null || (typeof data[key] === 'string' && !data[key]) ? 'null' : Number(data[key]);
+          } else if (dataType === 'array') {
             if (data[key] && data[key].length) {
               record[key] = `'{${data[key].join(',')}}'`;
             } else {
               record[key] = 'null';
             }
-          } else if (dbData[key].data_type === 'boolean') {
+          } else if (dataType === 'boolean') {
             record[key] = Boolean(data[key]);
           } else {
             // string
-            if (data[key] && dbData[key].data_type !== 'json') {
+            if (data?.[key] && dataType !== 'json') {
               data[key] = data[key].trim();
             }
             // check for well-formed string && prevent SQLi
@@ -343,7 +343,7 @@ export default {
           ', '
         )}) RETURNING id`;
       }
-
+      // console.log(query);
       if (query) {
         try {
           await pool.query('BEGIN');
@@ -373,7 +373,20 @@ export default {
       return { error: 'bad query' };
     }
   },
-
+  async saveRelation(user, relation) {
+    const query = 'INSERT INTO relships (rel_id, member1, member2) VALUES($1, $2, $3)';
+    const result = await pool.query(query, [relation.rel_id, relation.member1, relation.member2]);
+    return result.rowCount;
+  },
+  async deleteRelation(user, relation) {
+    const query = 'DELETE FROM relships WHERE rel_id = $1 AND member1 = $2 AND member2 = $3';
+    const result = await pool.query(query, [relation.rel_id, relation.member1, relation.member2]);
+    return result.rowCount;
+  },
+  async getRelationsForPerson(id) {
+    const res = await pool.query('SELECT * FROM relships WHERE member1 = $1 OR member2 = $1', [id]);
+    return res.rows;
+  },
   async getUserDataByID(id) {
     const res = await pool.query(`${selectables.users}WHERE id = $1 AND activated = TRUE`, [id]);
     return res.rows[0];

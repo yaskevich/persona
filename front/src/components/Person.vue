@@ -30,12 +30,24 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <el-tooltip placement="top-end" v-for="(item) in relships">
-          <template #content>
-            {{ getRelation(data.reltypes[item.rel_id], data.persons?.[item.member1],
+        <el-button-group style="margin-left:10px" v-for="(item, index) in relships">
+          <el-tooltip placement="top-end">
+            <template #content>
+              {{ getRelation(data.reltypes[item.rel_id], data.persons?.[item.member1],
     data.persons?.[item.member2]) }}</template>
-          <el-button icon="el-icon-share" link type="primary" style="margin-left: 5px;"></el-button>
-        </el-tooltip>
+            <el-button type="primary" link icon="el-icon-share" />
+          </el-tooltip>
+          <el-popconfirm :title="store.loc('confirmdel')" :confirmButtonText="store.loc('yes')"
+            :cancelButtonText="store.loc('no')" @confirm="removeRelation(item, index)">
+            <template #reference>
+              <el-button type="danger" link icon="el-icon-delete" />
+            </template>
+          </el-popconfirm>
+        </el-button-group>
+        <!-- <el-button icon="el-icon-share" link type="primary" style="margin-left: 5px;"></el-button> -->
+        <!-- <el-button type="danger" v-if="relships.length" plain>
+            {{ store.loc('remove') }}<el-icon class="el-icon--right"><el-icon-arrow-down /></el-icon>
+          </el-button> -->
       </el-col>
       <el-col>
         <el-tooltip placement="top-end" v-if="newRel?.rel_id">
@@ -120,6 +132,14 @@ const selectPerson = () => {
   }
 };
 
+const removeRelation = async (relship: IRelship, num: number) => {
+  const result = await store.deleteRelation(relship);
+  console.log('RM', relship, num, result?.data);
+  if (result?.data === 1) {
+    relships.value.splice(num, 1);
+  }
+};
+
 const swapMembers = () => {
   isFlipped.value = !isFlipped.value;
   if (newRel?.value) {
@@ -142,11 +162,16 @@ const clearRelation = () => {
   (newRel.value as any) = {} as IRelship;
 };
 
-const addRelation = () => {
+const addRelation = async () => {
   // console.log(newRel.value);
   if (newRel?.value) {
     relships.value.push(newRel.value);
-    clearRelation();
+    const result = await store.postData('relations', newRel.value);
+    if (result?.data === 1) {
+      clearRelation();
+    } else {
+      console.log("error", result);
+    }
   }
 };
 
@@ -155,6 +180,9 @@ onBeforeMount(async () => {
 
   if (id) {
     person.value = data.persons[id];
+
+    const result = await store.getData('relations', id);
+    relships.value = result.data;
   }
 
   persons.value = Object.values(data.persons).map((x: IPerson) => ({

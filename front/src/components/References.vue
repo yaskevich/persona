@@ -41,7 +41,7 @@
 
         <!-- <el-space> -->
         <!-- <el-input v-model="bib.text"><template #prepend>From</template></el-input>
-                <el-input v-model="bib.text"><template #prepend>To</template></el-input> -->
+<el-input v-model="bib.text"><template #prepend>To</template></el-input> -->
         <!-- <el-input v-model="bib.text"></el-input>
                 <el-button type="primary" icon="el-icon-plus"></el-button> -->
         <!-- </el-space> -->
@@ -63,7 +63,7 @@
       <el-input v-model="bib.content" type="textarea"></el-input>
       <el-row type="flex" justify="center">
         <el-button size="small" @click="fixQuotes" style="margin-top:2px;">{{
-          loc('quotmarks') }}</el-button>
+    loc('quotmarks') }}</el-button>
       </el-row>
     </div>
 
@@ -71,7 +71,7 @@
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false;">{{ loc('cancel') }}</el-button>
         <el-button type="primary" v-if="bib.title || pages.length" @click="handleClose">{{ loc('save')
-        }}</el-button>
+          }}</el-button>
       </span>
     </template>
 
@@ -82,26 +82,32 @@
   </el-row>
 
   <el-tree ref="treeRef" :data="refs" node-key="id" :props="{ label: 'title', disabled: 'children' }" default-expand-all
-    :expand-on-click-node="false" style="max-width:500px;" :empty-text="loc('loading')" :show-checkbox="isEmbedded"
-    :check-on-click-node="true" :check-strictly="true" :render-content="renderNode">
-    <!-- <template #default="{ node, data }">
-               <span class="custom-tree-node">
-                 <span v-html="( node?.data?.pages?.length ? loc('pdot') + ' ' + node?.data?.pages?.join(', ') + ' • ' : '' ) + node.label + ( node?.data?.content ? '&nbsp;<i class=el-icon-s-comment></i>' : '' )"></span>
-                 <span v-if="!isEmbedded">
-                   <el-dropdown >
-                     <i class="el-icon-s-tools"></i>
-                     <template #dropdown>
-                       <el-dropdown-menu>
-                         <el-dropdown-item @click="buildDialog(node, data, 1)">{{loc('addsibling')}}</el-dropdown-item>
-                         <el-dropdown-item v-if="data.reftype != 2" @click="buildDialog(node, data, 2)">{{loc('addchild')}}</el-dropdown-item>
-                         <el-dropdown-item @click="buildDialog(node, data)">{{loc('edit')}}</el-dropdown-item>
-                         <el-dropdown-item v-if="!data?.children?.length" @click="removeItem(node, data)"><strong>{{loc('delit')}}</strong></el-dropdown-item>
-                       </el-dropdown-menu>
-                     </template>
-                   </el-dropdown>
-                 </span>
-               </span>
-             </template> -->
+    :expand-on-click-node="false" :empty-text="loc('loading')" :show-checkbox="isEmbedded" :highlight-current="true"
+    :check-on-click-node="true" :check-strictly="true">
+    <template #default="{ node, data }">
+      <span class="custom-tree-node">
+        <el-dropdown v-if="!isEmbedded">
+          <span>
+            {{ getNodeLabel(node) }}
+            <el-icon v-if="node?.data?.content"><el-icon-chat-dot-square /></el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="buildDialog(node, data, 1)">{{ loc('addsibling') }}</el-dropdown-item>
+              <el-dropdown-item v-if="data.reftype != 2" @click="buildDialog(node, data, 2)">{{ loc('addchild')
+                }}</el-dropdown-item>
+              <el-dropdown-item @click="buildDialog(node, data)">{{ loc('edit') }}</el-dropdown-item>
+              <el-dropdown-item v-if="!data?.children?.length" @click="removeNode(node, data)"><strong>{{ loc('delit')
+                  }}</strong></el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <el-text v-else>
+          {{ getNodeLabel(node) }}
+          <el-icon v-if="node?.data?.content"><el-icon-chat-dot-square /></el-icon>
+        </el-text>
+      </span>
+    </template>
   </el-tree>
 </template>
 
@@ -113,8 +119,7 @@ import store from '../store';
 import { ElTree, ElDropdown, ElDropdownMenu, ElDropdownItem, ElMessage, ElTooltip } from 'element-plus';
 import type Node from 'element-plus/es/components/tree/src/model/node'
 
-
-export interface Props {
+interface Props {
   isEmbedded?: boolean,
   checks?: Array<number>,
 }
@@ -167,7 +172,19 @@ const buildDialog = (node: Node, data: ITree, actionType = 0) => {
   });
 };
 
-const fixQuotes = () => bib.content = store.curlify(bib.content);
+const getNodeLabel = (node: Node) => {
+  let result = '';
+  if (node?.data?.pages?.length) {
+    result += loc('pdot') + ' ' + node?.data?.pages?.join(', ') + (node.label && ' • ');
+  }
+  const prefix = (result.length + 1) || 0;
+  // console.log(prefix, node.label);
+  const suffix = node.data.content && 3;
+  const len = prefix + node.label.length + suffix;
+  const divWidth = (treeRef.value as any)?.$el.clientWidth / 9;
+  result += len > divWidth ? node.label.slice(0, divWidth - prefix - suffix).trim() + '...' : node.label
+  return result;
+}
 
 const handleClose = async () => {
   dialogVisible.value = false;
@@ -183,7 +200,7 @@ const handleClose = async () => {
     bib.content = '';
     bib.pages = [];
   } else {
-    bib.pages = pages.value;
+    bib.pages = pages.value.sort();
   }
 
   const datum = toRaw(bib) as keyable;
@@ -297,7 +314,7 @@ const renderNode = (h: Function, x: any) => {
 
   let maxLabelLength = 50 - prefixLength;
 
-  const labelArray = x.data.title.length > maxLabelLength ? [label + x.data.title.slice(0, maxLabelLength), h(ElTooltip, { content: x.data.title }, () => [h('i', { class: 'el-icon-more indent', style: "color:#F56C6C" })])] : [label + x.data.title];
+  const labelArray = x.data.title.length > maxLabelLength ? [label + x.data.title, h(ElTooltip, { content: x.data.title }, () => [h('i', { class: 'el-icon-more indent', style: "color:#F56C6C" })])] : [label + x.data.title];
 
   labelStack.push(...labelArray);
 
@@ -335,7 +352,7 @@ const renderNode = (h: Function, x: any) => {
     // }
 
     const dropdown = h(ElDropdown, null, {
-      default: () => [h('i', { class: 'el-icon-s-tools' })],
+      default: () => [h('i', { class: 'el-icon-s-tools' }, 'Tools')],
       dropdown: () => [h(ElDropdownMenu, () => dropitems)],
     });
     spans.push(dropdown);
@@ -348,33 +365,24 @@ const renderNode = (h: Function, x: any) => {
   return h('span', { class: 'custom-tree-node' }, spans);
 };
 
-const onDialogOpened = () => {
-  titleInputRef.value?.focus();
-};
-
-const getCheckedItems = () => {
-  return treeRef.value!.getCheckedKeys();
-};
-
-const setCheckedItems = (keys: Array<number>) => {
-  return treeRef.value!.setCheckedKeys(keys);
-};
+const fixQuotes = () => bib.content = store.curlify(bib.content);
+const onDialogOpened = () => titleInputRef.value?.focus();
+const getCheckedItems = () => treeRef.value!.getCheckedKeys();
+const setCheckedItems = (keys: Array<number>) => treeRef.value!.setCheckedKeys(keys);
 
 defineExpose({ getCheckedItems, setCheckedItems });
-
-
 
 </script>
 
 <style>
-.custom-tree-node {
+/* .custom-tree-node {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 14px;
   padding-right: 8px;
-}
+} */
 
 .el-tag+.el-tag {
   margin-left: 10px;

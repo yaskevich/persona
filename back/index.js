@@ -72,7 +72,7 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
   //   });
 
   app.get('/api/user/info', auth, async (req, res) => {
-    const settings = await db.getData('settings', 1);
+    const settings = await db.getData('settings', { id: 1 });
     const stats = await db.getStats();
     res.json(Object.assign(req.user, {
       settings: settings?.[0], stats, commit: process.env.COMMIT, server: __package.version,
@@ -85,7 +85,7 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
   });
 
   app.post('/api/user/add', auth, async (req, res) => {
-    const result = await db.createUser(req.body, true);
+    const result = await db.createUser(req.body, req.user.privs === 1);
     res.json(result);
   });
 
@@ -94,12 +94,26 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
     res.json(result);
   });
 
+  app.post('/api/relation', auth, async (req, res) => {
+    res.json(await db.saveRelation(req.user, req.body));
+  });
+
+  app.delete('/api/relation', auth, async (req, res) => {
+    res.json(await db.removeRelation(req.user, req.body));
+  });
+
+  app.get('/api/relations', auth, async (req, res) => {
+    res.json(await db.getRelationsForPerson(req.query.id));
+  });
+
   app.post('/api/:table', auth, async (req, res) => {
     console.log('POST params', req.params, 'query', req.query);
     if (req.params.table === 'users' && (!(req.user.id === req.body.id || req.user.privs === 1))) {
       return res.json({ error: 'access denied' });
     }
-    return res.json(await db.setData(req.body, req.params.table, req.user));
+    return res.json(req.params.table === 'relations'
+      ? await db.saveRelation(req.user, req.body)
+      : await db.setData(req.body, req.params.table, req.user));
   });
 
   app.delete('/api/:table/:id', auth, async (req, res) => {
@@ -107,9 +121,14 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
     res.json(await db.deleteData(req.params.table, req.params.id, req.user));
   });
 
+  app.delete('/api/relations', auth, async (req, res) => {
+    console.log('DELETE relations query', req.query);
+    res.json(await db.deleteRelation(req.user, req.query));
+  });
+
   app.get('/api/:table', auth, async (req, res) => {
     console.log('GET params', req.params, 'query', req.query);
-    res.json(await db.getData(req.params.table, req.query.id, req.query.off, req.query.lim,));
+    res.json(await db.getData(req.params.table, req.query));
   });
 
   app.listen(port);

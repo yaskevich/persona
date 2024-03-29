@@ -228,7 +228,7 @@ for (const table of Object.keys(dbStructure)) {
 // console.log(dbStructure);
 
 export default {
-  async deleteData(table, id, user) {
+  async deleteData(user, table, id) {
     const idInt = parseInt(id, 10);
     if (table in dbStructure && idInt) {
       try {
@@ -284,7 +284,7 @@ export default {
     }
     return { error: 'bad query' };
   },
-  async setData(datum, table, user) {
+  async setData(user, datum, table) {
     const data = datum;
     // console.log(data);
     if (table in dbStructure) {

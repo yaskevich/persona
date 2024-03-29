@@ -20,8 +20,6 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 (async () => {
   const app = express();
   const port = process.env.PORT || 8080;
-  const JWTStrategy = passportJWT.Strategy;
-  const ExtractJWT = passportJWT.ExtractJwt;
 
   const createToken = (user) => jwt.sign({
     iss: 'persona',
@@ -30,17 +28,16 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
     exp: new Date().setDate(new Date().getDate() + 1)
   }, process.env.JWT_SECRET);
 
-  const strategy = new JWTStrategy(
-    {
-      jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.JWT_SECRET
-    },
-    (jwtPayload, done) => db.getUserDataByID(jwtPayload.sub)
-      .then((user) => done(null, user))
-      .catch((err) => done(err))
-  );
+  const secretOrKey = process.env.JWT_SECRET;
+  if (!secretOrKey) {
+    console.log('Application secret cannot be empty! Exiting...');
+    process.exit();
+  }
 
-  passport.use(strategy);
+  const jwtFromRequest = passportJWT.ExtractJwt.fromAuthHeaderAsBearerToken();
+
+  passport.use(new passportJWT.Strategy({ jwtFromRequest, secretOrKey }, async (token, next) => next(null, (await db.getUserDataByID(token.sub)) || false)));
+
   const auth = passport.authenticate('jwt', { session: false });
   app.use(compression());
   app.set('trust proxy', 1);
@@ -55,21 +52,13 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
     const userData = await db.getUserData(req.body.email, req.body.password);
     if (userData && Object.keys(userData).length && !userData?.error) {
       console.log(req.body.email, '<SUCCESS>');
-      const token = createToken(userData);
-      userData.token = token;
+      userData.token = createToken(userData);
       res.json(userData);
     } else {
       console.log(`login attempt as [${req.body.email}]•[${req.body.password}]►${userData.error}◄`);
       res.json(userData);
     }
   });
-
-  //   app.get('/api/user/logout', auth, async (req, res) => {
-  // console.log('logging out');
-  // You can add 'issue time' to token and maintain 'last logout time' for each user on the server.
-  // When you check token validity, also check 'issue time' be after 'last logout time'.
-  // res.redirect('/login');
-  //   });
 
   app.get('/api/user/info', auth, async (req, res) => {
     const settings = await db.getData('settings', { id: 1 });
@@ -80,18 +69,15 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
   });
 
   app.post('/api/user/reg', async (req, res) => {
-    const result = await db.createUser({ privs: 5, ...req.body }, false);
-    res.json(result);
+    res.json(await db.createUser({ privs: 5, ...req.body }, false));
   });
 
   app.post('/api/user/add', auth, async (req, res) => {
-    const result = await db.createUser(req.body, req.user.privs === 1);
-    res.json(result);
+    res.json(await db.createUser(req.body, req.user.privs === 1));
   });
 
   app.post('/api/user/reset', auth, async (req, res) => {
-    const result = await db.resetPassword(req.user, req.body.id);
-    res.json(result);
+    res.json(await db.resetPassword(req.user, req.body.id));
   });
 
   app.post('/api/relation', auth, async (req, res) => {
@@ -113,12 +99,12 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
     }
     return res.json(req.params.table === 'relations'
       ? await db.saveRelation(req.user, req.body)
-      : await db.setData(req.body, req.params.table, req.user));
+      : await db.setData(req.user, req.body, req.params.table));
   });
 
   app.delete('/api/:table/:id', auth, async (req, res) => {
     console.log('DELETE params', req.params, 'query', req.query);
-    res.json(await db.deleteData(req.params.table, req.params.id, req.user));
+    res.json(await db.deleteData(req.user, req.params.table, req.params.id));
   });
 
   app.delete('/api/relations', auth, async (req, res) => {

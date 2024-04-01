@@ -1,7 +1,7 @@
 <template>
-    <MainTitle :title="store.loc('relations')" :callback="confirm"></MainTitle>
+    <MainTitle :title="store.loc('relations')" :callback="() => $router.push('/relation/')"></MainTitle>
     <el-space direction="vertical" alignment="flex-start">
-        <el-button style="margin: 5px" :type="value.bilateral ? 'primary' : 'info'" v-for="(value, key) in rels"
+        <el-button :color="value?.color" style="margin: 5px" v-for="(value, key) in rels"
             @click="$router.push('/relation/' + value.id)">
             <!-- <el-icon style="margin-left: 3px; margin-right: 3px;">
                 <el-icon-switch v-if="value.bilateral" />
@@ -13,20 +13,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onBeforeMount } from 'vue';
-import type { FormInstance, FormRules } from 'element-plus';
+
+import { ref, onBeforeMount } from 'vue';
 import store from '../store';
 import MainTitle from './MainTitle.vue';
 
 const rels = ref<Array<IRelation>>();
 
-const confirm = () => {
-    console.log("ok");
-}
-
 onBeforeMount(async () => {
     const { data } = await store.getData('reltypes');
-    console.log(data);
+    // console.log(data);
     rels.value = data;
 });
 

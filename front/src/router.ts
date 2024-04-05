@@ -2,6 +2,17 @@ import { createWebHistory, createRouter } from 'vue-router';
 
 const routes = [
   {
+    path: '/network',
+    name: 'Network',
+    component: () => import('./components/Network.vue'),
+  },
+  {
+    path: '/relation/:id?',
+    // component: Person,
+    name: 'Relation',
+    component: () => import('./components/Relation.vue'),
+  },
+  {
     path: '/relations',
     name: 'RelationList',
     component: () => import('./components/RelationList.vue'),

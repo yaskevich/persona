@@ -132,7 +132,12 @@
       "lang": ["Language", "Язык", "Мова"],
       "resetpass": ["Reset password", "Сбросить пароль", "Скінуць пароль"],
       "workspace": ["Workspace", "Навигация", "Навігацыя"],
-      "relations": ["Relations", "Отношения", "Адносіны"],
-      "flip": ["Press to flip the relations", "Нажмите, чтобы поменять местами", "Націсніце, каб памяняць месцамі"]
+      "relations": ["Relations", "Связи", "Сувязі"],
+      "flip": ["Press to flip the relations", "Нажмите, чтобы поменять местами", "Націсніце, каб памяняць месцамі"],
+      "network": ["Network", "Сеть", "Сетка"],
+      "role": ["Role", "Роль", "Роля"],
+      "direction": ["Direction", "Направление", "Накірунак"],
+      "color": ["Color", "Цвет", "Колер"],
+      "relation": ["Relation", "Связь", "Сувязь"]
     }
 }

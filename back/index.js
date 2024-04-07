@@ -88,6 +88,10 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
     res.json(await db.removeRelation(req.user, req.body));
   });
 
+  app.get('/api/relation', auth, async (req, res) => {
+    res.json(await db.getRelation(req.query.id));
+  });
+
   app.get('/api/relations', auth, async (req, res) => {
     res.json(await db.getRelationsForPerson(req.query.id));
   });
@@ -109,7 +113,7 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 
   app.delete('/api/relations', auth, async (req, res) => {
     console.log('DELETE relations query', req.query);
-    res.json(await db.deleteRelation(req.user, req.query));
+    res.json(await db.deleteConnection(req.user, req.query));
   });
 
   app.get('/api/:table', auth, async (req, res) => {

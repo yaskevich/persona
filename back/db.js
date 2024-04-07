@@ -131,7 +131,8 @@ const databaseScheme = {
   relships: `
     rel_id INTEGER NOT NULL,
     member1 INTEGER NOT NULL,
-    member2 INTEGER NOT NULL`,
+    member2 INTEGER NOT NULL,
+    color TEXT NOT NULL DEFAULT '#B8B8B8'`,
 
 };
 
@@ -278,7 +279,7 @@ export default {
       // console.log(dbStructure[table]);
       const params = addon
         ? [`${selectables[table]} WHERE ${addon}`] // [selectables[table] + (["settings", "acts"].includes(table) ? "": "ORDER BY id DESC")];
-        : [`${selectables[table]} ORDER BY id DESC OFFSET ${off} LIMIT ${lim}`];
+        : [`${selectables[table]} ORDER BY ${dbStructure[table]?.id ? 'id' : Object.keys(dbStructure[table])?.[0]} DESC OFFSET ${off} LIMIT ${lim}`];
       const result = await pool.query(...params);
       return result.rows;
     }
@@ -373,12 +374,17 @@ export default {
       return { error: 'bad query' };
     }
   },
+  async getRelation(id) {
+    const query = 'SELECT * FROM relships WHERE rel_id = $1';
+    const result = await pool.query(query, [id]);
+    return result.rowCount;
+  },
   async saveRelation(user, relation) {
     const query = 'INSERT INTO relships (rel_id, member1, member2) VALUES($1, $2, $3)';
     const result = await pool.query(query, [relation.rel_id, relation.member1, relation.member2]);
     return result.rowCount;
   },
-  async deleteRelation(user, relation) {
+  async deleteConnection(user, relation) {
     const query = 'DELETE FROM relships WHERE rel_id = $1 AND member1 = $2 AND member2 = $3';
     const result = await pool.query(query, [relation.rel_id, relation.member1, relation.member2]);
     return result.rowCount;

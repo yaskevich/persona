@@ -100,8 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
-import { onBeforeMount } from 'vue';
+import { onBeforeMount, ref, reactive } from 'vue';
 import store from '../store';
 import { useRoute } from 'vue-router';
 import MainTitle from './MainTitle.vue';

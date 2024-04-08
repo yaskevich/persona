@@ -141,6 +141,21 @@ const deleteById = async (table: string, id: string | number): Promise<any> => {
   console.log('No token. Fail.');
 };
 
+const deleteRelation = async (data: IRelship): Promise<any> => {
+  if (state.token) {
+    try {
+      const config = { headers: { Authorization: 'Bearer ' + state.token }, params: { ...data } };
+      // if(id) { config["params"] = { id: id }; }
+      const response = await axios.delete('/api/relations', config);
+      console.log(response.data);
+      return response;
+    } catch (error) {
+      console.log('Cannot delete', error);
+      return error;
+    }
+  }
+  console.log('No token. Fail.');
+};
 const getData = async (table: string, prop?: string | number | Object, pager?: Array<number>): Promise<any> => {
   if (state.token) {
     try {
@@ -231,7 +246,12 @@ const dateDropTimeZone = (x: Date) => {
 const getLabel = (x: IPerson | IUser, isNoted = false) =>
   x?.firstname + ' ' + x?.lastname + (isNoted && x?.note ? ' ⸱ ' + x.note : '');
 
+const renderRelations = (datum: IRelation, flipStatus = false) =>
+  `${flipStatus ? datum.name2 : datum.name1} ${datum.bilateral ? '⟺' : '⟹'} ${flipStatus ? datum.name1 : datum.name2}`;
+
 export default {
+  deleteRelation,
+  renderRelations,
   dateDropTimeZone,
   nest,
   classify,

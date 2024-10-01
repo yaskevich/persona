@@ -1,8 +1,4 @@
 <template>
-  <metainfo>
-    <template v-slot:title="{ content }">{{ content }}</template>
-  </metainfo>
-
   <div id="main" v-if="dataReady">
     <div v-if="loggedIn">
       <el-container>
@@ -10,7 +6,6 @@
           <el-menu class="el-menu-vertical-demo" :router="true" :default-openeds="['content']"
             :default-active="$router.currentRoute.value.path">
             <el-sub-menu v-for="(v, k) in menuScheme" :index="v.title" :key="k">
-
               <template #title><i :class="v.icon"></i><span>{{ loc(v.title) }}</span></template>
               <el-menu-item v-for="item in v.data" :index="'/' + item" :key="item">{{ loc(item) }}</el-menu-item>
             </el-sub-menu>
@@ -81,16 +76,18 @@ import router from './router';
 import store from './store';
 import Login from './components/Login.vue';
 import Profile from './components/Profile.vue';
-import { useMeta } from 'vue-meta';
+import { useTitle } from 'vue-page-title';
 import 'element-plus/theme-chalk/display.css';
 
 const dataReady = ref(false);
 
-useMeta(computed(() => ({ title: store.state?.user?.settings?.title || '∙' })));
+// useMeta(computed(() => ({ title: store.state?.user?.settings?.title || '∙' })));
+useTitle(computed(() => (store.state?.user?.settings?.title || '∙')));
 // const windowWidth = ref(window.innerWidth);
 // const onWidthChange = () => windowWidth.value = window.innerWidth;
 // onMounted(() => window.addEventListener('resize', onWidthChange));
 // onUnmounted(() => window.removeEventListener('resize', onWidthChange));
+console.log("here");
 
 
 const menuScheme = [

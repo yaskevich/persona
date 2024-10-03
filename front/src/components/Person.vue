@@ -1,5 +1,5 @@
 <template>
-  <MainTitle :title="store.loc('person') + ' ' + $route.params.id" :callback="confirm" :text="store.loc('save')">
+  <MainTitle :title="store.loc('person') + ' ' + vuerouter.params.id" :callback="confirm" :text="store.loc('save')">
   </MainTitle>
 
   <el-form label-width="120px" v-model="person" v-if="isLoaded">
@@ -25,8 +25,8 @@
             {{ store.loc('add') }}<el-icon class="el-icon--right"><el-icon-arrow-down /></el-icon>
           </el-button>
           <template #dropdown>
-            <el-dropdown-menu v-for="rel in data.reltypes">
-              <el-dropdown-item :command="rel.id">{{ rel?.name1 }}</el-dropdown-item>
+            <el-dropdown-menu>
+              <el-dropdown-item v-for="rel in data.reltypes" :command="rel.id">{{ rel?.name1 }}</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -34,7 +34,7 @@
           <el-tooltip placement="top-end">
             <template #content>
               {{ getRelation(data.reltypes[item.rel_id], data.persons?.[item.member1],
-    data.persons?.[item.member2]) }}</template>
+                data.persons?.[item.member2]) }}</template>
             <el-button type="primary" link icon="el-icon-share" />
           </el-tooltip>
           <el-popconfirm :title="store.loc('confirmdel')" :confirmButtonText="store.loc('yes')"
@@ -54,7 +54,7 @@
           <template #content>{{ store.loc('flip') }}</template>
           <el-button :plain="isFlipped" icon="el-icon-switchfilled" style="margin-top: 1rem;margin-bottom: 1rem;"
             type="success" @click="swapMembers"> {{
-    store.renderRelations(data.reltypes[newRel.rel_id], isFlipped) }}
+              store.renderRelations(data.reltypes[newRel.rel_id], isFlipped) }}
           </el-button>
         </el-tooltip>
 
@@ -63,10 +63,10 @@
             @change="selectPerson" />
           <el-tag effect="plain" type="info" v-if="relatedPerson">
             {{ data.persons[relatedPerson].firstname }} {{ data.persons[relatedPerson].lastname }} &ndash; {{
-    data.reltypes[newRel?.rel_id]?.[isFlipped ? 'name1' : 'name2'] }}</el-tag> <el-tag effect="plain"
+              data.reltypes[newRel?.rel_id]?.[isFlipped ? 'name1' : 'name2'] }}</el-tag> <el-tag effect="plain"
             type="info"> {{ person.firstname }}
             {{ person.lastname }} &ndash; {{
-    data.reltypes[newRel?.rel_id]?.[isFlipped ? 'name2' : 'name1'] }}
+              data.reltypes[newRel?.rel_id]?.[isFlipped ? 'name2' : 'name1'] }}
           </el-tag>
         </template>
       </el-col>

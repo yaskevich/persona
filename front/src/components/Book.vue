@@ -1,5 +1,5 @@
 <template>
-  <MainTitle :title="loc('book') + ' ' + $route.params.id" :callback="confirm" :text="loc(form.id ? 'save' : 'add')">
+  <MainTitle :title="loc('book') + ' ' + vuerouter.params.id" :callback="confirm" :text="loc(form.id ? 'save' : 'add')">
   </MainTitle>
 
   <el-form :model="form" ref="formRef" label-width="100px" :rules="rules">
@@ -12,7 +12,8 @@
     </el-form-item>
 
     <el-form-item :label="loc('works')">
-      <el-select-v2 v-model="form.works" multiple filterable remote reserve-keyword :placeholder="loc('work')" :options="worksAll" :props="{label:'title', value: 'id'}">
+      <el-select-v2 v-model="form.works" multiple filterable remote reserve-keyword :placeholder="loc('work')"
+        :options="worksAll" :props="{ label: 'title', value: 'id' }">
         <!-- <el-option v-for="item in worksAll" :key="item.id" :label="item.title" :value="item.id"> -->
         <!-- </el-option> -->
       </el-select-v2>
@@ -29,7 +30,7 @@
     <el-form-item :label="store.loc('facts')" v-if="relFacts?.length">
       <el-space wrap>
         <el-button size="small" type="warning" v-for="(value, key) in relFacts" :key="key"
-          @click="$router.push('/fact/' + value.id)">{{ value.datedesc }}</el-button>
+          @click="router.push('/fact/' + value.id)">{{ value.datedesc }}</el-button>
       </el-space>
     </el-form-item>
 
@@ -131,7 +132,7 @@ const deleteBook = async () => {
 };
 
 const confirm = () => {
-  formRef.value?.validate(async (valid: boolean) => {
+  formRef.value?.validate(async (valid) => {
     if (valid) {
       // console.log('form', form);
       const result = await store.postData('books', form.value);
@@ -141,8 +142,6 @@ const confirm = () => {
       } else {
         console.log('error!');
       }
-    } else {
-      return false;
     }
   });
 };

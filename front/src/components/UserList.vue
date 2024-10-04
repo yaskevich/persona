@@ -36,7 +36,7 @@
         <el-icon v-else><el-icon-female /></el-icon> -->
       <el-tooltip class="box-item" effect="dark" :content="store.getHumanReadablePrivs(value.privs)" placement="right">
         <el-button :disabled="store!.state!.user!.privs > 1 && value.id !== store!.state!.user!.id"
-          :plain="store.state.user?.id !== value.id" @click="$router.push('/user/' + value.id)"
+          :plain="store.state.user?.id !== value.id" @click="router.push('/user/' + value.id)"
           :type="getUserType(value)">{{ store.getLabel(value) }}</el-button>
       </el-tooltip>
       <!-- </div> -->
@@ -65,6 +65,7 @@ import { ref, reactive, onBeforeMount } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import store from '../store';
 import MainTitle from './MainTitle.vue';
+import router from '../router';
 
 const formRef = ref<FormInstance>();
 const form = reactive({ firstname: '', lastname: '', email: '', sex: 2, privs: 5 } as IUser);
@@ -143,7 +144,6 @@ const confirm = () => {
       formRef.value?.resetFields();
     } else {
       console.log('form not valid');
-      return false;
     }
   });
 };

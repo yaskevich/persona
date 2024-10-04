@@ -1,5 +1,5 @@
 <template>
-  <MainTitle :title="loc('fact') + ' ' + $route.params.id" :callback="confirm" :text="loc(fact.id ? 'save' : 'add')">
+  <MainTitle :title="loc('fact') + ' ' + vuerouter.params.id" :callback="confirm" :text="loc(fact.id ? 'save' : 'add')">
   </MainTitle>
   <el-form v-show="isLoaded" label-width="120px" ref="formRef" :model="fact" :rules="rules">
 

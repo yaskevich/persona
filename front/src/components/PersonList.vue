@@ -47,7 +47,7 @@
       <!-- <el-tooltip class="box-item" effect="dark" :content="value.firstname + ' ' + value.patroname" placement="top-start"> -->
       <el-space>
         <el-button plain :icon="value.sex === 1 ? 'el-icon-male' : 'el-icon-female'"
-          @click="$router.push('/person/' + value.id)">{{ value.firstname }}
+          @click="router.push('/person/' + value.id)">{{ value.firstname }}
           {{ value.patroname }} {{ value.lastname }}</el-button>
         <!-- </el-tooltip> -->
         <el-tag v-if="value?.note" effect="plain" size="large">{{ value.note }}</el-tag>
@@ -63,6 +63,7 @@ import { ElForm } from 'element-plus';
 import { ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
 import store from '../store';
 import MainTitle from './MainTitle.vue';
+import router from '../router';
 
 const isLoaded = ref(false);
 const formRef = ref<ComponentPublicInstance<typeof ElForm>>();

@@ -1,5 +1,5 @@
 <template>
-    <MainTitle :title="store.loc('genre') + ' ' + $route.params.id" :callback="confirm"
+    <MainTitle :title="store.loc('genre') + ' ' + vuerouter.params.id" :callback="confirm"
         :text="store.loc(form.id ? 'save' : 'add')">
     </MainTitle>
 
@@ -11,7 +11,7 @@
         <el-form-item :label="store.loc('works')" v-if="relWorks?.length">
             <el-space wrap>
                 <el-button size="small" type="warning" v-for="(value, key) in relWorks" :key="key"
-                    @click="$router.push('/work/' + value.id)">{{ value.title }}</el-button>
+                    @click="router.push('/work/' + value.id)">{{ value.title }}</el-button>
             </el-space>
         </el-form-item>
 
@@ -79,8 +79,6 @@ const confirm = () => {
             } else {
                 console.log('error!');
             }
-        } else {
-            return false;
         }
     });
 };

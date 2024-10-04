@@ -55,7 +55,6 @@ const confirm = () => {
       }
     } else {
       console.log('form not valid');
-      return false;
     }
   });
 };

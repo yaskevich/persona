@@ -35,7 +35,6 @@ const confirm = async () => {
       // }
     } else {
       console.log('not valid');
-      return false;
     }
   });
 };

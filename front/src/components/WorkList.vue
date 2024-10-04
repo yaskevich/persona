@@ -1,5 +1,5 @@
 <template>
-  <MainTitle :title="`${store.loc('works')} (${itemsCount})`" :callback="() => $router.push('/work/')"></MainTitle>
+  <MainTitle :title="`${store.loc('works')} (${itemsCount})`" :callback="() => router.push('/work/')"></MainTitle>
   <div v-show="isLoaded">
 
     <el-row type="flex" justify="center">
@@ -12,7 +12,7 @@
         <el-tag disable-transitions v-for="(id, index) in value.authors" type="warning" size="large" :key="index">
           {{ store.getLabel(data.persons?.[id]) }}
         </el-tag>
-        <el-button type="primary" plain @click="$router.push('/work/' + value.id)">
+        <el-button type="primary" plain @click="router.push('/work/' + value.id)">
           {{ value.title }}
         </el-button>
         <el-tag disable-transitions v-if="value?.genre" type="info" size="large">{{
@@ -33,6 +33,7 @@
 import { reactive, ref, onBeforeMount, computed } from 'vue';
 import store from '../store';
 import MainTitle from './MainTitle.vue';
+import router from '../router';
 
 const itemsPerPage = 10;
 const itemsCount = ref(0);

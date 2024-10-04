@@ -1,8 +1,8 @@
 <template>
-    <MainTitle :title="store.loc('relations')" :callback="() => $router.push('/relation/')"></MainTitle>
+    <MainTitle :title="store.loc('relations')" :callback="() => router.push('/relation/')"></MainTitle>
     <el-space direction="vertical" alignment="flex-start">
         <el-button :color="value?.color" style="margin: 5px" v-for="(value, key) in rels"
-            @click="$router.push('/relation/' + value.id)">
+            @click="router.push('/relation/' + value.id)">
             <!-- <el-icon style="margin-left: 3px; margin-right: 3px;">
                 <el-icon-switch v-if="value.bilateral" />
                 <el-icon-right v-else />
@@ -17,6 +17,7 @@
 import { ref, onBeforeMount } from 'vue';
 import store from '../store';
 import MainTitle from './MainTitle.vue';
+import router from '../router';
 
 const rels = ref<Array<IRelation>>();
 

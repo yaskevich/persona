@@ -26,7 +26,7 @@
     </el-col>
 
     <el-col :span="8">
-      <el-button type="primary" plain @click="$router.push('/log/' + value.id)">{{ store.dateToString(value.created)
+      <el-button type="primary" plain @click="router.push('/log/' + value.id)">{{ store.dateToString(value.created)
       }}</el-button>
     </el-col>
 
@@ -42,6 +42,7 @@
 
 import { reactive, onBeforeMount } from 'vue';
 import store from '../store';
+import router from '../router';
 
 const datum = reactive({ users: [], logs: [] as Array<ILog> });
 const total = store.state?.user?.stats?.logs;

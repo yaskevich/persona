@@ -4,7 +4,7 @@
       <el-container>
         <el-aside width="210px" style="overflow-y: hidden;" class="hidden-sm-and-down">
           <el-menu class="el-menu-vertical-demo" :router="true" :default-openeds="['content']"
-            :default-active="$router.currentRoute.value.path">
+            :default-active="router.currentRoute.value.path">
             <el-sub-menu v-for="(v, k) in menuScheme" :index="v.title" :key="k">
               <template #title><i :class="v.icon"></i><span>{{ loc(v.title) }}</span></template>
               <el-menu-item v-for="item in v.data" :index="'/' + item" :key="item">{{ loc(item) }}</el-menu-item>
@@ -13,7 +13,7 @@
         </el-aside>
         <el-container>
           <el-header style="text-align: right;" class="el-header">
-            <el-menu :default-active="$router.currentRoute.value.path" class="el-menu-demo" mode="horizontal"
+            <el-menu :default-active="router.currentRoute.value.path" class="el-menu-demo" mode="horizontal"
               :ellipsis="false" @select="handleSelect">
               <el-menu-item index="index">
                 <img style="height: 50%" src="/android-chrome-192x192.png" alt="Project logo" />
@@ -81,13 +81,7 @@ import 'element-plus/theme-chalk/display.css';
 
 const dataReady = ref(false);
 
-// useMeta(computed(() => ({ title: store.state?.user?.settings?.title || '∙' })));
 useTitle(computed(() => (store.state?.user?.settings?.title || '∙')));
-// const windowWidth = ref(window.innerWidth);
-// const onWidthChange = () => windowWidth.value = window.innerWidth;
-// onMounted(() => window.addEventListener('resize', onWidthChange));
-// onUnmounted(() => window.removeEventListener('resize', onWidthChange));
-console.log("here");
 
 
 const menuScheme = [

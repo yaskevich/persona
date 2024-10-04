@@ -1,9 +1,9 @@
 <template>
-  <MainTitle :title="store.loc('genres')" :callback="() => $router.push('/genre/')" />
+  <MainTitle :title="store.loc('genres')" :callback="() => router.push('/genre/')" />
   <!-- <el-row > -->
   <!-- <el-space wrap> -->
   <el-button style="margin: 5px" v-for="(value, key) in genres.sort((a, b) => b.title.length - a.title.length)"
-    type="primary" plain @click="$router.push('/genre/' + value.id)">{{ value.title }}</el-button>
+    type="primary" plain @click="router.push('/genre/' + value.id)">{{ value.title }}</el-button>
   <!-- </el-space> -->
   <!-- </el-row> -->
 </template>
@@ -14,6 +14,7 @@ import { reactive, ref, onBeforeMount, nextTick } from 'vue';
 // import type { FormInstance, FormRules } from 'element-plus';
 import store from '../store';
 import MainTitle from './MainTitle.vue';
+import router from '../router';
 
 const genres = reactive([] as Array<IGenre>);
 // const form = reactive({ title: '' } as IGenre);

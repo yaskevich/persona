@@ -1,5 +1,5 @@
 <template>
-  <MainTitle :title="store.loc('books')" :callback="() => $router.push('/book/')"></MainTitle>
+  <MainTitle :title="store.loc('books')" :callback="() => router.push('/book/')"></MainTitle>
 
   <div v-show="isLoaded">
     <el-row type="flex" justify="center">
@@ -18,7 +18,7 @@
 
         <el-tooltip placement="top-end">
           <template #content>{{ value.title }}</template>
-          <el-button @click="$router.push('/book/' + value.id)">
+          <el-button @click="router.push('/book/' + value.id)">
             {{ value.title.length > 42 ? value.title.slice(0, 40) + '...' : value.title }}
           </el-button>
         </el-tooltip>
@@ -36,6 +36,7 @@
 import { ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
 import store from '../store';
 import MainTitle from './MainTitle.vue';
+import router from '../router';
 
 const data = reactive({ books: [] as Array<IBook>, persons: [] as Array<IPerson> });
 const filterString = ref('');

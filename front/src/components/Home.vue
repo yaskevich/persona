@@ -30,6 +30,8 @@
     <el-row type="flex" justify="start">
       <el-space wrap>
 
+        <el-button size="small" type="info" icon="el-icon-download" @click="download" />
+
         <el-tooltip class="item" effect="dark" :content="loc('webver')" placement="bottom">
           <el-tag>{{ store.version }}</el-tag>
         </el-tooltip>
@@ -39,8 +41,9 @@
         </el-tooltip>
 
         <el-tooltip class="item" effect="dark" :content="loc('commithash')" placement="bottom" v-if="github">
-          <span><el-link type="primary" :href="'https://github.com/yaskevich/persona/commit/' + github" target="_blank">{{
-            github }}</el-link></span>
+          <span><el-link type="primary" :href="'https://github.com/yaskevich/persona/commit/' + github"
+              target="_blank">{{
+                github }}</el-link></span>
         </el-tooltip>
       </el-space>
     </el-row>
@@ -53,11 +56,23 @@
 <script setup lang="ts">
 import { reactive, ref, onBeforeMount } from 'vue';
 import store from '../store';
+import * as converter from 'json-2-csv';
 
 const data = reactive({} as IData);
 const loc = store.loc;
 const github = store.state?.user?.commit;
 const isLoaded = ref(false);
+
+const download = async () => {
+  const info = await store.getData('facts');
+  // console.log(info.data);
+  const csv = converter.json2csv(info.data, { emptyFieldValue: '', excludeKeys: ['snippet'] });
+  const anchor = document.createElement("a");
+  anchor.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+  anchor.target = "_blank";
+  anchor.download = `Pasternak${(new Date().toJSON().slice(0, 19).replaceAll('-', '_').replace('T', '-'))}.csv`;
+  anchor.click();
+};
 
 onBeforeMount(async () => {
   const names = ['persons', 'works', 'books', 'facts'] as Array<keyof IData>;

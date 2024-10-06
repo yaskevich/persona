@@ -5,25 +5,25 @@
         <template #label>
           <el-icon><el-icon-user /></el-icon>
           {{ loc('persons') }}
-        </template> {{ data.persons }}
+        </template> {{ data.persons?.length }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label>
           <el-icon><el-icon-edit /></el-icon>
           {{ loc('works') }}
-        </template> {{ data.works }}
+        </template> {{ data.works?.length }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label>
           <el-icon><el-icon-notebook /></el-icon>
           {{ loc('books') }}
-        </template> {{ data.books }}
+        </template> {{ data.books?.length }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label>
           <el-icon><el-icon-watch /></el-icon>
           {{ loc('facts') }}
-        </template> {{ data.facts }}
+        </template> {{ data.facts?.length }}
       </el-descriptions-item>
     </el-descriptions>
     <el-divider></el-divider>
@@ -53,20 +53,38 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" x>
 import { reactive, ref, onBeforeMount } from 'vue';
 import store from '../store';
 import * as converter from 'json-2-csv';
 
-const data = reactive({} as IData);
+const data = reactive({} as keyable);
 const loc = store.loc;
 const github = store.state?.user?.commit;
 const isLoaded = ref(false);
 
+const getName = (x: IPerson) => `${x?.firstname || ''} ${x?.lastname || ''}`;
+
 const download = async () => {
-  const info = await store.getData('facts');
-  // console.log(info.data);
-  const csv = converter.json2csv(info.data, { emptyFieldValue: '', excludeKeys: ['snippet'] });
+  const dataSheet = data.facts.map((item: any) => {
+    // console.log(data);
+
+    const acts = item.acts.map((y: any) => data.acts.find((z: any) => z.id === y)?.title).join(', ');
+    const agentInfo = data.persons.find((z: any) => z.id === item.agent);
+    const agent = getName(agentInfo);
+    const books = item.books?.map((y: any) => data.books.find((z: any) => z.id === y)?.title).join(', ') || '';
+
+    const persons1 = item.persons1?.map((y: any) => getName(data.persons.find((z: any) => z.id === y))).join(', ')
+
+    const persons2 = item.persons2?.map((y: any) => getName(data.persons.find((z: any) => z.id === y))).join(', ')
+
+    return ({
+      id: item.id, acts, agent, books, comment: item.comment, datedesc: item.datedesc, persons1, persons2, place: item.place, stamp: item.stamp, title: item.title
+    });
+  });
+
+  // console.log(dataSheet);
+  const csv = converter.json2csv(dataSheet, { emptyFieldValue: '', excludeKeys: ['snippet'] });
   const anchor = document.createElement("a");
   anchor.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
   anchor.target = "_blank";
@@ -75,8 +93,8 @@ const download = async () => {
 };
 
 onBeforeMount(async () => {
-  const names = ['persons', 'works', 'books', 'facts'] as Array<keyof IData>;
-  (await Promise.all(names.map(async x => store.getData(x)))).forEach((x, i) => (data[names[i]] = x.data.length));
+  const names = ['acts', 'persons', 'works', 'books', 'facts'] as Array<keyof IData>;
+  (await Promise.all(names.map(async x => store.getData(x)))).forEach((x, i) => (data[names[i]] = x.data));
   isLoaded.value = true;
 });
 

@@ -1,27 +1,60 @@
 <template>
+    <el-tooltip v-model:visible="visible"
+        :content="`${clickedItem?.firstname} ${clickedItem?.lastname} ${clickedItem?.note || ''}`" placement="bottom"
+        effect="light" trigger="click" virtual-triggering :virtual-ref="triggerRef" />
     <div ref="container">
     </div>
 </template>
 
 <script setup lang="ts">
-
-import { onMounted, onBeforeUnmount, ref, reactive } from 'vue';
-
+import { onMounted, onUnmounted, onBeforeUnmount, ref, reactive } from 'vue';
 import {
     defineGraph,
     defineGraphConfig,
     defineLink,
     defineNodeWithDefaults,
-    Graph,
+    GraphNode,
     GraphController,
 } from 'd3-graph-controller';
-import { GraphNode } from 'd3-graph-controller';
 import 'd3-graph-controller/default.css';
 import store from "../store";
+
+const visible = ref(false)
+const triggerRef = ref({
+    getBoundingClientRect() {
+        return position.value
+    },
+} as any);
+
+const position = ref({
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+});
+
+const mousemoveHandler = (e: MouseEvent) => {
+    position.value = DOMRect.fromRect({
+        width: 0,
+        height: 0,
+        x: e.clientX,
+        y: e.clientY,
+    })
+};
+
+onMounted(() => {
+    document.addEventListener('mousemove', mousemoveHandler)
+});
+
+onUnmounted(() => {
+    document.removeEventListener('mousemove', mousemoveHandler)
+});
 
 const controller = ref();
 const container = ref<HTMLInputElement>();
 const data = reactive({ reltypes: {} as { [index: string]: IRelation }, persons: {} as { [index: string]: IPerson } });
+
+const clickedItem = ref<IPerson>();
 
 onBeforeUnmount(() => {
     controller.value.shutdown()
@@ -81,7 +114,12 @@ onMounted(async () => {
                 min: 1,
             },
             callbacks: {
-                nodeClicked: (node: GraphNode) => console.log(node.id, data.persons[node.id]),
+                nodeClicked: (node: GraphNode) => {
+                    clickedItem.value = data.persons[node.id];
+                    if (!visible.value) {
+                        visible.value = true;
+                    }
+                },
             },
         }));
     }

@@ -51,7 +51,9 @@ const databaseScheme = {
     title TEXT NOT NULL,
     genre INTEGER,
     genrename TEXT,
-    authors INTEGER[] NULL`,
+    authors INTEGER[] NULL,
+    hash TEXT,
+    comment TEXT`,
 
   users: `
     id SERIAL PRIMARY KEY,
@@ -106,7 +108,7 @@ const databaseScheme = {
     refs INTEGER[] NULL,
     comment TEXT,
     media INTEGER,
-    relfact INTEGER
+    relfact INTEGER,
     relfacttype TEXT`,
 
   logs: `
@@ -471,5 +473,9 @@ export default {
         .map((x) => x.rows.shift())
         .map((x) => [x.table, Number(x.count)])
     );
+  },
+  async saveText(user, hash, id) {
+    const result = await pool.query('UPDATE works SET hash = $2 WHERE id = $1', [id, hash]);
+    return ({ hash, id, result: result.rowCount });
   },
 };

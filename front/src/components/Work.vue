@@ -33,6 +33,20 @@
       <el-button type="primary" @click="confirm">{{ store.loc('save') }}</el-button>
     </el-form-item> -->
 
+    <el-form-item :label="store.loc('year')">
+      <el-input-number v-model="work.yeardate" :controls="false" />
+    </el-form-item>
+
+    <el-form-item :label="store.loc('comment')">
+      <el-input  type="textarea" v-model="work.comment" />
+    </el-form-item>
+
+    <el-form-item :label="store.loc('text')">
+      <el-button @click="router.push(`/work/${id}/text`)" type="warning">{{ work.hash ? store.loc('edit') :
+        store.loc('add') }}</el-button>
+    </el-form-item>
+
+
     <template v-if="relBooks?.length || relFacts?.length">
       <el-form-item :label="store.loc('books')" v-if="relBooks?.length">
         <el-space wrap>
@@ -57,6 +71,7 @@
         </template>
       </el-popconfirm>
     </el-form-item>
+    <!-- <hr/> -->
 
   </el-form>
 

@@ -16,7 +16,12 @@
           {{ value.title }}
         </el-button>
         <el-tag disable-transitions v-if="value?.genre" type="info" size="large">{{
-    data.genres[String(value.genre)]?.title }}</el-tag>
+          data.genres[String(value.genre)]?.title }}</el-tag>
+        <el-tag disable-transitions v-if="value?.yeardate" type="info" size="large">{{
+          value.yeardate }}</el-tag>
+        <!-- <el-tag       effect="plain" disable-transitions v-if="value?.hash" type="info" size="large"> -->
+        <el-icon><el-icon-document /></el-icon>
+        <!-- </el-tag> -->
       </el-space>
     </el-row>
 
@@ -24,7 +29,7 @@
       <el-pagination layout="prev, pager, next" :total="itemsCount" hide-on-single-page background
         @update:current-page="updatePage" />
     </el-row>
-    
+
   </div>
 </template>
 

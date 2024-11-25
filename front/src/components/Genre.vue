@@ -39,7 +39,7 @@ import { useRoute } from 'vue-router';
 import MainTitle from './MainTitle.vue';
 
 const formRef = ref<FormInstance>();
-const form = ref({ title: '', published: '', editors: [], works: [], id: null });
+const form = ref({ title: '', id: null });
 const relWorks = ref([] as Array<IWork>);
 const vuerouter = useRoute();
 const id = String(vuerouter.params.id);

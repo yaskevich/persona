@@ -53,7 +53,8 @@ const databaseScheme = {
     genrename TEXT,
     authors INTEGER[] NULL,
     hash TEXT,
-    comment TEXT`,
+    comment TEXT,
+    yeardate INTEGER`,
 
   users: `
     id SERIAL PRIMARY KEY,

@@ -10,7 +10,7 @@ export default {
     body.set('tagger', '');
     body.set('parser', '');
     body.set('model', langID);
-    body.set('data', content.replace(/<[^>]*>?/gm, ''));
+    body.set('data', content.replace(/<[^>]*>?/gm, ' ').replaceAll("'", '’'));
 
     const response = await fetch('https://lindat.mff.cuni.cz/services/udpipe/api/process', { method: 'POST', body });
 
@@ -18,13 +18,17 @@ export default {
       throw new Error(`Response status: ${response.status}`);
     }
 
-    let sn = 0;
     const json = await response.json();
-    const sentPattern = '# sent_id = ';
+    return json.result;
+  },
 
+  conllToArray(data) {
     const parseFeatures = (x) => Object.fromEntries(x.split('|').map((z) => z.split('=')));
 
-    return json.result.split('\n').map((x) => {
+    let sn = 0;
+    const sentPattern = '# sent_id = ';
+
+    return data.split('\n').map((x) => {
       if (x.charAt(0) === '#') {
         if (x.includes(sentPattern)) {
           sn = Number(x.replace(sentPattern, ''));

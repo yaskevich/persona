@@ -54,7 +54,8 @@ const databaseScheme = {
     authors INTEGER[] NULL,
     hash TEXT,
     comment TEXT,
-    yeardate INTEGER`,
+    yeardate INTEGER,
+    parsed BOOLEAN`,
 
   users: `
     id SERIAL PRIMARY KEY,
@@ -136,6 +137,20 @@ const databaseScheme = {
     member1 INTEGER NOT NULL,
     member2 INTEGER NOT NULL,
     color TEXT NOT NULL DEFAULT '#B8B8B8'`,
+
+  corpus: `
+    wid INTEGER NOT NULL,
+    sid INTEGER NOT NULL,
+    tid INTEGER NOT NULL,
+    form TEXT,
+    lemma TEXT,
+    upos TEXT,
+    xpos TEXT,
+    feats JSON,
+    head INTEGER,
+    deprel TEXT,
+    deps TEXT,
+    misc JSON`,
 
 };
 

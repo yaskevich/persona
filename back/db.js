@@ -494,4 +494,27 @@ export default {
     const result = await pool.query('UPDATE works SET hash = $2 WHERE id = $1', [id, hash]);
     return ({ hash, id, result: result.rowCount });
   },
+  async saveCorpus(user, id, data) {
+    await pool.query('BEGIN');
+    try {
+      const qty = data?.length;
+      await pool.query('DELETE from corpus WHERE wid = $1', [id]);
+      // console.log('deleted');
+      // eslint-disable-next-line no-restricted-syntax
+      for (const item of data) {
+        const query = `INSERT INTO corpus (wid, ${Object.keys(item).join(', ')}) VALUES(${id}, ${Object.values(item).map((x) => `'${(typeof x === 'object' ? JSON.stringify(x) : x)}'`).join(', ')})`;
+        // eslint-disable-next-line no-await-in-loop
+        await pool.query(query);
+      }
+      // console.log('inserted');
+      await pool.query('UPDATE works SET tokens = $2 WHERE id = $1', [id, qty]);
+      await pool.query('COMMIT');
+      // console.log('commited');
+      return qty;
+    } catch (error) {
+      console.log(error);
+      await pool.query('ROLLBACK');
+      return 0;
+    }
+  },
 };

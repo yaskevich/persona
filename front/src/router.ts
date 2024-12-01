@@ -105,6 +105,12 @@ const routes = [
     component: () => import('./components/Work.vue'),
   },
   {
+    path: '/work/:id?/text',
+    // component: Work,
+    name: 'Text',
+    component: () => import('./components/Text.vue'),
+  },
+  {
     path: '/genre/:id?',
     name: 'Genre',
     component: () => import('./components/Genre.vue'),

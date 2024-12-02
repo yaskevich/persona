@@ -1,4 +1,6 @@
-import fs from 'fs';
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import path from 'node:path';
 import express from 'express';
 import compression from 'compression';
 import bodyParser from 'body-parser';
@@ -6,11 +8,14 @@ import passport from 'passport';
 import passportJWT from 'passport-jwt';
 import jwt from 'jsonwebtoken';
 import history from 'connect-history-api-fallback';
-// import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'url';
 import db from './db.js';
+import nlp from './nlp.js';
 
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const textsDir = path.join(__dirname, 'texts');
+
 if (!process.env.JWT_SECRET) {
   console.error('Error: secret key should be provided as an environment variable!');
   process.exit(1);
@@ -20,6 +25,8 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 (async () => {
   const app = express();
   const port = process.env.PORT || 8080;
+
+  fs.mkdirSync(textsDir, { recursive: true });
 
   const createToken = (user) => jwt.sign({
     iss: 'persona',
@@ -78,6 +85,22 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 
   app.post('/api/user/reset', auth, async (req, res) => {
     res.json(await db.resetPassword(req.user, req.body.id));
+  });
+
+  app.get('/api/text', auth, async (req, res) => {
+    if (req.query.id) {
+      try {
+        const filePath = path.join(textsDir, req.query.id);
+        if (fs.existsSync(filePath)) {
+          const content = fs.readFileSync(filePath, 'utf8');
+          res.send(content);
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    res.send('');
   });
 
   app.post('/api/relation', auth, async (req, res) => {

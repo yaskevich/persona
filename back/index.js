@@ -87,6 +87,24 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
     res.json(await db.resetPassword(req.user, req.body.id));
   });
 
+  app.post('/api/text', auth, async (req, res) => {
+    const { text, ...rest } = req.body;
+    if (text && rest?.id) {
+      const hash = crypto.createHash('sha256').update(text).digest('hex');
+      const filePath = path.join(textsDir, hash);
+      if (!fs.existsSync(filePath)) {
+        try {
+          fs.writeFileSync(filePath, text);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      res.json(await db.saveText(req.user, hash, rest.id));
+      return;
+    }
+    res.json({});
+  });
+
   app.get('/api/text', auth, async (req, res) => {
     if (req.query.id) {
       try {

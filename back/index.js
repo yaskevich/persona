@@ -121,6 +121,22 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
     res.send('');
   });
 
+  app.get('/api/analyze', auth, async (req, res) => {
+    const props = await db.getData('works', req.query);
+    const { hash, id } = props.shift();
+    let result = 0;
+    if (hash) {
+      const filePath = path.join(textsDir, hash);
+      const content = fs.readFileSync(filePath, 'utf8');
+      const conll = await nlp.udpipe(content, 'bel');
+      fs.writeFileSync(`${filePath}.conll`, conll);
+      // console.log('written');
+      const parsed = nlp.conllToArray(conll);
+      result = await db.saveCorpus(req.user, id, parsed);
+    }
+    res.json({ tokens: result });
+  });
+
   app.post('/api/relation', auth, async (req, res) => {
     res.json(await db.saveRelation(req.user, req.body));
   });

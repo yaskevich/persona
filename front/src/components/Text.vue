@@ -32,10 +32,16 @@ const work = ref({} as IWork);
 const html = ref('');
 const id = String(vuerouter.params.id);
 
-const saveText = () => {
-    const htmlContent = customEditor.getHTML();
-    // console.log(htmlContent);
+const saveText = async () => {
+    const textContent = customEditor.getText()?.trim();
+    if (textContent) {
+        const htmlContent = customEditor.getHTML();
+        // console.log(htmlContent);
+        const result = await store.postData('text', { ...work.value, text: htmlContent });
+        console.log(result?.data);
+    }
 };
+
 
 const customEditor = new Editor({
     content: '',
@@ -88,16 +94,20 @@ onBeforeUnmount(() => {
     customEditor.destroy();
 });
 
-
 onBeforeMount(async () => {
-  // console.log('router id', id);
-  if (id) {
-    const { data } = await store.getData('works', id);
-    if (data) {
-      work.value = data[0];
-      // console.log('this work', work.value);
+    // console.log('router id', id);
+    if (id) {
+        const { data } = await store.getData('works', id);
+        if (data) {
+            work.value = data[0];
+            // console.log('this work', work.value);
+        }
+        if (work?.value?.hash) {
+            const result = await store.getData('text', work.value.hash);
+            customEditor.commands.setContent(result.data);
+        }
     }
-}});
+});
 
 
 </script>
@@ -107,8 +117,8 @@ onBeforeMount(async () => {
 :deep(.ProseMirror) {
     min-height: 200px;
     padding: 0.75em;
-    color: gray;
-    font-size: .75rem;
+    color: rgba(47, 42, 42, 0.95);
+    font-size: .9rem;
 
     &:focus {
         outline: none;

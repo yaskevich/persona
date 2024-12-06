@@ -123,12 +123,31 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 
   app.get('/api/analyze', auth, async (req, res) => {
     const props = await db.getData('works', req.query);
-    const { hash, id } = props.shift();
+    const {
+      hash, id, title, yeardate, authors
+    } = props.shift();
+    const authorsInfo = [];
+    // eslint-disable-next-line no-restricted-syntax
+    for (const person of authors) {
+      // eslint-disable-next-line no-await-in-loop
+      const author = (await db.getData('persons', { id: person }))?.shift();
+      authorsInfo.push(`${author.lastname}, ${author.firstname} [${['n', 'm', 'f'][author.sex]}]`);
+    }
+
     let result = 0;
     if (hash) {
       const filePath = path.join(textsDir, hash);
       const content = fs.readFileSync(filePath, 'utf8');
-      const conll = await nlp.udpipe(content, 'bel');
+      let conll = await nlp.udpipe(content, 'bel');
+      conll = `# text_id = ${id}
+# hash = ${hash}
+# authors = ${authorsInfo.join('; ')}
+# title = ${title}
+# lang = be
+# origyear = ${yeardate}
+# lang_var = be-BY
+${conll}`;
+
       fs.writeFileSync(`${filePath}.conll`, conll);
       // console.log('written');
       const parsed = nlp.conllToArray(conll);

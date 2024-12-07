@@ -44,9 +44,11 @@
     <el-form-item :label="store.loc('text')">
       <el-button @click="router.push(`/work/${id}/text`)" type="warning">{{ work.hash ? store.loc('edit') :
         store.loc('add') }}</el-button>
+        <el-button @click="parseText" type="warning" v-if="work?.hash">{{ store.loc('parse') }}</el-button>
     </el-form-item>
 
 
+    
     <template v-if="relBooks?.length || relFacts?.length">
       <el-form-item :label="store.loc('books')" v-if="relBooks?.length">
         <el-space wrap>
@@ -93,11 +95,14 @@ const genres = reactive([] as Array<IGenre>);
 const persons = ref([] as Array<IPerson>);
 const vuerouter = useRoute();
 const id = String(vuerouter.params.id);
-
 const relBooks = ref([] as Array<IBook>);
 const relFacts = ref([] as Array<IFact>);
-
 const isLoaded = ref(false);
+
+const parseText = async() => {
+    const { data } = await store.getData('analyze', id);
+    console.log(data);
+};
 
 onBeforeMount(async () => {
   // console.log('router id', id);

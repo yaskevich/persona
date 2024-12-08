@@ -20,7 +20,10 @@
         <el-tag disable-transitions v-if="value?.yeardate" type="info" size="large">{{
           value.yeardate }}</el-tag>
         <!-- <el-tag       effect="plain" disable-transitions v-if="value?.hash" type="info" size="large"> -->
-        <el-icon><el-icon-document /></el-icon>
+        <el-tooltip v-if="value?.hash" class="box-item" effect="dark" :content="String(value?.tokens || 0)"
+          placement="top-start">
+          <el-icon><el-icon-document /></el-icon>
+        </el-tooltip>
         <!-- </el-tag> -->
       </el-space>
     </el-row>

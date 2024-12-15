@@ -38,17 +38,17 @@
     </el-form-item>
 
     <el-form-item :label="store.loc('comment')">
-      <el-input  type="textarea" v-model="work.comment" />
+      <el-input type="textarea" v-model="work.comment" />
     </el-form-item>
 
-    <el-form-item :label="store.loc('text')">
+    <el-form-item :label="store.loc('text')" v-if="work?.genre && work?.yeardate && work?.id">
       <el-button @click="router.push(`/work/${id}/text`)" type="warning">{{ work.hash ? store.loc('edit') :
         store.loc('add') }}</el-button>
-        <el-button @click="parseText" type="warning" v-if="work?.hash">{{ store.loc('parse') }}</el-button>
+      <el-button @click="parseText" type="warning" v-if="work?.hash">{{
+        store.loc('parse') }}</el-button>
+      <el-tag size="large" v-if="work?.tokens">{{ work.tokens }}</el-tag>
     </el-form-item>
 
-
-    
     <template v-if="relBooks?.length || relFacts?.length">
       <el-form-item :label="store.loc('books')" v-if="relBooks?.length">
         <el-space wrap>
@@ -99,9 +99,10 @@ const relBooks = ref([] as Array<IBook>);
 const relFacts = ref([] as Array<IFact>);
 const isLoaded = ref(false);
 
-const parseText = async() => {
-    const { data } = await store.getData('analyze', id);
-    console.log(data);
+const parseText = async () => {
+  const { data } = await store.getData('analyze', id);
+  work.value.tokens = data.tokens;
+  console.log(data);
 };
 
 onBeforeMount(async () => {
@@ -150,7 +151,7 @@ const confirm = () => {
       const result = await store.postData('works', work.value);
       /* console.log(result); */
       if ('data' in result && 'id' in result.data) {
-        router.push('/works');
+        // router.push('/works');
       } else {
         console.log('error!');
       }

@@ -15,6 +15,9 @@ import nlp from './nlp.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const textsDir = path.join(__dirname, 'texts');
+const filesDir = path.join(__dirname, 'files');
+const imptdName = '.imported';
+const imptd = path.join(filesDir, imptdName);
 
 if (!process.env.JWT_SECRET) {
   console.error('Error: secret key should be provided as an environment variable!');
@@ -22,11 +25,57 @@ if (!process.env.JWT_SECRET) {
 }
 const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 
+const writeText = (html) => {
+  const hash = crypto.createHash('sha256').update(html).digest('hex');
+  const filePath = path.join(textsDir, hash);
+  if (!fs.existsSync(filePath)) {
+    try {
+      fs.writeFileSync(filePath, html);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  return hash;
+};
+
+const importFiles = async () => {
+  let filesToIgnore = '';
+  if (fs.existsSync(imptd)) {
+    filesToIgnore = fs.readFileSync(imptd, 'utf8');
+  } else {
+    fs.writeFileSync(imptd, '');
+  }
+
+  const files = fs.readdirSync(filesDir);
+  const persons = Object.fromEntries((await db.getData('persons')).map((x) => [`${x.firstname} ${x.lastname}`, x.id]));
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const fileName of files) {
+    const sourcePath = path.join(filesDir, fileName);
+    if (fileName !== imptdName) {
+      if (filesToIgnore.includes(fileName)) {
+        // console.log('IGNORE', fileName);
+      } else {
+        const [author, title] = fileName.split('=');
+        console.log(author, persons[author], title);
+        // check whether this author has this work
+        const html = fs.readFileSync(sourcePath, 'utf8');
+        const hash = writeText(html);
+        // eslint-disable-next-line no-await-in-loop
+        await db.setData({ id: 0 }, 'works', { title, authors: [persons?.[author] || null], hash });
+        fs.appendFileSync(imptd, `${fileName}\n`);
+      }
+    }
+  }
+};
+
 (async () => {
   const app = express();
   const port = process.env.PORT || 8080;
 
   fs.mkdirSync(textsDir, { recursive: true });
+  fs.mkdirSync(filesDir, { recursive: true });
+  await importFiles();
 
   const createToken = (user) => jwt.sign({
     iss: 'persona',
@@ -50,7 +99,7 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
   app.set('trust proxy', 1);
   app.use(passport.initialize());
   // app.use(passport.session());
-  app.use(bodyParser.json());
+  app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(history());
   app.use(express.static('public'));
@@ -90,17 +139,26 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
   app.post('/api/text', auth, async (req, res) => {
     const { text, ...rest } = req.body;
     if (text && rest?.id) {
-      const hash = crypto.createHash('sha256').update(text).digest('hex');
-      const filePath = path.join(textsDir, hash);
-      if (!fs.existsSync(filePath)) {
-        try {
-          fs.writeFileSync(filePath, text);
-        } catch (err) {
-          console.error(err);
+      const info = await db.getData('works', { id: req.body.id });
+      const { hash } = info.shift();
+      // console.log(info);
+      const newHash = writeText(text);
+      if (hash !== newHash) {
+        if (hash) {
+          const filePath = path.join(textsDir, hash);
+          const filePath2 = path.join(textsDir, `${hash}.conll`);
+          if (fs.existsSync(filePath)) {
+            console.log('remove');
+            fs.unlinkSync(filePath);
+          }
+          if (fs.existsSync(filePath2)) {
+            console.log('remove2');
+            fs.unlinkSync(filePath2);
+          }
         }
+        res.json(await db.setHash(req.user, newHash, rest.id));
+        return;
       }
-      res.json(await db.saveText(req.user, hash, rest.id));
-      return;
     }
     res.json({});
   });
@@ -138,7 +196,9 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
     if (hash) {
       const filePath = path.join(textsDir, hash);
       const content = fs.readFileSync(filePath, 'utf8');
+      console.log(new Date().toUTCString(), 'sent to API');
       let conll = await nlp.udpipe(content, 'bel');
+      console.log(new Date().toUTCString(), 'conll received');
       conll = `# text_id = ${id}
 # hash = ${hash}
 # authors = ${authorsInfo.join('; ')}
@@ -149,9 +209,10 @@ const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 ${conll}`;
 
       fs.writeFileSync(`${filePath}.conll`, conll);
-      // console.log('written');
+      console.log(new Date().toUTCString(), 'written');
       const parsed = nlp.conllToArray(conll);
       result = await db.saveCorpus(req.user, id, parsed);
+      console.log(new Date().toUTCString(), 'saved');
     }
     res.json({ tokens: result });
   });
@@ -173,13 +234,13 @@ ${conll}`;
   });
 
   app.post('/api/:table', auth, async (req, res) => {
-    console.log('POST params', req.params, 'query', req.query);
+    console.log('POST params', req.params, 'payload', req.body);
     if (req.params.table === 'users' && (!(req.user.id === req.body.id || req.user.privs === 1))) {
       return res.json({ error: 'access denied' });
     }
     return res.json(req.params.table === 'relations'
       ? await db.saveRelation(req.user, req.body)
-      : await db.setData(req.user, req.body, req.params.table));
+      : await db.setData(req.user, req.params.table, req.body));
   });
 
   app.delete('/api/:table/:id', auth, async (req, res) => {

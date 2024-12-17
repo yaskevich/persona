@@ -274,7 +274,7 @@ export default {
     }
     return { error: 'bad query' };
   },
-  async getData(table, query) {
+  async getData(table, query = {}) {
     const props = query;
     let off = 0;
     let lim = 5000;
@@ -303,7 +303,7 @@ export default {
     }
     return { error: 'bad query' };
   },
-  async setData(user, datum, table) {
+  async setData(user, table, datum,) {
     const data = datum;
     // console.log(data);
     if (table in dbStructure) {
@@ -490,8 +490,8 @@ export default {
         .map((x) => [x.table, Number(x.count)])
     );
   },
-  async saveText(user, hash, id) {
-    const result = await pool.query('UPDATE works SET hash = $2 WHERE id = $1', [id, hash]);
+  async setHash(user, hash, id) {
+    const result = await pool.query('UPDATE works SET hash = $2, tokens = NULL WHERE id = $1', [id, hash]);
     return ({ hash, id, result: result.rowCount });
   },
   async saveCorpus(user, id, data) {
@@ -517,4 +517,8 @@ export default {
       return 0;
     }
   },
+  async getTokensCount() {
+    const result = await pool.query('SELECT COUNT(*) FROM corpus');
+    return Number(result.rows.shift()?.count);
+  }
 };

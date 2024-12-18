@@ -15,21 +15,25 @@
         <el-button type="primary" plain @click="router.push('/work/' + value.id)">
           {{ value.title }}
         </el-button>
+
         <el-tag disable-transitions v-if="value?.genre" type="info" size="large">{{
           data.genres[String(value.genre)]?.title }}</el-tag>
         <el-tag disable-transitions v-if="value?.yeardate" type="info" size="large">{{
           value.yeardate }}</el-tag>
         <!-- <el-tag       effect="plain" disable-transitions v-if="value?.hash" type="info" size="large"> -->
-        <el-tooltip v-if="value?.hash" class="box-item" effect="dark" :content="String(value?.tokens || 0)"
-          placement="top-start">
-          <el-icon><el-icon-document /></el-icon>
+        <el-tooltip v-if="value?.tokens" class="box-item" :content="String(value.tokens)" placement="right"
+          effect="light">
+          <el-icon><el-icon-grid /></el-icon>
         </el-tooltip>
+        <el-icon v-else><el-icon-document v-if="value?.hash" /></el-icon>
+
         <!-- </el-tag> -->
       </el-space>
     </el-row>
 
     <el-row type="flex" justify="center">
       <el-pagination layout="prev, pager, next" :total="itemsCount" hide-on-single-page background
+          :page-size="itemsPerPage"
         @update:current-page="updatePage" />
     </el-row>
 
@@ -43,7 +47,7 @@ import store from '../store';
 import MainTitle from './MainTitle.vue';
 import router from '../router';
 
-const itemsPerPage = 10;
+const itemsPerPage = 15;
 const itemsCount = ref(0);
 const pageRange = ref([0, itemsPerPage]);
 const updatePage = (page: number) => {

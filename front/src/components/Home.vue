@@ -3,7 +3,6 @@
     <el-descriptions class="margin-top" :title="loc('prodata')" :column="1" border style="max-width: 400px;">
       <el-descriptions-item>
         <template #label>
-          <el-icon><el-icon-user /></el-icon>
           {{ loc('persons') }}
         </template> {{ data.persons?.length }}
       </el-descriptions-item>
@@ -25,6 +24,25 @@
           {{ loc('facts') }}
         </template> {{ data.facts?.length }}
       </el-descriptions-item>
+
+      <el-descriptions-item v-if="data?.tokens">
+        <template #label>
+          <el-icon><el-icon-files /></el-icon>
+          {{ loc('corpus') }}
+        </template>
+        <el-tooltip
+        class="box-item"
+        effect="dark"
+        :content="(data.tokens).toLocaleString()"
+        placement="top-start"
+      >
+      {{ formatter.format(data.tokens) }}
+      </el-tooltip>
+        
+        
+      </el-descriptions-item>
+
+
     </el-descriptions>
     <el-divider></el-divider>
     <el-row type="flex" justify="start">
@@ -63,6 +81,8 @@ const loc = store.loc;
 const github = store.state?.user?.commit;
 const isLoaded = ref(false);
 
+const formatter = Intl.NumberFormat('en', { notation: 'compact' });
+
 const getName = (x: IPerson) => `${x?.firstname || ''} ${x?.lastname || ''}`;
 
 const download = async () => {
@@ -93,7 +113,7 @@ const download = async () => {
 };
 
 onBeforeMount(async () => {
-  const names = ['acts', 'persons', 'works', 'books', 'facts'] as Array<keyof IData>;
+  const names = ['acts', 'persons', 'works', 'books', 'facts', 'tokens'] as Array<keyof IData>;
   (await Promise.all(names.map(async x => store.getData(x)))).forEach((x, i) => (data[names[i]] = x.data));
   isLoaded.value = true;
 });

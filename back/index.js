@@ -136,6 +136,10 @@ const importFiles = async () => {
     res.json(await db.resetPassword(req.user, req.body.id));
   });
 
+  app.get('/api/tokens', auth, async (req, res) => {
+    res.json(await db.getTokensCount(req.user));
+  });
+
   app.post('/api/text', auth, async (req, res) => {
     const { text, ...rest } = req.body;
     if (text && rest?.id) {

@@ -152,6 +152,7 @@ const confirm = () => {
       /* console.log(result); */
       if ('data' in result && 'id' in result.data) {
         // router.push('/works');
+        work.value.id = result.data.id;
       } else {
         console.log('error!');
       }

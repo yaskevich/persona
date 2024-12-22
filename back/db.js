@@ -39,6 +39,7 @@ const databaseScheme = {
 
   persons: `
     id SERIAL PRIMARY KEY,
+    rendername TEXT,
     firstname TEXT NOT NULL,
     lastname TEXT,
     patroname TEXT,
@@ -130,13 +131,13 @@ const databaseScheme = {
     id SERIAL PRIMARY KEY,
     name1 TEXT NOT NULL,
     name2 TEXT NOT NULL,
-    bilateral BOOLEAN NOT NULL DEFAULT FALSE`,
+    bilateral BOOLEAN NOT NULL DEFAULT FALSE,
+    color TEXT NOT NULL DEFAULT '#B8B8B8'`,
 
   relships: `
     rel_id INTEGER NOT NULL,
     member1 INTEGER NOT NULL,
-    member2 INTEGER NOT NULL,
-    color TEXT NOT NULL DEFAULT '#B8B8B8'`,
+    member2 INTEGER NOT NULL`,
 
   corpus: `
     wid INTEGER NOT NULL,

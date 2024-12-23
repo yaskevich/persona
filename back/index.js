@@ -47,7 +47,7 @@ const importFiles = async () => {
   }
 
   const files = fs.readdirSync(filesDir);
-  const persons = Object.fromEntries((await db.getData('persons')).map((x) => [`${x.firstname} ${x.lastname}`, x.id]));
+  const persons = Object.fromEntries((await db.getData('persons')).map((x) => [`${x.rendername ? x.rendername : `${x.firstname} ${x.lastname}`}`, x.id]));
 
   // eslint-disable-next-line no-restricted-syntax
   for (const fileName of files) {

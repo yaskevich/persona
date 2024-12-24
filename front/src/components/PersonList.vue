@@ -4,6 +4,18 @@
 
     <el-form label-width="120px" ref="formRef" :model="form" :inline="true" :rules="rules">
 
+      <el-form-item prop="rendername">
+        <el-input class="text-input" :placeholder="loc('rendername')" v-model="form.rendername"></el-input>
+      </el-form-item>
+
+      <el-form-item prop="wikidata">
+        <el-input :placeholder="loc('wikidata')" prop="wikidata" v-model="form.wikidata" class="text-input"></el-input>
+      </el-form-item>
+
+      <el-form-item prop="note">
+        <el-input :placeholder="loc('note')" prop="note" v-model="form.note" class="text-input"></el-input>
+      </el-form-item>
+
       <el-form-item prop="firstname">
         <el-input :placeholder="loc('firstname')" v-model="form.firstname" class="text-input"></el-input>
       </el-form-item>
@@ -15,17 +27,6 @@
       <el-form-item prop="lastname">
         <el-input :placeholder="loc('lastname')" v-model="form.lastname"></el-input>
       </el-form-item>
-
-      <el-form-item prop="wikidata">
-        <el-input :placeholder="loc('wikidata')" prop="wikidata" v-model="form.wikidata" class="text-input"
-          style="max-width:110px;"></el-input>
-      </el-form-item>
-
-      <el-form-item prop="note">
-        <el-input :placeholder="loc('note')" prop="note" v-model="form.note" class="text-input"
-          style="max-width:110px;"></el-input>
-      </el-form-item>
-
 
       <el-form-item>
         <el-radio-group v-model="form.sex">
@@ -48,7 +49,8 @@
       <el-space>
         <el-button plain :icon="value.sex === 1 ? 'el-icon-male' : 'el-icon-female'"
           @click="router.push('/person/' + value.id)">{{ value.firstname }}
-          {{ value.patroname }} {{ value.lastname }}</el-button>
+          {{ value.patroname }} {{ value.lastname }} <el-text v-if="value?.rendername"
+            type="primary">⬝{{ value.rendername }}</el-text></el-button>
         <!-- </el-tooltip> -->
         <el-tag v-if="value?.note" effect="plain" size="large">{{ value.note }}</el-tag>
       </el-space>
@@ -94,6 +96,10 @@ const resetForm = () => {
 const confirm = () => {
   formRef.value?.validate(async (valid: boolean) => {
     if (valid) {
+      if (form?.wikidata) {
+        form.wikidata = form.wikidata.replace(/\D/g, "");
+      }
+
       const { data } = await store.postData('persons', form);
       // console.log(result);
       if (data && 'id' in data) {

@@ -3,6 +3,10 @@
   </MainTitle>
 
   <el-form label-width="120px" v-model="person" v-if="isLoaded">
+    <el-form-item prop="rendername" :label="store.loc('rendername')">
+      <el-input :placeholder="store.loc('rendername')" v-model="person.rendername" class="text-input"
+        prop="firstName"></el-input>
+    </el-form-item>
     <el-form-item prop="firstname" :label="store.loc('firstname')">
       <el-input :placeholder="store.loc('firstname')" v-model="person.firstname" class="text-input"
         prop="firstName"></el-input>

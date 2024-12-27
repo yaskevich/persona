@@ -45,14 +45,27 @@
     </el-row>
 
     <el-row v-for="(value, key) in filtered()" :gutter="20" :key="key">
-      <!-- <el-tooltip class="box-item" effect="dark" :content="value.firstname + ' ' + value.patroname" placement="top-start"> -->
+
       <el-space>
-        <el-button plain :icon="value.sex === 1 ? 'el-icon-male' : 'el-icon-female'"
-          @click="router.push('/person/' + value.id)">{{ value.firstname }}
-          {{ value.patroname }} {{ value.lastname }} <el-text v-if="value?.rendername"
-            type="primary">⬝{{ value.rendername }}</el-text></el-button>
-        <!-- </el-tooltip> -->
+
+        <el-tooltip class="box-item" effect="dark"
+          :content="` ${value.firstname} ${value.patroname} ${value.lastname} ${value.wikidata ? ' Q' + value.wikidata : ''}`">
+
+          <el-button :type="value.wikidata ? 'primary' : 'info'" plain
+            :icon="value.sex === 1 ? 'el-icon-male' : 'el-icon-female'" @click="router.push('/person/' + value.id)">
+
+            <el-text v-if="value?.rendername" type="warning">{{ value.rendername }}</el-text>
+
+            <span v-else>
+              {{ value.firstname }} {{ value.lastname }}
+            </span>
+
+          </el-button>
+
+        </el-tooltip>
+
         <el-tag v-if="value?.note" effect="plain" size="large">{{ value.note }}</el-tag>
+
       </el-space>
 
     </el-row>
@@ -99,7 +112,6 @@ const confirm = () => {
       if (form?.wikidata) {
         form.wikidata = form.wikidata.replace(/\D/g, "");
       }
-
       const { data } = await store.postData('persons', form);
       // console.log(result);
       if (data && 'id' in data) {
@@ -133,7 +145,7 @@ const filtered = () => {
   const re = new RegExp(filterString.value, 'i');
   return filterString.value
     ? persons.filter(
-      x => x?.firstname && x.firstname.search(re) !== -1 || x?.lastname && x.lastname.search(re) !== -1 || x?.patroname && x.patroname.search(re) !== -1 || x?.note && x.note.search(re) !== -1
+      x => x?.rendername && x.rendername.search(re) !== -1 || x?.firstname && x.firstname.search(re) !== -1 || x?.lastname && x.lastname.search(re) !== -1 || x?.patroname && x.patroname.search(re) !== -1 || x?.note && x.note.search(re) !== -1
     )
     : persons;
 };

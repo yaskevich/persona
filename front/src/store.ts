@@ -244,7 +244,7 @@ const dateDropTimeZone = (x: Date) => {
 };
 
 const getLabel = (x: IPerson | IUser, isNoted = false) =>
-  x?.firstname + ' ' + x?.lastname + (isNoted && x?.note ? ' ⸱ ' + x.note : '');
+  (x?.rendername ? x.rendername : x?.firstname + ' ' + x?.lastname) + (isNoted && x?.note ? ' ⸱ ' + x.note : '');
 
 const renderRelations = (datum: IRelation, flipStatus = false) =>
   `${flipStatus ? datum.name2 : datum.name1} ${datum.bilateral ? '⟺' : '⟹'} ${flipStatus ? datum.name1 : datum.name2}`;

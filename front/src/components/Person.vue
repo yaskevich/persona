@@ -201,6 +201,9 @@ onBeforeMount(async () => {
 const confirm = async () => {
   // form.validate();
   // console.log('save:', person.value);
+  if (person?.value?.wikidata) {
+    person.value.wikidata = person.value.wikidata.replace(/\D/g, "");
+  }
   const result = await store.postData('persons', person.value);
   if (!('data' in result && 'id' in result.data)) {
     console.log("error", result);

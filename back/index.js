@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import crypto from 'node:crypto';
 import path from 'node:path';
 import express from 'express';
 import compression from 'compression';
@@ -9,6 +8,7 @@ import passportJWT from 'passport-jwt';
 import jwt from 'jsonwebtoken';
 import history from 'connect-history-api-fallback';
 import { fileURLToPath } from 'url';
+import crypto from 'node:crypto';
 import db from './db.js';
 import nlp from './nlp.js';
 
@@ -25,19 +25,6 @@ if (!process.env.JWT_SECRET) {
 }
 const __package = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 
-const writeText = (html) => {
-  const hash = crypto.createHash('sha256').update(html).digest('hex');
-  const filePath = path.join(textsDir, hash);
-  if (!fs.existsSync(filePath)) {
-    try {
-      fs.writeFileSync(filePath, html);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-  return hash;
-};
-
 const importFiles = async () => {
   let filesToIgnore = '';
   if (fs.existsSync(imptd)) {
@@ -52,18 +39,38 @@ const importFiles = async () => {
   // eslint-disable-next-line no-restricted-syntax
   for (const fileName of files) {
     const sourcePath = path.join(filesDir, fileName);
+    // console.log(fileName);
     if (fileName !== imptdName) {
       if (filesToIgnore.includes(fileName)) {
         // console.log('IGNORE', fileName);
       } else {
-        const [author, title] = fileName.split('=');
-        console.log(author, persons[author], title);
-        // check whether this author has this work
-        const html = fs.readFileSync(sourcePath, 'utf8');
-        const hash = writeText(html);
-        // eslint-disable-next-line no-await-in-loop
-        await db.setData({ id: 0 }, 'works', { title, authors: [persons?.[author] || null], hash });
-        fs.appendFileSync(imptd, `${fileName}\n`);
+        const ext = path.extname(fileName);
+        const info = {
+          id: 0, author: 0, title: '', content: '', lang: '', hash: ''
+        };
+        // check whether this author has this work?
+        if (ext === '.epub') {
+          const { options, html } = nlp.parseEbook(sourcePath);
+          console.log(options);
+          info.author = persons?.[options.author];
+          info.title = options.title;
+          info.lang = options.lang;
+          info.content = html;
+        } else if (!ext) {
+          const [author, title] = fileName.split('=');
+          console.log(author, persons[author], title);
+          info.author = persons?.[author];
+          info.content = fs.readFileSync(sourcePath, 'utf8');
+        }
+        if (info.author && info.title && info.content) {
+          const hash = crypto.createHash('sha256').update(info.content).digest('hex');
+          // eslint-disable-next-line no-await-in-loop
+          const { id } = await db.setData({ id: 0 }, 'works', { title: info.title, authors: [info.author], hash });
+          console.log(id);
+          const filePath = path.join(textsDir, `${id}.html`);
+          fs.writeFileSync(filePath, info.content);
+        // fs.appendFileSync(imptd, `${fileName}\n`);
+        }
       }
     }
   }
@@ -143,22 +150,17 @@ const importFiles = async () => {
   app.post('/api/text', auth, async (req, res) => {
     const { text, ...rest } = req.body;
     if (text && rest?.id) {
-      const info = await db.getData('works', { id: req.body.id });
+      const info = await db.getData('works', { id: rest.id });
       const { hash } = info.shift();
       // console.log(info);
-      const newHash = writeText(text);
+      const newHash = crypto.createHash('sha256').update(text).digest('hex');
       if (hash !== newHash) {
-        if (hash) {
-          const filePath = path.join(textsDir, hash);
-          const filePath2 = path.join(textsDir, `${hash}.conll`);
-          if (fs.existsSync(filePath)) {
-            console.log('remove');
-            fs.unlinkSync(filePath);
-          }
-          if (fs.existsSync(filePath2)) {
-            console.log('remove2');
-            fs.unlinkSync(filePath2);
-          }
+        const filePathHTML = path.join(textsDir, `${rest.id}.html`);
+        fs.writeFileSync(filePathHTML, text);
+        const filePathCONLL = path.join(textsDir, `${rest.id}.conll`);
+        if (fs.existsSync(filePathCONLL)) {
+          console.log('remove CONLL');
+          fs.unlinkSync(filePathCONLL);
         }
         res.json(await db.setHash(req.user, newHash, rest.id));
         return;
@@ -170,7 +172,7 @@ const importFiles = async () => {
   app.get('/api/text', auth, async (req, res) => {
     if (req.query.id) {
       try {
-        const filePath = path.join(textsDir, req.query.id);
+        const filePath = path.join(textsDir, `${req.query.id}.html`);
         if (fs.existsSync(filePath)) {
           const content = fs.readFileSync(filePath, 'utf8');
           res.send(content);

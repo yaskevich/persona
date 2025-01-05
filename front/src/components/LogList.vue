@@ -20,8 +20,8 @@
     </el-col>
 
     <el-col :span="8">
-      <el-tag disable-transitions type="warning" size="large">
-        {{ store.getLabel(datum.users[value.user_id]) }}
+      <el-tag disable-transitions :type="value.user_id ? 'warning' : 'info'" size="large">
+        {{ value.user_id ? store.getLabel(datum.users[value.user_id]) : loc('system') }}
       </el-tag>
     </el-col>
 

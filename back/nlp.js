@@ -1,28 +1,57 @@
 import fs from 'fs';
-import path from 'path';
-import crypto from 'node:crypto';
 import { unzipSync } from 'fflate';
 import { XMLParser, XMLBuilder } from 'fast-xml-parser';
+import chardet from 'chardet';
+import iconv from 'iconv-lite';
+// import jschardet from 'jschardet';
+
+const options = {
+  ignoreAttributes: false,
+  attributeNamePrefix: '',
+  textNodeName: 'text',
+  trimValues: true,
+  parseAttributeValue: true,
+  attributesGroupName: 'attrs',
+  processEntities: true,
+};
 
 export default {
   //   convertToConll(corpus) {
   //     console.log(corpus);
   //   },
   // .replace(/<[^>]*>?/gm, '');
-  writeText(dir, html) {
-    const hash = crypto.createHash('sha256').update(html).digest('hex');
-    const filePath = path.join(dir, hash);
-    if (!fs.existsSync(filePath)) {
-      try {
-        fs.writeFileSync(filePath, html);
-      } catch (err) {
-        console.error(err);
+
+  parseFb2(filePath) {
+    const buf = fs.readFileSync(filePath);
+    let encoding = '';
+
+    if (buf.toString('utf8', 0, 30) === '<?xml version="1.0" encoding="') {
+      const match = buf.toString('utf8', 30, 100).split('"').shift();
+      if (iconv.encodingExists(match)) {
+        encoding = match;
+      } else {
+        console.log('inknown encoding');
       }
     }
-    return hash;
+
+    if (!encoding) {
+      encoding = chardet.detect(buf);
+    }
+
+    const text = iconv.decode(buf, encoding);
+    const parser = new XMLParser(options);
+    parser.addEntity('nbsp', ' ');
+    parser.addEntity('apos', '’');
+    const builder = new XMLBuilder(options);
+    const jObj = parser.parse(text);
+    console.log(JSON.stringify(jObj));
+    const author = jObj.FictionBook.body.section.p.shift().trim();
+    const title = jObj.FictionBook.body.section.p.shift().trim();
+    return { options: { author, title }, html: builder.build(jObj.FictionBook.body.section) };
+    // return JSON.stringify(jObj.FictionBook.body.section);
   },
-  parseEbook(fileName) {
-    const buf = fs.readFileSync(fileName);
+  parseEbook(filePath) {
+    const buf = fs.readFileSync(filePath);
     const unzipped = unzipSync(buf);
     // console.log(unzipped);
     // const content = Object.keys(unzipped)
@@ -30,16 +59,6 @@ export default {
     //   .map((filename) => new File([unzipped[filename]], filename));
     // console.log(content);
     const meta = Buffer.from(unzipped['content.opf']).toString();
-    const options = {
-      ignoreAttributes: false,
-      attributeNamePrefix: '',
-      textNodeName: 'text',
-      trimValues: true,
-      parseAttributeValue: true,
-      attributesGroupName: 'attrs',
-      processEntities: true,
-    };
-
     const parser = new XMLParser(options);
     parser.addEntity('nbsp', ' ');
     parser.addEntity('apos', '’');

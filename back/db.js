@@ -56,7 +56,9 @@ const databaseScheme = {
     hash TEXT,
     comment TEXT,
     yeardate INTEGER,
-    parsed BOOLEAN`,
+    parsed BOOLEAN,
+    tokens INTEGER,
+    lang TEXT`,
 
   users: `
     id SERIAL PRIMARY KEY,
@@ -73,7 +75,8 @@ const databaseScheme = {
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL DEFAULT 'Persona',
     mainperson INTEGER NOT NULL DEFAULT 1,
-    lang INTEGER NOT NULL DEFAULT 0`,
+    lang TEXT NOT NULL DEFAULT 'eng',
+    uilang INTEGER NOT NULL DEFAULT 0`,
 
   books: `
     id SERIAL PRIMARY KEY,
@@ -491,7 +494,7 @@ export default {
         .map((x) => [x.table, Number(x.count)])
     );
   },
-  async setHash(user, hash, id) {
+  async setHash(hash, id) {
     const result = await pool.query('UPDATE works SET hash = $2, tokens = NULL WHERE id = $1', [id, hash]);
     return ({ hash, id, result: result.rowCount });
   },

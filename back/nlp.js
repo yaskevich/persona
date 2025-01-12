@@ -1,4 +1,3 @@
-import fs from 'fs';
 import { unzipSync } from 'fflate';
 import { XMLParser, XMLBuilder } from 'fast-xml-parser';
 import chardet from 'chardet';
@@ -11,18 +10,21 @@ const options = {
   textNodeName: 'text',
   trimValues: true,
   parseAttributeValue: true,
-  attributesGroupName: 'attrs',
   processEntities: true,
 };
 
 export default {
-  //   convertToConll(corpus) {
-  //     console.log(corpus);
-  //   },
-  // .replace(/<[^>]*>?/gm, '');
-
-  parseFb2(filePath) {
-    const buf = fs.readFileSync(filePath);
+  addHeader(text, id, hash, authorship, title, year, lang) {
+    return `# text_id = ${id}
+    # hash = ${hash}
+    # authors = ${authorship}
+    # title = ${title}
+    # lang = ${lang}
+    # origyear = ${year}
+    # lang_var = be-BY
+    ${text}`;
+  },
+  parseFb2(buf) {
     let encoding = '';
 
     if (buf.toString('utf8', 0, 30) === '<?xml version="1.0" encoding="') {

@@ -11,7 +11,10 @@ const options = {
   trimValues: true,
   parseAttributeValue: true,
   processEntities: true,
+  preserveOrder: true,
 };
+
+const getNodeByName = (arr, name) => arr.find((x) => name in x)?.[name];
 
 export default {
   addHeader(text, id, hash, authorship, title, year, lang) {
@@ -46,15 +49,18 @@ export default {
     parser.addEntity('apos', '’');
     const builder = new XMLBuilder(options);
     const jObj = parser.parse(text);
-    console.log(JSON.stringify(jObj));
-    const author = jObj.FictionBook.body.section.p.shift().trim();
-    const title = jObj.FictionBook.body.section.p.shift().trim();
-    return { options: { author, title }, html: builder.build(jObj.FictionBook.body.section) };
+    // console.log(JSON.stringify(jObj));
+    const nodeF = getNodeByName(jObj, 'FictionBook');
+    const nodeB = getNodeByName(nodeF, 'body');
+    const nodeC = getNodeByName(nodeB, 'section');
+    const author = Object.values(nodeC.shift()).shift().shift().text.trim();
+    const title = Object.values(nodeC.shift()).shift().shift().text.trim();
+    return { options: { author, title }, html: builder.build(nodeC) };
     // return JSON.stringify(jObj.FictionBook.body.section);
   },
-  parseEbook(filePath) {
-    const buf = fs.readFileSync(filePath);
+  parseEbook(buf) {
     const unzipped = unzipSync(buf);
+    const q = ':@';
     // console.log(unzipped);
     // const content = Object.keys(unzipped)
     //   .filter((filename) => unzipped[filename].length > 0)
@@ -66,12 +72,25 @@ export default {
     parser.addEntity('apos', '’');
     const builder = new XMLBuilder(options);
     const jObj = parser.parse(meta);
-    // console.log(jObj);
-    const { 'dc:title': title, 'dc:language': lang, 'dc:creator': creator } = jObj.package.metadata;
-    const html = jObj.package.manifest.item.filter((x) => x?.attrs?.['media-type'] === 'application/xhtml+xml').map((x) => builder.build(parser.parse(Buffer.from(unzipped[x.attrs.href]).toString()).html.body)).join('').replaceAll('<p> </p>', '');
+    // console.log(JSON.stringify(jObj));
+    const nodeP = getNodeByName(jObj, 'package');
+    const nodeD = getNodeByName(nodeP, 'metadata');
+    const nodeM = getNodeByName(nodeP, 'manifest');
+    const title = getNodeByName(getNodeByName(nodeD, 'dc:title'), 'text');
+    const lang = getNodeByName(getNodeByName(nodeD, 'dc:language'), 'text');
+    const author = getNodeByName(getNodeByName(nodeD, 'dc:creator'), 'text');
+
+    const getData = (chunk) => {
+      const obj = parser.parse(chunk.toString())[1].html[1].body;
+      return obj.map((x) => (x?.div && x[q]?.class === 'POETRY' ? { blockquote: x.div, [q]: { class: 'poetry' } } : x));
+    };
+
+    const html = nodeM.filter((x) => x?.[':@']?.['media-type'] === 'application/xhtml+xml').map((x) => builder.build(getData(Buffer.from(unzipped[x?.[q]?.href])))).join('').replaceAll('<p> </p>', '')
+      .replaceAll('<div class="CLEAR"></div>', '');
+    // console.log(html);
     return {
       options: {
-        title, lang, author: creator.text
+        title, lang, author
       },
       html
     };

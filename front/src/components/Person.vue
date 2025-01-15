@@ -100,7 +100,17 @@
       </el-popconfirm>
       <el-button type="primary" @click="confirm">{{ store.loc('save') }}</el-button>
     </el-form-item>
+
+    <el-form-item :label="store.loc('works')" v-if="works?.length">
+
+      <el-space fill wrap direction="vertical">
+        <el-button type="info" plain v-for="work in works" @click="router.push(`/work/${work.id}`)">{{ work.title
+          }}</el-button>
+      </el-space>
+    </el-form-item>
+
   </el-form>
+
 </template>
 
 <script setup lang="ts">
@@ -120,6 +130,7 @@ const relatedPerson = ref<number>();
 const persons = ref<Array<IPerson>>([]);
 const relships = ref<Array<IRelship>>([]);
 const newRel = ref<IRelship>();
+const works = ref();
 const isLoaded = ref(false);
 const isFlipped = ref(false);
 
@@ -186,6 +197,9 @@ onBeforeMount(async () => {
 
     const result = await store.getData('relations', id);
     relships.value = result.data;
+
+    const res = await store.getData('works', { authors: id });
+    works.value = res.data;
   }
 
   persons.value = Object.values(data.persons).map((x: IPerson) => ({

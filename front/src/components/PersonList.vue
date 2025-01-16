@@ -64,6 +64,8 @@
 
         </el-tooltip>
 
+        <el-tag v-if="stats?.[value?.id]?.length" type="info" effect="plain" size="large">{{ stats?.[value?.id]?.length }}</el-tag>
+
         <el-tag v-if="value?.note" effect="plain" size="large">{{ value.note }}</el-tag>
 
       </el-space>
@@ -85,12 +87,19 @@ const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
 const form = reactive({ firstname: '', lastname: '', patroname: '', sex: 1, wikidata: '', note: '' } as IPerson);
 const persons = reactive([] as Array<IPerson>);
 const filterString = ref('');
+const stats = ref();
 
 onBeforeMount(async () => {
   const { data } = await store.getData('persons');
   if (data) {
     persons.push(...data.sort((a: IPerson, b: IPerson) => b.id - a.id));
   }
+
+  const res = await store.getData('persons/works');
+  if (res?.data) {
+    stats.value = res.data;
+  }
+
   isLoaded.value = true;
 });
 

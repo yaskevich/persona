@@ -30,6 +30,20 @@ const getText = (id) => {
   return '';
 };
 
+const removeText = (user, id) => {
+  const filePathHTML = path.join(textsDir, `${id}.html`);
+  if (fs.existsSync(filePathHTML)) {
+    console.log('remove HTML', id);
+    fs.unlinkSync(filePathHTML);
+  }
+  const filePathCONLL = path.join(textsDir, `${id}.conll`);
+  if (fs.existsSync(filePathCONLL)) {
+    console.log('remove CONLL', id);
+    fs.unlinkSync(filePathCONLL);
+  }
+  return { id };
+};
+
 const storeText = async (id, text) => {
   if (text && id) {
     const info = await db.getData('works', { id });
@@ -56,13 +70,15 @@ const textToConll = async (user, props, authorship) => {
   } = props;
   let result = 0;
   if (hash) {
-    const filePath = path.join(textsDir, `${id}.html`);
-    const content = fs.readFileSync(filePath, 'utf8');
+    const fileBasePath = path.join(textsDir, String(id));
+    const content = fs.readFileSync(`${fileBasePath}.html`, 'utf8');
+    console.log('==============================');
+    console.log('ID', id);
     console.log(new Date().toUTCString(), 'sent to API');
     let conll = await nlp.udpipe(content, lang);
     console.log(new Date().toUTCString(), 'conll received');
-    conll = nlp.addHeader(conll, id, hash, authorship, title, yeardate);
-    fs.writeFileSync(`${filePath}.conll`, conll);
+    conll = nlp.addHeader(conll, id, hash, authorship, title, yeardate, lang);
+    fs.writeFileSync(`${fileBasePath}.conll`, conll);
     console.log(new Date().toUTCString(), 'written');
     const parsed = nlp.conllToArray(conll);
     result = await db.saveCorpus(user, id, parsed);
@@ -119,7 +135,11 @@ const importFiles = async () => {
           const buf = fs.readFileSync(sourcePath);
           const { options, html } = nlp.parseEbook(buf);
           // console.log(options);
-          info.author = persons?.[options.author];
+          if (!html) {
+            console.log('File error', fileName);
+            process.exit();
+          }
+          info.author = persons?.[options.author] || persons?.[options.author.replace('ь', '')];
           info.title = options.title;
           info.lang = options.lang;
           info.content = html;
@@ -147,10 +167,11 @@ const importFiles = async () => {
           });
           // console.log(id);
           const filePath = path.join(textsDir, `${id}.html`);
-          fs.writeFileSync(filePath, info.content);
+          const text = info.content.replaceAll(' - ', ' — ').replaceAll("'", 'ʼ').replaceAll('>-', '>—');
+          fs.writeFileSync(filePath, text);
           fs.appendFileSync(imptd, `${fileName}\n`);
         } else {
-          console.error(info.author, info.title, fileName);
+          console.error('Import error:', info.author, info.title, fileName);
         }
       }
     }
@@ -162,6 +183,7 @@ export default {
   importFiles,
   getText,
   storeText,
+  removeText,
   textToConll,
   annotateWorks,
   analyze,

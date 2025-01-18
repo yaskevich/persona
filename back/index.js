@@ -75,6 +75,8 @@ app.post('/api/text', auth, async (req, res) => res.json(await ops.storeText(req
 
 app.get('/api/text', auth, async (req, res) => res.send(ops.getText(req.query.id)));
 
+app.delete('/api/text', auth, async (req, res) => res.json(await ops.removeText(req.user, Number(req.query.id))));
+
 app.get('/api/analyze', auth, async (req, res) => res.send(await ops.analyze(req.user, req.query)));
 
 app.post('/api/relation', auth, async (req, res) => res.json(await db.saveRelation(req.user, req.body)));
@@ -84,6 +86,8 @@ app.delete('/api/relation', auth, async (req, res) => res.json(await db.removeRe
 app.get('/api/relation', auth, async (req, res) => res.json(await db.getRelation(req.query.id)));
 
 app.get('/api/relations', auth, async (req, res) => res.json(await db.getRelationsForPerson(req.query.id)));
+
+app.get('/api/persons/works', auth, async (req, res) => res.json(await db.getPersonsWorks(req.query.id)));
 
 app.post('/api/:table', auth, async (req, res) => {
   console.log('POST params', req.params, 'payload', req.body);

@@ -21,10 +21,13 @@ import Color from '@tiptap/extension-color';
 import Placeholder from '@tiptap/extension-placeholder';
 import Blockquote from '@tiptap/extension-blockquote';
 import Bold from '@tiptap/extension-bold';
+import Italic from '@tiptap/extension-italic';
 import Image from '@tiptap/extension-image';
 import Dropcursor from '@tiptap/extension-dropcursor';
 import CharacterCount from '@tiptap/extension-character-count';
 import Gapcursor from '@tiptap/extension-gapcursor';
+import Heading from '@tiptap/extension-heading';
+import History from '@tiptap/extension-history';
 import store from '../store';
 
 const vuerouter = useRoute();
@@ -51,6 +54,12 @@ const customEditor = new Editor({
         Document,
         Paragraph,
         Text,
+        Heading.configure({
+            levels: [1, 2, 3],
+        }),
+        History.configure({
+            depth: 5,
+        }),
         Color,
         Placeholder.configure({
             placeholder: 'Put a text here...',
@@ -62,6 +71,7 @@ const customEditor = new Editor({
                 class: 'quote',
             },
         }),
+        Italic,
         Bold.configure({
             HTMLAttributes: {
                 class: 'em',
@@ -103,7 +113,7 @@ onBeforeMount(async () => {
             // console.log('this work', work.value);
         }
         if (work?.value?.hash) {
-            const result = await store.getData('text', work.value.hash);
+            const result = await store.getData('text', id);
             customEditor.commands.setContent(result.data);
         }
     }
@@ -218,6 +228,10 @@ onBeforeMount(async () => {
 
 button {
     margin-right: 1px;
+}
+
+:deep(blockquote) {
+    background: rgba(244, 245, 246, 0.745);
 }
 
 :deep(.csl-entry) {

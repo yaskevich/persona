@@ -51,12 +51,10 @@ const databaseScheme = {
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     genre INTEGER,
-    genrename TEXT,
     authors INTEGER[] NULL,
     hash TEXT,
     comment TEXT,
     yeardate INTEGER,
-    parsed BOOLEAN,
     tokens INTEGER,
     lang TEXT`,
 
@@ -205,7 +203,7 @@ const initDatabase = async () => {
 };
 
 if (tables.length !== Object.keys(databaseScheme).length) {
-  console.log(tables.length, Object.keys(databaseScheme).length);
+  // console.log(tables.length, Object.keys(databaseScheme).length);
   console.log('initializing database: started');
   try {
     await pool.query('BEGIN');
@@ -524,5 +522,20 @@ export default {
   async getTokensCount() {
     const result = await pool.query('SELECT COUNT(*) FROM corpus');
     return Number(result.rows.shift()?.count);
+  },
+  async getPersonsWorks() {
+    const result = await pool.query('SELECT id, UNNEST(authors) as person FROM works');
+    const obj = {};
+    // eslint-disable-next-line no-return-assign
+    result.rows.forEach((x) => (obj?.[String(x.person)] ? obj[String(x.person)].push(x.id) : obj[String(x.person)] = [x.id]));
+    return obj;
+  },
+  async getProperNouns(popularity = 0) {
+    const result = await pool.query(`SELECT lemma, count(lemma)as freq, count(distinct wid) as qty from corpus where upos = 'PROPN' group by lemma ${popularity ? `having (count(distinct wid) > ${popularity})` : ''} order by freq desc`);
+    return result?.rows;
+  },
+  async getLemmasForVectors() {
+    const result = await pool.query('select wid, sid, tid, lemma from corpus order by wid, sid, tid');
+    return result.rows;
   }
 };

@@ -3,6 +3,7 @@
 .ftpconfig
 dist/
 texts/
+data/
 files/
 # Logs
 logs

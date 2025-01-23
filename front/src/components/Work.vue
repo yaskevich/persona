@@ -37,14 +37,18 @@
       <el-input-number v-model="work.yeardate" :controls="false" />
     </el-form-item>
 
+    <el-form-item :label="store.loc('lang')">
+      <el-input v-model="work.lang" />
+    </el-form-item>
+
     <el-form-item :label="store.loc('comment')">
       <el-input type="textarea" v-model="work.comment" />
     </el-form-item>
 
-    <el-form-item :label="store.loc('text')" v-if="work?.genre && work?.yeardate && work?.id">
+    <el-form-item :label="store.loc('text')" v-if="work?.id">
       <el-button @click="router.push(`/work/${id}/text`)" type="warning">{{ work.hash ? store.loc('edit') :
         store.loc('add') }}</el-button>
-      <el-button @click="parseText" type="warning" v-if="work?.hash">{{
+      <el-button @click="parseText" type="warning" v-if="work?.genre && work?.yeardate && work?.hash">{{
         store.loc('parse') }}</el-button>
       <el-tag size="large" v-if="work?.tokens">{{ work.tokens }}</el-tag>
     </el-form-item>
@@ -101,7 +105,7 @@ const isLoaded = ref(false);
 
 const parseText = async () => {
   const { data } = await store.getData('analyze', id);
-  work.value.tokens = data.tokens;
+  work.value.tokens = data;
   console.log(data);
 };
 
@@ -148,11 +152,14 @@ const setDefaultAuthor = () => mainperson ? work.value.authors = [mainperson] : 
 const confirm = () => {
   formRef.value?.validate(async (valid: boolean) => {
     if (valid) {
-      const result = await store.postData('works', work.value);
+      const { data } = await store.postData('works', work.value);
       /* console.log(result); */
-      if ('data' in result && 'id' in result.data) {
+      if (data?.id) {
         // router.push('/works');
-        work.value.id = result.data.id;
+        if (!work?.value?.id) {
+          router.push('/work/' + data.id);
+        }
+        work.value.id = data.id;
       } else {
         console.log('error!');
       }
@@ -164,9 +171,12 @@ const confirm = () => {
 
 const deleteWork = async () => {
   // console.log(work.value.id);
-  const result = await store.deleteById('works', work.value.id);
-  if ('data' in result && 'id' in result.data) {
-    router.push('/works');
+  const { data } = await store.deleteByName('text', { id: work.value.id });
+  if (data?.id === work.value.id) {
+    const result = await store.deleteById('works', work.value.id);
+    if ('data' in result && 'id' in result.data) {
+      router.push('/works');
+    }
   }
 };
 

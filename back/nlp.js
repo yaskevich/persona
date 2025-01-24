@@ -104,13 +104,14 @@ export default {
       return {};
     }
   },
-  async udpipe(content, title, langID) {
+  async udpipe(id, content, title, lang) {
     const body = new FormData();
     body.set('tokenizer', '');
     body.set('tagger', '');
     body.set('parser', '');
-    body.set('model', langID);
-    body.set('data', `${title}\n\n${content.replace(/(?<=<\/h\d>)/gm, '\n\n').replace(/<[^>]*>?/gm, ' ').replaceAll("'", '’')}`);
+    body.set('model', lang);
+    const data = (`${title}\n\n${content}`).replace(/(?<=<\/h\d>)/gm, '\n\n').replace(/<[^>]*>?/gm, ' ').replaceAll("'", '’');
+    body.set('data', data);
 
     const response = await fetch('https://lindat.mff.cuni.cz/services/udpipe/api/process', { method: 'POST', body });
 
@@ -119,7 +120,7 @@ export default {
       return json.result;
     }
 
-    console.log(`Response status: ${response.status}`);
+    console.log(`[${id}] Response status: ${response.status}`);
     // throw new Error(`Response status: ${response.status}`);
     return '';
   },

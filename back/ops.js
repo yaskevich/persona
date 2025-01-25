@@ -72,17 +72,19 @@ const textToConll = async (user, props, authorship) => {
   if (hash) {
     const fileBasePath = path.join(textsDir, String(id));
     const content = fs.readFileSync(`${fileBasePath}.html`, 'utf8');
-    console.log('==============================');
-    console.log('ID', id);
-    console.log(new Date().toUTCString(), 'sent to API');
-    let conll = await nlp.udpipe(content, lang);
-    console.log(new Date().toUTCString(), 'conll received');
-    conll = nlp.addHeader(conll, id, hash, authorship, title, yeardate, lang);
-    fs.writeFileSync(`${fileBasePath}.conll`, conll);
-    console.log(new Date().toUTCString(), 'written');
-    const parsed = nlp.conllToArray(conll);
-    result = await db.saveCorpus(user, id, parsed);
-    console.log(new Date().toUTCString(), 'saved');
+    // console.log('==============================');
+    // console.log('ID', id);
+    // console.log(new Date().toUTCString(), 'sent to API');
+    let conll = await nlp.udpipe(id, content, title, lang);
+    if (conll) {
+      // console.log(new Date().toUTCString(), 'conll received');
+      conll = nlp.addHeader(conll, id, hash, authorship, title, yeardate, lang);
+      fs.writeFileSync(`${fileBasePath}.conll`, conll);
+      // console.log(new Date().toUTCString(), 'written');
+      const parsed = nlp.conllToArray(conll);
+      result = await db.saveCorpus(user, id, parsed);
+      // console.log(new Date().toUTCString(), 'saved');
+    }
   }
   return result;
 };

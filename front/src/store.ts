@@ -26,7 +26,7 @@ const state = reactive({
 } as IState);
 
 const loc = (id: string) => {
-  return id ? (localDict?.[id] ? localDict[id][((<any>state)?.user?.settings?.lang as any) || 0] : id) : '...';
+  return id ? (localDict?.[id] ? localDict[id][((<any>state)?.user?.settings?.uilang as any) || 0] : id) : '...';
 };
 
 const getHumanReadablePrivs = (id: number) => {
@@ -141,12 +141,11 @@ const deleteById = async (table: string, id: string | number): Promise<any> => {
   console.log('No token. Fail.');
 };
 
-const deleteRelation = async (data: IRelship): Promise<any> => {
+const deleteByName = async (name: string, data: Object): Promise<any> => {
   if (state.token) {
     try {
       const config = { headers: { Authorization: 'Bearer ' + state.token }, params: { ...data } };
-      // if(id) { config["params"] = { id: id }; }
-      const response = await axios.delete('/api/relations', config);
+      const response = await axios.delete('/api/' + name, config);
       console.log(response.data);
       return response;
     } catch (error) {
@@ -250,7 +249,7 @@ const renderRelations = (datum: IRelation, flipStatus = false) =>
   `${flipStatus ? datum.name2 : datum.name1} ${datum.bilateral ? '⟺' : '⟹'} ${flipStatus ? datum.name1 : datum.name2}`;
 
 export default {
-  deleteRelation,
+  deleteByName,
   renderRelations,
   dateDropTimeZone,
   nest,

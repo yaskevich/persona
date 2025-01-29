@@ -13,11 +13,20 @@
       <el-input placeholder="..." v-model="settings.title" class="text-input"></el-input>
     </el-form-item>
 
-    <el-form-item prop="lang" :label="loc('lang')">
-      <el-select v-model="settings.lang" :placeholder="loc('lang')">
+    <el-form-item prop="uilang" :label="loc('uilang')">
+      <el-select v-model="settings.uilang" :placeholder="loc('uilang')">
         <el-option v-for="(item, key) in langs" :key="key" :label="item" :value="key">
         </el-option>
       </el-select>
+    </el-form-item>
+
+    <el-form-item prop="lang" :label="loc('textlang')">
+      <el-input placeholder="..." v-model="settings.lang" class="text-input"></el-input>
+
+      <!-- <el-select v-model="settings.lang" :placeholder="loc('lang')">
+        <el-option v-for="(item, key) in langs" :key="key" :label="item" :value="key">
+        </el-option>
+      </el-select> -->
     </el-form-item>
 
   </el-form>

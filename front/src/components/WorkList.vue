@@ -32,9 +32,8 @@
     </el-row>
 
     <el-row type="flex" justify="center">
-      <el-pagination layout="prev, pager, next" :total="itemsCount" hide-on-single-page background
-          :page-size="itemsPerPage"
-        @update:current-page="updatePage" />
+      <el-pagination :current-page="page" layout="prev, pager, next" :total="itemsCount" hide-on-single-page background
+        :page-size="itemsPerPage" @update:current-page="updatePage" />
     </el-row>
 
   </div>
@@ -46,14 +45,28 @@ import { reactive, ref, onBeforeMount, computed } from 'vue';
 import store from '../store';
 import MainTitle from './MainTitle.vue';
 import router from '../router';
+import { useRoute } from 'vue-router';
+
+const vuerouter = useRoute();
+
+const page = ref(1);
+const pageIn = Number(vuerouter.params.page);
+if (pageIn) {
+  page.value = pageIn;
+}
+
+console.log(page.value);
+
 
 const itemsPerPage = 15;
 const itemsCount = ref(0);
-const pageRange = ref([0, itemsPerPage]);
-const updatePage = (page: number) => {
+const pageRange = ref([(page.value - 1) * itemsPerPage, page.value * itemsPerPage]);
+const updatePage = (newPage: number) => {
   // console.log(page);
-  const last = page * itemsPerPage;
+  page.value = newPage;
+  const last = page.value * itemsPerPage;
   pageRange.value = [last - itemsPerPage, last];
+  router.push(`/works/${page.value || '1'}`);
 }
 
 const filtered = computed(() => {

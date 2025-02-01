@@ -147,7 +147,7 @@ const selectPerson = () => {
 };
 
 const removeRelation = async (relship: IRelship, num: number) => {
-  const result = await store.deleteRelation(relship);
+  const result = await store.deleteByName('relations',relship);
   console.log('RM', relship, num, result?.data);
   if (result?.data === 1) {
     relships.value.splice(num, 1);

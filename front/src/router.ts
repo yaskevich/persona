@@ -70,7 +70,7 @@ const routes = [
     component: () => import('./components/Person.vue'),
   },
   {
-    path: '/works',
+    path: '/works/:page?',
     // component: WorkList,
     name: 'WorkList',
     component: () => import('./components/WorkList.vue'),

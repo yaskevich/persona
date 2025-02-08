@@ -537,5 +537,9 @@ export default {
   async getLemmasForVectors() {
     const result = await pool.query('select wid, sid, tid, lemma from corpus order by wid, sid, tid');
     return result.rows;
+  },
+  async getAnnotation(id) {
+    const result = await pool.query('SELECT * FROM corpus WHERE wid = $1 ORDER BY sid, tid', [id]);
+    return result.rows;
   }
 };

@@ -79,6 +79,8 @@ app.delete('/api/text', auth, async (req, res) => res.json(await ops.removeText(
 
 app.get('/api/analyze', auth, async (req, res) => res.send(await ops.analyze(req.user, req.query)));
 
+app.get('/api/annotation', auth, async (req, res) => res.json(await db.getAnnotation(req.query.id)));
+
 app.post('/api/relation', auth, async (req, res) => res.json(await db.saveRelation(req.user, req.body)));
 
 app.delete('/api/relation', auth, async (req, res) => res.json(await db.removeRelation(req.user, req.body)));

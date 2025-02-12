@@ -111,6 +111,11 @@ const routes = [
     component: () => import('./components/Text.vue'),
   },
   {
+    path: '/work/:id?/annotation',
+    name: 'Anno',
+    component: () => import('./components/Anno.vue'),
+  },
+  {
     path: '/genre/:id?',
     name: 'Genre',
     component: () => import('./components/Genre.vue'),

@@ -3,8 +3,8 @@
     <!-- <el-button @click="saveText" type="warning">{{ store.loc('save') }}</el-button> -->
     <el-auto-resizer>
         <template #default="{ height, width }">
-            <el-tabs v-model="activeName" @tab-click="handleClick" v-if="arr?.length">
-                <el-tab-pane label="Text" name="first">
+            <el-tabs v-model="activeTab" v-if="arr?.length">
+                <el-tab-pane :label="store.loc('text')" name="text">
                     <el-table-v2 :data="arr" :columns="columns" :width="width" :height="height" fixed
                         v-if="arr?.length">
                         <!-- <el-table-column prop="form" :label="store.loc('word')" width="180" />
@@ -28,8 +28,16 @@
 </el-table-column> -->
                     </el-table-v2>
                 </el-tab-pane>
-                <el-tab-pane label="Statistics" name="second">
-                    {{ getPos(arr) }}
+                <el-tab-pane :label="store.loc('stats')" name="stats">
+                    {{ }}
+                    <el-descriptions class="margin-top" :title="store.loc('pos')" :column="1" border
+                        style="max-width: 400px;">
+                        <el-descriptions-item v-for="v in getPos(arr)">
+                            <template #label>
+                                {{ v[0] }}
+                            </template> {{ v[1] }}
+                        </el-descriptions-item>
+                    </el-descriptions>
                 </el-tab-pane>
             </el-tabs>
         </template>
@@ -54,28 +62,23 @@ import type { HeaderCellSlotProps } from 'element-plus';
 import type { TabsPaneContext } from 'element-plus';
 import { useRoute } from 'vue-router';
 import store from '../store';
+
 const colors = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928', '#FFD70', '#C0C0C0'];
-
-const activeName = ref('first');
-
-const getPos = (datum: Array<ICONLL>) => datum?.reduce((stat: keyable, v) => (stat[v.upos] = (stat[v.upos] || 0) + 1, stat), {});
-
-const handleClick = (tab: TabsPaneContext, event: Event) => {
-    console.log(tab, event)
-}
+const activeTab = ref('text');
 const vuerouter = useRoute();
 const work = ref({} as IWork);
 const arr = ref<Array<ICONLL>>();
-const html = ref('');
 const id = String(vuerouter.params.id);
 const tags = ref();
 
 const columns: Column<any>[] = [
     { key: 'form', title: store.loc('word'), width: 100, dataKey: 'form' },
     { key: 'lemma', title: store.loc('lemma'), width: 100, dataKey: 'lemma' },
-    { key: 'upos', dataKey: 'upos', width: 150, title: 'PoS', cellRenderer: ({ cellData: upos }) => <ElTag disable-transitions color={colors[tags.value.indexOf(upos)]}>{upos} </ElTag>, },
-    { key: 'feats', dataKey: 'feats', width: 400, title: 'Features', cellRenderer: ({ cellData: feats }) => feats ? <ElSpace> {Object.entries(feats)?.map((x: any) => <ElTooltip content={x[0]}><ElTag disable-transitions> {x?.[1]} </ElTag></ElTooltip>)} </ElSpace> : '', },
+    { key: 'upos', dataKey: 'upos', width: 150, title: store.loc('pos'), cellRenderer: ({ cellData: upos }) => <ElTag disable-transitions color={colors[tags.value.indexOf(upos)]}>{upos} </ElTag>, },
+    { key: 'feats', dataKey: 'feats', width: 400, title: store.loc('features'), cellRenderer: ({ cellData: feats }) => feats ? <ElSpace> {Object.entries(feats)?.map((x: any) => <ElTooltip content={x[0]}><ElTag disable-transitions> {x?.[1]} </ElTag></ElTooltip>)} </ElSpace> : '', },
 ];
+
+const getPos = (datum: Array<ICONLL>) => Object.entries(datum?.reduce((stat: keyable, v) => (stat[v.upos] = (stat[v.upos] || 0) + 1, stat), {})).sort(([, a], [, b]) => b - a);
 
 const filterTag = (value: string, row: ICONLL) => {
     return row.upos === value

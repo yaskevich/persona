@@ -4,6 +4,26 @@
     <el-auto-resizer>
         <template #default="{ height, width }">
             <el-tabs v-model="activeTab" v-if="arr?.length">
+                <el-tab-pane :label="store.loc('stats')" name="stats">
+                    {{ }}
+                    <el-descriptions class="margin-top" :title="store.loc('pos')" :column="1" border
+                        style="max-width: 400px;">
+                        <el-descriptions-item v-for="v in getStats(arr, 'upos')">
+                            <template #label>
+                                {{ v[0] }}
+                            </template> {{ v[1] }}
+                        </el-descriptions-item>
+                    </el-descriptions>
+
+                    <el-descriptions class="margin-top" :title="store.loc('lemma')" :column="1" border
+                        style="max-width: 400px;">
+                        <el-descriptions-item v-for="v in getStats(arr, 'lemma')">
+                            <template #label>
+                                {{ v[0] }}
+                            </template> {{ v[1] }}
+                        </el-descriptions-item>
+                    </el-descriptions>
+                </el-tab-pane>
                 <el-tab-pane :label="store.loc('text')" name="text">
                     <el-table-v2 :data="arr" :columns="columns" :width="width" :height="height" fixed
                         v-if="arr?.length">
@@ -27,17 +47,6 @@
             </template>
 </el-table-column> -->
                     </el-table-v2>
-                </el-tab-pane>
-                <el-tab-pane :label="store.loc('stats')" name="stats">
-                    {{ }}
-                    <el-descriptions class="margin-top" :title="store.loc('pos')" :column="1" border
-                        style="max-width: 400px;">
-                        <el-descriptions-item v-for="v in getPos(arr)">
-                            <template #label>
-                                {{ v[0] }}
-                            </template> {{ v[1] }}
-                        </el-descriptions-item>
-                    </el-descriptions>
                 </el-tab-pane>
             </el-tabs>
         </template>
@@ -64,7 +73,7 @@ import { useRoute } from 'vue-router';
 import store from '../store';
 
 const colors = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928', '#FFD70', '#C0C0C0'];
-const activeTab = ref('text');
+const activeTab = ref('stats');
 const vuerouter = useRoute();
 const work = ref({} as IWork);
 const arr = ref<Array<ICONLL>>();
@@ -78,7 +87,7 @@ const columns: Column<any>[] = [
     { key: 'feats', dataKey: 'feats', width: 400, title: store.loc('features'), cellRenderer: ({ cellData: feats }) => feats ? <ElSpace> {Object.entries(feats)?.map((x: any) => <ElTooltip content={x[0]}><ElTag disable-transitions> {x?.[1]} </ElTag></ElTooltip>)} </ElSpace> : '', },
 ];
 
-const getPos = (datum: Array<ICONLL>) => Object.entries(datum?.reduce((stat: keyable, v) => (stat[v.upos] = (stat[v.upos] || 0) + 1, stat), {})).sort(([, a], [, b]) => b - a);
+const getStats = (datum: Array<ICONLL>, key: 'upos' | 'lemma') => Object.entries(datum?.reduce((stat: keyable, v) => (stat[v[key]] = (stat[v[key]] || 0) + 1, stat), {})).sort(([, a], [, b]) => b - a);
 
 const filterTag = (value: string, row: ICONLL) => {
     return row.upos === value
@@ -100,3 +109,9 @@ onBeforeMount(async () => {
     }
 });
 </script>
+
+<style>
+.margin-top {
+    margin-top: 1rem;
+}
+</style>

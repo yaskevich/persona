@@ -73,15 +73,17 @@
 // import { defineComponent, onBeforeMount, ref, onMounted, onUnmounted, computed, } from 'vue'
 import { onBeforeMount, ref, computed } from 'vue';
 import router from './router';
+import { useRoute } from 'vue-router';
 import store from './store';
 import Login from './components/Login.vue';
 import Profile from './components/Profile.vue';
 import { useTitle } from 'vue-page-title';
 import 'element-plus/theme-chalk/display.css';
 
+const vuerouter = useRoute();
 const dataReady = ref(false);
 
-useTitle(computed(() => (store.state?.user?.settings?.title || '∙')));
+useTitle(computed(() => (store.state?.user?.settings?.title || '∙') + ' ∙ ' + vuerouter.fullPath.split('/').slice(1).map((x: string) => store.loc(x)).join(' ∙ ').replace('∙', '')));
 
 
 const menuScheme = [

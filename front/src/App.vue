@@ -1,72 +1,74 @@
 <template>
-  <div id="main" v-if="dataReady">
-    <div v-if="loggedIn">
-      <el-container>
-        <el-aside width="210px" style="overflow-y: hidden;" class="hidden-sm-and-down">
-          <el-menu class="el-menu-vertical-demo" :router="true" :default-openeds="['content']"
-            :default-active="router.currentRoute.value.path">
-            <el-sub-menu v-for="(v, k) in menuScheme" :index="v.title" :key="k">
-              <template #title><i :class="v.icon"></i><span>{{ loc(v.title) }}</span></template>
-              <el-menu-item v-for="item in v.data" :index="'/' + item" :key="item">{{ loc(item) }}</el-menu-item>
-            </el-sub-menu>
-          </el-menu>
-        </el-aside>
+  <el-config-provider :locale="locale">
+    <div id="main" v-if="dataReady">
+      <div v-if="loggedIn">
         <el-container>
-          <el-header style="text-align: right;" class="el-header">
-            <el-menu :default-active="router.currentRoute.value.path" class="el-menu-demo" mode="horizontal"
-              :ellipsis="false" @select="handleSelect">
-              <el-menu-item index="index">
-                <img style="height: 50%" src="/android-chrome-192x192.png" alt="Project logo" />
-              </el-menu-item>
-              <div class="flex-grow" />
-              <el-sub-menu index="workspace" class="hidden-md-and-up">
-
-                <template #title>{{ loc('workspace') }}</template>
-                <el-menu-item-group v-for="(v, k) in menuScheme" :index="v.title" :key="k">
-
-                  <template #title><i :class="v.icon"></i><span>{{ loc(v.title) }}</span></template>
-                  <el-menu-item v-for="item in v.data" :index="'/' + item" :key="item">{{ loc(item) }}</el-menu-item>
-                </el-menu-item-group>
-              </el-sub-menu>
-              <el-sub-menu index="userspace">
-
-                <template #title> <el-icon><el-icon-avatar /></el-icon>
-                  {{ state?.user?.firstname }}
-                </template>
-                <el-menu-item index="/profile"> {{ loc("profile") }}
-                </el-menu-item>
-                <el-menu-item index="logout"> {{ loc("logout") }}
-                </el-menu-item>
+          <el-aside width="210px" style="overflow-y: hidden;" class="hidden-sm-and-down">
+            <el-menu class="el-menu-vertical-demo" :router="true" :default-openeds="['content']"
+              :default-active="router.currentRoute.value.path">
+              <el-sub-menu v-for="(v, k) in menuScheme" :index="v.title" :key="k">
+                <template #title><i :class="v.icon"></i><span>{{ loc(v.title) }}</span></template>
+                <el-menu-item v-for="item in v.data" :index="'/' + item" :key="item">{{ loc(item) }}</el-menu-item>
               </el-sub-menu>
             </el-menu>
-          </el-header>
-          <el-main>
-            <router-view />
-          </el-main>
+          </el-aside>
+          <el-container>
+            <el-header style="text-align: right;" class="el-header">
+              <el-menu :default-active="router.currentRoute.value.path" class="el-menu-demo" mode="horizontal"
+                :ellipsis="false" @select="handleSelect">
+                <el-menu-item index="index">
+                  <img style="height: 50%" src="/android-chrome-192x192.png" alt="Project logo" />
+                </el-menu-item>
+                <div class="flex-grow" />
+                <el-sub-menu index="workspace" class="hidden-md-and-up">
 
+                  <template #title>{{ loc('workspace') }}</template>
+                  <el-menu-item-group v-for="(v, k) in menuScheme" :index="v.title" :key="k">
+
+                    <template #title><i :class="v.icon"></i><span>{{ loc(v.title) }}</span></template>
+                    <el-menu-item v-for="item in v.data" :index="'/' + item" :key="item">{{ loc(item) }}</el-menu-item>
+                  </el-menu-item-group>
+                </el-sub-menu>
+                <el-sub-menu index="userspace">
+
+                  <template #title> <el-icon><el-icon-avatar /></el-icon>
+                    {{ state?.user?.firstname }}
+                  </template>
+                  <el-menu-item index="/profile"> {{ loc("profile") }}
+                  </el-menu-item>
+                  <el-menu-item index="logout"> {{ loc("logout") }}
+                  </el-menu-item>
+                </el-sub-menu>
+              </el-menu>
+            </el-header>
+            <el-main>
+              <router-view />
+            </el-main>
+
+          </el-container>
         </el-container>
-      </el-container>
-    </div>
-    <div v-else style="margin-top:4rem;text-align:center;">
-      <div style="max-width:600px;display: inline-block;margin: 0 auto;">
+      </div>
+      <div v-else style="margin-top:4rem;text-align:center;">
+        <div style="max-width:600px;display: inline-block;margin: 0 auto;">
 
-        <el-row type="flex" justify="center">
-          <h3>{{ loc('userauth') }}</h3>
-        </el-row>
+          <el-row type="flex" justify="center">
+            <h3>{{ loc('userauth') }}</h3>
+          </el-row>
 
-        <Login />
+          <Login />
 
-        <el-divider>{{ loc("or") }}</el-divider>
-        <h3>{{ loc("userreg") }}</h3>
+          <el-divider>{{ loc("or") }}</el-divider>
+          <h3>{{ loc("userreg") }}</h3>
 
-        <Profile />
+          <Profile />
 
+        </div>
       </div>
     </div>
-  </div>
-  <div v-else>
-    {{ loc("loading") }}
-  </div>
+    <div v-else>
+      {{ loc("loading") }}
+    </div>
+  </el-config-provider>
 </template>
 
 <script setup lang="ts">
@@ -79,12 +81,16 @@ import Login from './components/Login.vue';
 import Profile from './components/Profile.vue';
 import { useTitle } from 'vue-page-title';
 import 'element-plus/theme-chalk/display.css';
+import { ElConfigProvider } from 'element-plus';
+import en from 'element-plus/es/locale/lang/en';
+import ru from 'element-plus/es/locale/lang/ru';
+// Belarusian locale for Element Plus is not available, despite it exists for Day.js!
 
 const vuerouter = useRoute();
 const dataReady = ref(false);
 
 useTitle(computed(() => (store.state?.user?.settings?.title || '∙') + ' ∙ ' + vuerouter.fullPath.split('/').slice(1).map((x: string) => store.loc(x)).join(' ∙ ').replace('∙', '')));
-
+const locale = computed(() => (store?.state?.user?.settings?.uilang && store.locales[store.state.user.settings.uilang] === 'ru' ? ru : en));
 
 const menuScheme = [
   {

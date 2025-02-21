@@ -144,6 +144,12 @@ const routes = [
     // component: Home,
     component: () => import('./components/Home.vue'),
   },
+  {
+    path: '/places',
+    name: 'PlaceList',
+    component: () => import('./components/PlaceList.vue'),
+  },
+
 ];
 
 const router = createRouter({

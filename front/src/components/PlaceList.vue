@@ -1,6 +1,15 @@
 <template>
-Places
-{{ places }}
+  <div v-if="isLoaded">
+    <MainTitle :title="store.loc('places')" :callback="() => router.push('/place/')"></MainTitle>
+    <el-row v-for="(value, key) in places" :gutter="20" :key="key">
+      <el-space>
+          <el-button :type="value.wikidata ? 'primary' : 'info'" plain
+             @click="router.push('/place/' + value.id)">
+          {{ value.name }}
+          </el-button>
+      </el-space>
+    </el-row>
+  </div>
 </template>
 
 <script setup lang="ts">

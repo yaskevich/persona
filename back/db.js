@@ -103,6 +103,7 @@ const databaseScheme = {
     agent INTEGER,
     datedesc TEXT,
     place TEXT,
+    place_id INTEGER,
     title TEXT,
     acts INTEGER[] NULL,
     persons1 INTEGER[] NULL,
@@ -153,6 +154,13 @@ const databaseScheme = {
     deprel TEXT,
     deps TEXT,
     misc JSON`,
+
+  places: `
+    id SERIAL PRIMARY KEY,
+    name TEXT,
+    location POINT,
+    wikidata INTEGER,
+    note TEXT`,
 
 };
 

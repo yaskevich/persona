@@ -149,7 +149,11 @@ const routes = [
     name: 'PlaceList',
     component: () => import('./components/PlaceList.vue'),
   },
-
+  {
+    path: '/place/:id?',
+    name: 'Place',
+    component: () => import('./components/Place.vue'),
+  },
 ];
 
 const router = createRouter({

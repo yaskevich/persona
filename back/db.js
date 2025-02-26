@@ -339,9 +339,12 @@ export default {
           } else if (dataType === 'boolean') {
             record[key] = Boolean(data[key]);
           } else {
-            // string
             if (data?.[key] && dataType !== 'json') {
-              data[key] = data[key].trim();
+              if (dataType === 'point') {
+                data[key] = `(${data[key]?.x},${data[key]?.y})`;
+              } else { // string
+                data[key] = data[key].trim();
+              }
             }
             // check for well-formed string && prevent SQLi
             record[key] = pgFormat.literal(data[key]);

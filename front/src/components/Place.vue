@@ -5,7 +5,7 @@
 
     <el-form :model="place" ref="formRef" label-width="6rem" :rules="rules" v-if="isLoaded">
 
-        <el-form-item prop="title" :label="store.loc('name')">
+        <el-form-item prop="name" :label="store.loc('name')">
             <el-input :placeholder="store.loc('title')" v-model="place.name" class="text-input"></el-input>
         </el-form-item>
 
@@ -29,13 +29,15 @@
 
 
 <script setup lang="ts">
-import { onBeforeMount, ref, reactive } from 'vue';
+import { ElForm } from 'element-plus';
+import { ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
 import store from '../store';
 import { useRoute } from 'vue-router';
 import MainTitle from './MainTitle.vue';
 import router from '../router';
 
-let place = ref({} as IPlace);
+const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
+const place = ref({} as IPlace);
 const vuerouter = useRoute();
 const id = String(vuerouter.params.id);
 const isLoaded = ref(false);
@@ -52,21 +54,35 @@ const rules = {
 };
 
 const confirm = () => {
-    console.log("ok");
+    formRef.value?.validate(async (valid: boolean) => {
+        if (valid) {
+            const { data } = await store.postData('places', place.value);
+            if (data?.id) {
+                if (!place?.value?.id) {
+                    router.push('/place/' + data.id);
+                }
+                place.value.id = data.id;
+            } else {
+                console.log('error!');
+            }
+        } else {
+            return false;
+        }
+    });
 };
 
 onBeforeMount(async () => {
     if (id) {
         const { data } = await store.getData('places', id);
         if (data) {
-            const datum = data.shift();
-            if (!datum?.location) {
-                datum.location = { x: 0, y: 0 };
-            }
-            place.value = datum;
+            place.value = data.shift();
         }
-        isLoaded.value = true;
     }
+    if (!place.value?.location) {
+        place.value.location = { x: 0, y: 0 };
+    }
+
+    isLoaded.value = true;
 });
 
 </script>

@@ -96,7 +96,7 @@ const menuScheme = [
   {
     title: 'content',
     icon: 'el-icon-message',
-    data: ['home', 'facts', 'persons', 'works', 'books', 'genres', 'acts', 'refs', 'network', 'relations'],
+    data: ['home', 'facts', 'persons', 'works', 'books', 'genres', 'acts', 'places', 'refs', 'network', 'relations'],
   },
   {
     title: 'admin',

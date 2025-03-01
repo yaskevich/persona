@@ -24,17 +24,28 @@
             <el-input :placeholder="store.loc('note')" v-model="place.note" class="text-input"></el-input>
         </el-form-item>
 
+        <el-form-item>
+            <el-popconfirm v-if="place?.id" :title="store.loc('confirmdel')" :confirmButtonText="store.loc('yes')"
+                :cancelButtonText="store.loc('no')" @confirm="deletePlace">
+
+                <template #reference>
+                    <el-button type="danger">{{ store.loc('remove') }}</el-button>
+                </template>
+            </el-popconfirm>
+        </el-form-item>
+
     </el-form>
 </template>
 
 
 <script setup lang="ts">
-import { ElForm } from 'element-plus';
+import { ElForm, ElNotification } from 'element-plus';
 import { ref, reactive, onBeforeMount, ComponentPublicInstance } from 'vue';
 import store from '../store';
 import { useRoute } from 'vue-router';
 import MainTitle from './MainTitle.vue';
 import router from '../router';
+import { h } from 'vue';
 
 const formRef = ref<ComponentPublicInstance<typeof ElForm>>();
 const place = ref({} as IPlace);
@@ -69,6 +80,20 @@ const confirm = () => {
             return false;
         }
     });
+};
+
+const deletePlace = async () => {
+    const { data } = await store.deleteById('places', place.value.id);
+    console.log("data", data);
+    if (data?.id) {
+        router.push('/places');
+    } else if (Number.isInteger(data.error)) {
+        ElNotification({
+            title: store.loc('remprob'),
+            message: h('i', { style: 'color: teal' }, `${store.loc('facts')}: ${data.error}`),
+            type: 'warning',
+        })
+    }
 };
 
 onBeforeMount(async () => {

@@ -266,9 +266,16 @@ export default {
           const selectResult = await pool.query(`${selectables[table]} WHERE id = ${id}`);
           const stored = selectResult.rows[0];
           delete stored.id;
-
+          if (table === 'places') {
+            const checkQuery = 'SELECT id from facts WHERE place_id = $1';
+            const checkResult = await pool.query(checkQuery, [idInt]);
+            const related = checkResult?.rows?.length;
+            if (related) {
+              return { error: related };
+            }
+          }
           const queryResult = await pool.query(`DELETE FROM ${table} WHERE id=${id} RETURNING id`);
-          //   const resultId = queryResult.rows[0].id;
+          // const resultId = queryResult.rows[0].id;
           const logQuery = 'INSERT INTO logs (user_id, table_name, record_id, data0) VALUES($1, $2, $3, $4) RETURNING id';
           // const logResult =
           await pool.query(logQuery, [user.id, table, idInt, stored]);
@@ -276,9 +283,10 @@ export default {
           return queryResult.rows[0];
         } catch (error) {
           await pool.query('ROLLBACK');
-          return { error };
+          throw error;
         }
       } catch (error) {
+        console.log('removal error', error);
         return { error };
       }
     }

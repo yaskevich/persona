@@ -50,7 +50,8 @@
         store.loc('add') }}</el-button>
       <el-button @click="parseText" type="warning" v-if="work?.genre && work?.yeardate && work?.hash">{{
         store.loc('parse') }}</el-button>
-      <el-tag size="large" v-if="work?.tokens">{{ work.tokens }}</el-tag>
+      <el-button type="info" v-if="work?.tokens" @click="router.push(`/work/${id}/annotation`)">{{ work.tokens
+        }}</el-button>
     </el-form-item>
 
     <template v-if="relBooks?.length || relFacts?.length">

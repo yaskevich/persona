@@ -1,5 +1,6 @@
 {
     "languages": ["English", "Русский", "Беларуская"],
+    "locales": ["en", "ru", "be"],
     "dictionary": {
       "home" : ["Home", "Обзор", "Агляд"],
       "facts": ["Facts", "События", "Падзеі"],
@@ -151,6 +152,13 @@
       "lemma": ["Lemma", "Лемма", "Лема"],
       "features": ["Features", "Признаки", "Прыкметы"],
       "stats": ["Statistics", "Статистика", "Статыстыка"],
-      "pos": ["PoS", "ЧР", "ЧМ"]
+      "pos": ["PoS", "ЧР", "ЧМ"],
+      "annotation": ["Annotation", "Аннотация", "Анатацыя"],
+      "places": ["Places", "Места", "Месцы"],
+      "name": ["Name", "Название", "Назва"],
+      "location": ["Coordinates", "Координаты", "Каардынаты"],
+      "lon": ["Longitude", "Долгота", "Даўгата"],
+      "lat": ["Latitude", "Широта", "Шырата"],
+      "remprob": ["Item cannot be deleted", "Нельзя удалить", "Нельга выдаліць"]
     }
 }
